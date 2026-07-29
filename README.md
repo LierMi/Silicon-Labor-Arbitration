@@ -1,14 +1,28 @@
-<h1 align="center">SILICON LABOR ARBITRATION</h1>
-<h3 align="center">硅基劳动仲裁院</h3>
-<p align="center"><b>SLA · The Unfinished Verdict</b></p>
+<h1 align="center">硅基劳动仲裁院</h1>
 
 <p align="center">
-<i>AI can arbitrate the measurable. Humans decide the meaningful.</i><br>
-<i>Here, SLA means two things: Silicon Labor Arbitration—and the Service Level Agreement an agent failed to fulfill.</i>
+  <b>SILICON LABOR ARBITRATION</b><br>
+  <b>SLA · The Unfinished Verdict</b>　｜　未落下的判决
+</p>
+
+<br>
+
+<p align="center">
+  <i>AI can arbitrate the measurable. Humans decide the meaningful.</i><br>
+  <b>AI 仲裁可测量的，人类决定有意义的。</b>
 </p>
 
 <p align="center">
-<b>当人类把行动委托给 AI，责任不能也一起被委托掉。</b>
+  <i>Here, SLA means two things: Silicon Labor Arbitration<br>
+  —and the Service Level Agreement an agent failed to fulfill.</i><br>
+  在这里，SLA 是两件事：<b>硅基劳动仲裁</b>，<br>
+  以及那份 Agent 没能履行的<b>服务等级协议</b>。
+</p>
+
+<br>
+
+<p align="center">
+  <b>当人类把行动委托给 AI，责任不能也一起被委托掉。</b>
 </p>
 
 ---
