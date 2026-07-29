@@ -1,0 +1,38 @@
+# ---- 密钥与环境变量（通配，任何形态都不提交）----
+.env*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# ---- 依赖 ----
+node_modules/
+.pnpm-store/
+
+# ---- 构建产物 ----
+.next/
+out/
+dist/
+build/
+
+# ---- Foundry ----
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# ---- 日志 ----
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# ---- 编辑器与系统 ----
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# ---- 本地缓存 ----
+.turbo/
+.vercel/
+coverage/
