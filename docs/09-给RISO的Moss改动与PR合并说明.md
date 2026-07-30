@@ -229,20 +229,20 @@ RISO 建议优先阅读：
 
 ```text
 1. 冻结 TaskEscrow.createTask 与 TaskCreated Event
-2. 创建 Foundry 工程并完成合约测试
-3. 部署到 Monad Testnet
-4. 生成 deployments/monad-testnet.json 与 ABI hash
-5. 从团队确认的 Moss 基线创建 feat/silicon-arbitration-protocol
-6. 实现 createTask Capability + Receipt parser
-7. 完成真实 Testnet action → simulate
-8. 实现产品 MossBridge、钱包一致性门和 E3
-9. 更新 vendor/moss submodule 指针
-10. 完成端到端 Demo
+2. 创建 Foundry 工程并完成 Gate 3 创建路径测试
+3. 实现并测试完整资金生命周期（验收、结算、退款、权限、重复结算、重入防护）
+4. 移除 Gate 3 deployment guard 后部署到 Monad Testnet
+5. 生成 deployments/monad-testnet.json 与 ABI hash
+6. 从团队确认的 Moss 基线创建 feat/silicon-arbitration-protocol
+7. 实现 createTask Capability + Receipt parser
+8. 完成真实 Testnet action → simulate
+9. 实现产品 MossBridge、钱包一致性门和 E3
+10. 更新 vendor/moss submodule 指针并完成端到端 Demo
 ```
 
-在第 7 步完成前，不应对外宣称“产品已完成 Moss Testnet 集成”。目前准确说法是：
+在第 8 步完成前，不应对外宣称“产品已完成 Moss Testnet 集成”。目前准确说法是：
 
-> Monad Testnet Runtime PR 和产品集成架构已经完成；createTask Protocol 与真实产品闭环尚待 ABI、部署地址和 Receipt parser。
+> 产品集成架构与 createTask ABI 已冻结；完整资金生命周期、Monad Testnet 部署地址、createTask Protocol、Receipt parser 与真实产品闭环尚待完成。
 
 ## 八、当前 PR 状态快照
 

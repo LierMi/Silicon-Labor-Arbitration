@@ -100,7 +100,7 @@ export const POTATO_CASE: Case = {
         mossCommit: "PENDING", // 待 Neo 填入团队 Moss 基线 commit
         protocolVersion: "silicon-arbitration@0.1.0",
         contractAddress: "PENDING", // 待 Gate 4 部署后填入
-        abiHash: "PENDING", // 待 Gate 3 冻结 ABI 后填入
+        abiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
         capabilityParams: {
           requirementsHash:
             "0xreq0000000000000000000000000000000000000000000000000000000000001",
@@ -245,8 +245,10 @@ export const POTATO_CASE: Case = {
     frozen: "0.05",
   },
 
-  // ── 链上引用（待 Gate 3 / Gate 4）────────────────────────
+  // ── 链上引用（Gate 3 已冻结；部署引用待 Gate 4）────────────
   onchain: {
+    chainId: 10143,
+    createTaskAbiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
     deadline: "2026-08-01T12:00:00Z",
     amount: "0.2",
     confirmed: false,
