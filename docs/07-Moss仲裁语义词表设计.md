@@ -10,7 +10,7 @@
 
 经重新审视 Moss 的实际职责、黑客松交付范围和维护成本，团队不采用该方案：
 
-1. Moss 技术上可以在每笔交易签名前构造和模拟任何 Capability，但本项目 P0 不需要把完整业务状态机都变成 Moss Protocol API；
+1. 在实现对应 Protocol Capability、未签交易构造和 Receipt parser 后，Moss 技术上可以在每笔交易签名前构造和模拟；但本项目 P0 不需要把完整业务状态机都变成 Moss Protocol API；
 2. `createTask` 涉及资金锁定、参数解释和 E3，是 Moss 增量价值最高的入口；
 3. 后续生命周期操作在黑客松阶段使用 viem/wagmi 直接调用，并保存普通交易证据；
 4. 不在当前 Runtime PR 中增加项目专用全局词汇；

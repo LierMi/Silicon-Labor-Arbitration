@@ -319,7 +319,7 @@ Domain Command
 2. `load` 返回准确 intent、参数、`transfer`、`fundOut` 和 tags；
 3. `action` 构造唯一、未签名的 `TaskEscrow.createTask` 交易；
 4. `simulate` 在 Monad Testnet 返回完整 Change / Receipt，Warnings 为空；
-5. E3 显式记录 `domainAction=commission` 与 `mossVerb=transfer` 的粗粒度映射；
+5. E3 显式记录 `domainAction=commission`、`mossVerb=transfer`、`semanticMappingVersion=create-task-v1`、`semanticFidelity=coarse-verb` 和 `task-creation / escrow / agent-work / arbitration` tags；
 6. 钱包请求与 Moss 未签名交易逐字段一致；
 7. 实际 `TaskCreated` Event 与模拟 Receipt 对应；
 8. 后续直接交易不得被标成 Moss verified。

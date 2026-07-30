@@ -276,7 +276,7 @@ silicon-arbitration.createTask
 
 需要区分“技术能力”和“产品范围”：
 
-- Moss 技术上可以在每笔交易各自签名前构造和模拟未签名交易；
+- 在先实现对应 Protocol Capability、未签交易构造和 Receipt parser 后，Moss 技术上可以在每笔交易各自签名前构造和模拟；
 - 产品 P0 只选择增量价值最高、涉及资金锁定并需要 canonical E3 的 `createTask`；
 - `submitDelivery`、`openDispute`、`settle` 等后续操作暂用 viem/wagmi 直接调用，不能标成 Moss verified；
 - 后续出现复杂资金分配、强制全链路 E3 或第二个通用用例时，再评估扩大 Moss 范围。
@@ -388,6 +388,7 @@ forge test
 - 合约地址在 Testnet 有 bytecode；
 - Protocol 使用的 ABI hash 与部署版本一致；
 - `createTask` 模拟无 Warning；
+- E3 包含 `domainAction=commission`、`mossVerb=transfer`、`semanticMappingVersion=create-task-v1`、`semanticFidelity=coarse-verb` 及约定 tags；
 - 钱包签的是 Moss 模拟过的同一笔交易；
 - 交易成功并发出预期 `TaskCreated` Event；
 - E3 可通过 canonical hash 重算；
