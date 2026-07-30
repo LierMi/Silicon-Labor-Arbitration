@@ -8,7 +8,7 @@
 - Monad Testnet chain ID: `10143` (`0x279f`). Default public RPC: `https://testnet-rpc.monad.xyz`.
 - Moss upstream: `https://github.com/nishuzumi/moss`.
 - Team Moss fork: `https://github.com/LierMi/moss`.
-- Team: NEO (contracts, Moss, on-chain integration), RISO (product, deterministic rules, AI explanation, coordination), ELEVENT (UI, visual design, interaction).
+- Team: NEO (contracts, Moss, on-chain integration), RISO (product, deterministic rules, AI explanation, coordination), ELEVEN (UI, visual design, interaction).
 
 Before any write, commit, push, deployment, or GitHub action, verify:
 
@@ -115,7 +115,7 @@ Default ownership:
 
 - NEO: `contracts/`, `packages/moss-bridge/`, `vendor/moss`, deployment manifests, cross-chain integration tests.
 - RISO: `packages/domain/`, `packages/rule-engine/`, server-side AI explanation code, demo data, product coordination.
-- ELEVENT: `apps/web/`, UI assets, interaction, animation, loading/error/empty states.
+- ELEVEN: `apps/web/`, UI assets, interaction, animation, loading/error/empty states.
 
 Shared interfaces require review from every affected owner. UI development must use a typed mock adapter until the live adapter is available; switching from mock to live must not require component rewrites.
 
