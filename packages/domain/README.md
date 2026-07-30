@@ -98,6 +98,28 @@ Gate 3 已冻结 `TaskEscrow.createTask` / `TaskCreated`，`OnchainRefs` 现在�
 
 > **UI 不要依赖 `onchain` 字段的内部组织方式。**部署前地址、交易哈希和区块号保持缺省，不使用假地址冒充链上证据。
 
+## ⚠️ 调用 createTask 时的 deadline
+
+案件里的 `onchain.deadline` 是 **ISO 字符串，只给展示和规则引擎用**。
+直接传给合约会出两种事故：
+
+| | 后果 |
+|---|---|
+| 写死的日期到路演当天已过期 | 合约 revert `DeadlineNotFuture`，**demo 跑不起来** |
+| `taskId` 完全由参数决定，无随机项 | 同参数创建第二次 revert `TaskAlreadyExists`，**彩排跑两遍就撞** |
+
+两条靠同一件事解决——**运行时计算**：
+
+```ts
+import { deadlineFromNow, assertUsableDeadline } from "@sla/domain";
+
+const deadline = deadlineFromNow(1);   // 一小时后，每次调用都不同
+assertUsableDeadline(deadline);        // 发交易前最后一道闸
+await createTask({ requirementsHash, deadline, value });
+```
+
+> **陷阱：**把样例里的日期往后挪只解决第一条，第二条还在。必须是运行时计算。
+
 ## 校验
 
 ```bash

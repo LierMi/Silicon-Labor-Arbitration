@@ -249,6 +249,7 @@ export const POTATO_CASE: Case = {
   onchain: {
     chainId: 10143,
     createTaskAbiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
+    // ⚠️ 展示与规则比较用。**不要传给 createTask** —— 用 deadlineFromNow()。
     deadline: "2026-08-01T12:00:00Z",
     amount: "0.2",
     confirmed: false,
