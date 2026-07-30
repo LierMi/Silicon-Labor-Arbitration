@@ -63,7 +63,9 @@ export type AiRejectReason =
   | "UNKNOWN_CITE"
   | "UNKNOWN_UNCERTAIN"
   | "MISSING_UNDECIDABLE"
-  | "AMOUNT_IN_TEXT";
+  | "AMOUNT_IN_TEXT"
+  | "BAD_BRACKET"
+  | "TOO_LONG";
 
 export interface AiRejection {
   reason: AiRejectReason;
