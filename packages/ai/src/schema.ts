@@ -72,6 +72,8 @@ export interface AiRejection {
 
 /** 生成过程的溯源信息，进案件证据用 */
 export interface AiProvenance {
+  /** 哪家供应商生成的 */
+  provider: string;
   model: string;
   promptVersion: string;
   /** 输入证据与判定的规范化哈希，用于复算 */
