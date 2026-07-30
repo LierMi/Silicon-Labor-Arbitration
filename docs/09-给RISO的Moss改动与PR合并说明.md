@@ -242,7 +242,7 @@ RISO 建议优先阅读：
 
 在第 8 步完成前，不应对外宣称“产品已完成 Moss Testnet 集成”。目前准确说法是：
 
-> 产品集成架构与 createTask ABI 已冻结；完整资金生命周期、Monad Testnet 部署地址、createTask Protocol、Receipt parser 与真实产品闭环尚待完成。
+> 产品集成架构、createTask ABI 与完整资金生命周期已实现并通过本地验证；Monad Testnet 部署地址、createTask Protocol、Receipt parser 与真实产品闭环尚待完成。
 
 ## 八、当前 PR 状态快照
 
