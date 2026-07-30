@@ -268,27 +268,33 @@ silicon-arbitration.createTask
 - Testnet live simulation；
 - MCP server composition。
 
-`submitDelivery`、`openDispute`、`settle` 等操作是否进入 Moss，Feature Freeze 后再评估。产品仍可通过普通 viem/wagmi 发送这些后续交易，但必须明确区分“Moss 构造的操作”和“产品直接构造的操作”。
+黑客松 P0 已决定不将 `submitDelivery`、`openDispute`、`settle` 等后续操作接入 Moss。产品通过 viem/wagmi 发送这些交易，并明确区分“Moss 构造的操作”和“产品直接构造的操作”；满足 `docs/08` 的复议条件后再开新 ADR。
 
 ## 九、Verb / Category 语义问题
 
-当前 Moss 的 Verb 和 Category 是封闭集合，而仲裁领域没有自然对应项：
+完整决策见 [Moss 边界与职责划分](./08-Moss边界与职责划分.md)。P0 不再把完整仲裁生命周期都建模为 Moss Capability，也不在当前 Runtime PR 中增加 8 个项目专用 Verb、2 个 Category 和 4 个 Risk Label。
+
+需要区分“技术能力”和“产品范围”：
+
+- Moss 技术上可以在每笔交易各自签名前构造和模拟未签名交易；
+- 产品 P0 只选择增量价值最高、涉及资金锁定并需要 canonical E3 的 `createTask`；
+- `submitDelivery`、`openDispute`、`settle` 等后续操作暂用 viem/wagmi 直接调用，不能标成 Moss verified；
+- 后续出现复杂资金分配、强制全链路 E3 或第二个通用用例时，再评估扩大 Moss 范围。
+
+`createTask` 暂用 Moss 现有闭集：
 
 ```text
-Verbs: swap, wrap, unwrap, supply, withdraw, borrow, repay,
-       stake, unstake, claim, mint, transfer, approve
-
-Categories: dex, lending, staking, rewards, token, nft
+protocol: silicon-arbitration
+method: createTask
+verb: transfer
+category: token
+risk: fundOut
+tags: task-creation, escrow, agent-work, arbitration
 ```
 
-`createTask` 不应为了通过类型检查被误标为 `swap`、`supply` 或普通 `transfer`。处理顺序：
+`transfer` 只是资金进入托管合约的粗粒度 Moss Verb，不等价于完整业务语义 `commission`。MossBridge 和 E3 必须同时保存 `domainAction=commission`、`mossVerb=transfer`、mapping version 和 `semanticFidelity=coarse-verb`；UI 必须展示准确 intent，不能只显示“Transfer”。
 
-1. 先向 Moss 维护者确认推荐建模方式；
-2. 如果现有 verb + tags 可以准确表达，记录 ADR 后采用；
-3. 如果无法表达，在团队 Fork 中做最小语义扩展，并同时更新类型、Registry 校验、MCP schema、文档与测试；
-4. 不在 UI 或产品代码中绕开语义问题。
-
-在该决策完成前，`createTask` Protocol 处于设计阻塞状态。
+该决策冻结了 P0 范围，但实际 Protocol Package 仍依赖 `TaskEscrow.createTask` ABI、`TaskCreated` Event、Monad Testnet 地址和 Receipt parser。
 
 ## 十、E3 证据结构
 
@@ -301,6 +307,8 @@ E3 不能只有一句“签名前解释”。至少包含：
 | `mossRepository` / `mossCommit` | 固定 Moss 实现版本 |
 | `protocol` / `protocolVersion` | 固定 Adapter 语义 |
 | `contractAddress` / `abiHash` | 固定被调用合约 |
+| `domainAction` / `mossVerb` | 显式保存 `commission` 与粗粒度 `transfer` 的映射 |
+| `semanticMappingVersion` / `semanticFidelity` | 固定映射版本并声明 `coarse-verb` 语义损失 |
 | `capability` | 保存 Moss 结构化意图 |
 | `unsignedTransactions` | 保存签名前交易 |
 | `simulationReceipts` | 保存结构化模拟结果 |
@@ -395,6 +403,8 @@ forge test
 | Moss 调用位置 | 服务端 MossBridge，不在浏览器直接调用 |
 | 钱包职责 | 唯一签名与广播边界 |
 | 首个 Protocol Capability | `createTask` |
+| P0 Moss 范围 | 仅 `createTask`；后续写操作走 Direct 路径 |
+| createTask 语义 | `transfer + fundOut + 精确 intent/tags`，E3 标记 `coarse-verb` |
 | Moss 是否裁决 | 否 |
 | Mainnet 是否用于 Demo | 否 |
 | E3 | 结构化、可 hash、绑定 Moss commit 与交易上下文 |

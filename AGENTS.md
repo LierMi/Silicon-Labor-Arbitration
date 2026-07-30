@@ -38,6 +38,7 @@ Read these before implementation:
 2. `docs/02-开发执行案.md` — delivery scope, responsibilities, and schedule.
 3. `docs/05-双仓库架构与Moss-Testnet集成.md` — repository topology and runtime architecture.
 4. `docs/06-技术风险与决策清单.md` — current blockers, evidence, owners, and decision gates.
+5. `docs/08-Moss边界与职责划分.md` — accepted P0 boundary: Moss only for `createTask`; later writes use the direct transaction path.
 
 When documents conflict, the order above does not decide automatically. Preserve the product invariants in this file, record the conflict in `docs/06-技术风险与决策清单.md`, and obtain a team decision before changing architecture.
 

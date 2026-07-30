@@ -232,6 +232,7 @@ forge script ...  # 部署到 Monad Testnet
 | [04 · 竞品调研](docs/04-竞品调研.md) | Internet Court 拆解、五个差异点、Q&A 弹药库 |
 | [05 · 双仓库架构与 Moss Testnet 集成](docs/05-双仓库架构与Moss-Testnet集成.md) | 产品仓库、团队 Moss Fork、Testnet Runtime、Protocol 与 E3 证据链 |
 | [06 · 技术风险与决策清单](docs/06-技术风险与决策清单.md) | 已核验事实、P0/P1/P2 问题、负责人、决策门与验收证据 |
+| [08 · Moss 边界与职责划分](docs/08-Moss边界与职责划分.md) | P0 只集成 createTask、粗粒度 Verb 映射、后续直接调用边界与升级条件 |
 | [AGENTS.md](AGENTS.md) | AI Agent 与团队共同遵循的网络、仓库、架构和验证约定 |
 
 ---
