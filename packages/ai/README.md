@@ -20,13 +20,45 @@ const result = await generateArguments(caseObj);
 
 if (result) {
   caseObj.aiArguments = result.arguments;
-  // result.provenance: { model, promptVersion, inputHash, outputHash, attempts, generatedAt }
+  // result.provenance: { provider, model, promptVersion, inputHash, outputHash, attempts, generatedAt }
 } else {
   // ⚠️ 失败不阻断资金路径：只展示规则层判定，结算照常执行
 }
 ```
 
-需要 `ANTHROPIC_API_KEY`，或 `ant auth login` 之后的本地 profile。
+## 供应商
+
+**默认走 Gonka**（新账号有一次性 $20 免费额度）。GonkaRouter 兼容 Anthropic Messages API，
+所以 SDK 不用换，只改 baseURL + 模型 ID。
+
+```bash
+cp .env.example .env.local   # 填 GONKA_API_KEY
+```
+
+| 环境变量 | 默认值 |
+|---|---|
+| `GONKA_API_KEY` | 必填 |
+| `GONKA_BASE_URL` | `https://api.gonkarouter.io` |
+| `GONKA_MODEL` | `moonshotai/Kimi-K2.6` |
+
+设了 `ANTHROPIC_API_KEY` 而没设 `GONKA_API_KEY` 时自动走 Anthropic。
+
+### ⚠️ baseURL 不要写 `/v1`
+
+SDK 会自己在 baseURL 后面拼 `/v1/messages`。写成 `https://api.gonkarouter.io/v1`
+会变成 `/v1/v1/messages` 打不通。代码里做了兜底（末尾 `/v1` 自动剥掉），两种写法都能用，
+但知道这件事能省一小时。
+
+### 两家供应商的能力差异
+
+| | Anthropic | Gonka |
+|---|---|---|
+| 结构化输出 `output_config.format` | ✅ 用 | ❌ 文档未提供，按不支持处理 |
+| `thinking` / `effort` | ✅ 用（effort 默认 `low`） | ❌ 开源模型不认，不发送 |
+| 保证 JSON 合法 | 靠 schema | 靠 prompt 约束 + 容错解析 + 重试 |
+
+**校验器两条路径共用**——cites 非空、不得谈钱、必须标注 undecidable 是产品不变量，
+跟谁家的模型无关。
 
 ## 为什么 AI 不可能输出金额
 
@@ -65,28 +97,36 @@ if (result) {
 
 - 网络 / 额度 / 服务错误 → 不重试，直接放弃
 - `stop_reason === "refusal"` → 停止重试
-- 输出不是合法 JSON → 放弃
+- 输出不是合法 JSON → **重试**（Gonka 路径没有 schema 保证，重试能救回来）
 - 3 次校验都不过 → 放弃
 
 调用方拿到 `null` 时只展示规则层结果。**AI 是解释层，不是决策层——它挂了，钱照样按规则分。**
 
 ## 模型配置
 
+**Gonka（默认）**
+```ts
+model: "moonshotai/Kimi-K2.6"
+max_tokens: 16000
+// 不发 thinking / output_config —— 开源模型不认这两个参数
+```
+
+**Anthropic（备选）**
 ```ts
 model: "claude-opus-5"
-thinking: { type: "adaptive" }        // 需要推理：读证据、分立场、核对编号
-output_config: { format: { type: "json_schema", schema } }   // 结构化输出，不用 prefill
+thinking: { type: "adaptive" }
+output_config: { effort: "low", format: { type: "json_schema", schema } }
 max_tokens: 16000
 ```
 
-`effort` 是成本旋钮，默认 `high`。演示要反复跑的话可以降到 `medium`。
+`effort` 已设为 `low`——调 prompt 阶段够用，定型后再切 `high` 看最终质量。
 
 ## 溯源
 
 每次成功生成都会返回 `provenance`，进案件证据用：
 
 ```ts
-{ model, promptVersion, inputHash, outputHash, attempts, generatedAt }
+{ provider, model, promptVersion, inputHash, outputHash, attempts, generatedAt }
 ```
 
 `inputHash` 是喂给模型的完整输入的 SHA-256，`outputHash` 是输出的。事后可以复算比对。

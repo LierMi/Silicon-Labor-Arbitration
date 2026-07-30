@@ -117,3 +117,24 @@ export function buildUserInput(c: Case): string {
     `请生成 ${Object.values(AI_ROLE_LABEL).join("、")} 三份意见。`,
   ].join("\n");
 }
+
+/**
+ * 给**不支持结构化输出**的供应商（如 Gonka 上的开源模型）追加的输出约束。
+ * Anthropic 路径靠 `output_config.format` 保证，不需要这段。
+ */
+export const JSON_ONLY_INSTRUCTION = `
+
+---
+## 输出格式（严格遵守）
+
+只输出一个 JSON 对象，**不要有任何解释文字，不要用 \`\`\` 代码围栏**：
+
+{
+  "arguments": [
+    { "role": "prosecution", "text": "...", "cites": ["E1"], "uncertain": ["C4"] },
+    { "role": "defense",     "text": "...", "cites": ["E2"], "uncertain": ["C4"] },
+    { "role": "audit",       "text": "...", "cites": ["E3"], "uncertain": ["C4"] }
+  ]
+}
+
+role 只能是 prosecution / defense / audit，三个都要有且各只出现一次。`;
