@@ -1,7 +1,7 @@
 # Moss 边界与职责划分：P0 只集成 createTask
 
-> 状态：Accepted  
-> 日期：2026-07-30  
+> 状态：Accepted
+> 日期：2026-07-30
 > 决策：黑客松 P0 只将 `TaskEscrow.createTask` 接入 Moss；后续生命周期操作暂用 viem/wagmi 直接调用。
 > 审读基线：`nishuzumi/moss@2e7c1dbeb5e6f3b1492455034e3b0348a3c0094d`，并结合团队 Fork 的 Monad Testnet Runtime PR。
 
