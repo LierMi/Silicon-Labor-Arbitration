@@ -279,7 +279,13 @@ export interface OnchainRefs {
   caseId?: string;
   requirementsHash?: string;
   deliveryHash?: string;
-  /** ISO 8601 */
+  /**
+   * ISO 8601。
+   *
+   * ⚠️ **只用于展示和规则引擎比较，不要传给 `createTask`。**
+   * 写死的日期到路演当天会过期（合约 revert `DeadlineNotFuture`），
+   * 而且重复演示会撞 `taskId`。合约入参请用 `deadlineFromNow()`。
+   */
   deadline?: string;
   /** 十进制字符串，单位 MON */
   amount?: string;
