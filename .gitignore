@@ -6,7 +6,7 @@
 secrets/
 
 # ---- 依赖 ----
-node_modules/
+node_modules
 .pnpm-store/
 
 # ---- 构建产物 ----
