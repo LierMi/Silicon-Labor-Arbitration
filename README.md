@@ -202,6 +202,8 @@ Moss 让用户用自然语言表达链上任务，**在签名前解释将要发�
 
 ## 快速开始
 
+> **当前状态：架构与执行文档阶段。** 下列命令是目标工程入口；在 `package.json`、Next.js 与 Foundry 工程落地并经全新 clone 验证前，不应视为已可执行的安装说明。当前阻塞见 [06 · 技术风险与决策清单](docs/06-技术风险与决策清单.md)。
+
 ```bash
 pnpm install
 cp .env.example .env.local     # 填 RPC / API Key
@@ -228,6 +230,9 @@ forge script ...  # 部署到 Monad Testnet
 | [02 · 开发执行案](docs/02-开发执行案.md) | 合约方案、分工、排期、Go/No-Go |
 | [03 · 视觉灵感与 3D 方案](docs/03-视觉灵感与3D方案.md) | 关键词、艺术与游戏参考、2D/3D、节奏 |
 | [04 · 竞品调研](docs/04-竞品调研.md) | Internet Court 拆解、五个差异点、Q&A 弹药库 |
+| [05 · 双仓库架构与 Moss Testnet 集成](docs/05-双仓库架构与Moss-Testnet集成.md) | 产品仓库、团队 Moss Fork、Testnet Runtime、Protocol 与 E3 证据链 |
+| [06 · 技术风险与决策清单](docs/06-技术风险与决策清单.md) | 已核验事实、P0/P1/P2 问题、负责人、决策门与验收证据 |
+| [AGENTS.md](AGENTS.md) | AI Agent 与团队共同遵循的网络、仓库、架构和验证约定 |
 
 ---
 
