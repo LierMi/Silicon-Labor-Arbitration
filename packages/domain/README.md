@@ -82,14 +82,21 @@ semantics: {
 }
 ```
 
-## ⚠️ 唯一待定的部分
+## 链上字段状态
 
-`OnchainRefs` 里的字段**等 Gate 3 冻结合约接口后再补**（`docs/06` P0-7，负责人 Neo）。
+Gate 3 已冻结 `TaskEscrow.createTask` / `TaskCreated`，`OnchainRefs` 现在包含 chain、合约、ABI、taskId、创建交易与确认区块字段。Moss-facing ABI hash 为：
 
-土豆案里这些位置目前是 `"PENDING"` 字符串：`mossCommit`、`contractAddress`、`abiHash`、`unsignedTx.to`、`unsignedTx.data`、`canonicalPayloadHash`。
+```text
+0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5
+```
 
-> **UI 不要依赖 `onchain` 里的字段细节**，只把它当"链上有对应记录"的占位。
-> 上面那一大块链下结构是冻结的，Neo 定完接口只补 `onchain` 这一小块，页面不用返工。
+土豆案已写入该 ABI hash。以下字段仍保持 `"PENDING"`，因为它们分别依赖后续真实 Gate，不得伪造：
+
+- Gate 4 Testnet 部署：`contractAddress`、`unsignedTx.to`；
+- Gate 6 固定 Moss Protocol：`mossCommit`；
+- Gate 8/9 真实 Moss 输出与 canonical E3：`unsignedTx.data`、`canonicalPayloadHash`。
+
+> **UI 不要依赖 `onchain` 字段的内部组织方式。**部署前地址、交易哈希和区块号保持缺省，不使用假地址冒充链上证据。
 
 ## 校验
 

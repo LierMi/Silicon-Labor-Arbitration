@@ -7,7 +7,7 @@
  * 分层原则：
  *   - 链下字段（requirements / evidence / ruleResults / aiArguments / responsibilityChain）
  *     由 Riso 定义，现在就冻结，可以直接开发。
- *   - 链上字段集中在 `onchain`，等 Neo 冻结合约接口（docs/06 P0-7、Gate 3）后再补齐。
+ *   - 链上字段集中在 `onchain`；Gate 3 已冻结 createTask 引用，部署证据在 Gate 4 后补齐。
  */
 
 import type { CaseStatus } from "./status.js";
@@ -261,16 +261,21 @@ export interface ChainHop {
 }
 
 // ────────────────────────────────────────────────────────────
-// 链上引用（⚠️ 待冻结）
+// 链上引用
 // ────────────────────────────────────────────────────────────
 
 /**
- * ⚠️ 待 Neo 冻结合约接口后补齐（docs/06 P0-7，Gate 3）。
- * 字段名与类型都可能变，**UI 不要依赖这里的细节**，
- * 只把它当作"链上有对应记录"的占位。
+ * Gate 3 已冻结 createTask / TaskCreated 的引用字段。
+ * Gate 4 部署前地址、交易哈希和区块号保持 undefined；不得用假地址冒充部署证据。
  */
 export interface OnchainRefs {
+  chainId: number;
+  taskEscrowAddress?: string;
+  createTaskAbiHash: string;
   taskId?: string;
+  createTaskTxHash?: string;
+  createTaskBlockNumber?: number;
+  /** 后续 Direct 路径字段，尚未进入 Moss P0 范围 */
   caseId?: string;
   requirementsHash?: string;
   deliveryHash?: string;
