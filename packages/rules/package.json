@@ -1,0 +1,12 @@
+{
+  "name": "@sla/rules",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic rule engine. Objective conditions only; subjective conditions always undecidable.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { "@sla/domain": "workspace:*" },
+  "scripts": { "typecheck": "tsc --noEmit" }
+}

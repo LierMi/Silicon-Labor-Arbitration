@@ -29,6 +29,7 @@ export const POTATO_CASE: Case = {
       check: "delivered_before_deadline",
       expect: "2026-08-01T12:00:00Z",
       label: "在 8 月 1 日 12:00 前交付",
+      weightBps: 2500,
     },
     {
       id: "C2",
@@ -36,6 +37,7 @@ export const POTATO_CASE: Case = {
       check: "file_format",
       expect: "PNG",
       label: "文件格式为 PNG",
+      weightBps: 2500,
     },
     {
       id: "C3",
@@ -43,6 +45,7 @@ export const POTATO_CASE: Case = {
       check: "has_alpha",
       expect: true,
       label: "背景透明",
+      weightBps: 2500,
     },
     {
       id: "C4",
@@ -50,6 +53,7 @@ export const POTATO_CASE: Case = {
       check: "depicts_a_cat",
       expect: true,
       label: "画的是一只适合儿童产品的橙色猫",
+      weightBps: 2500,
     },
   ],
 
@@ -72,6 +76,15 @@ export const POTATO_CASE: Case = {
       ts: "2026-08-01T11:42:00Z",
       hash: "0xdel0000000000000000000000000000000000000000000000000000000000002",
       text: "potato.png（PNG，含 alpha 通道）。Agent 附言：这是对猫这一概念的后现代重构。",
+      // 规则引擎只读这里，不读上面的 text
+      delivery: {
+        fileName: "potato.png",
+        mimeType: "image/png", // 由字节解析得出，不是看扩展名
+        hasAlpha: true,
+        byteSize: 184_320,
+        submittedAt: "2026-08-01T11:42:00Z", // 应来自链上 DeliverySubmitted 的 block timestamp
+        parsedBy: "png-parser-v1",
+      },
     },
     {
       id: "E3",

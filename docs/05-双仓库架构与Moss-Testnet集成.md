@@ -356,7 +356,7 @@ Feature Freeze 后停止跟随上游 Moss；只允许将已验证的紧急修复
 |---|---|---|
 | NEO | `contracts/`、`packages/moss-bridge/`、团队 Moss Fork、`deployments/` | ABI、地址、Capability、simulation result |
 | RISO | `packages/domain/`、`packages/rule-engine/`、`apps/api/` | Case Schema、RuleResult、AI arguments、demo seed |
-| ELEVENT | `apps/web/` | 使用 typed mock/live adapter 的完整交互 |
+| ELEVEN | `apps/web/` | 使用 typed mock/live adapter 的完整交互 |
 
 共享类型集中在 `packages/domain/`。UI 先依赖 typed mock adapter，Live adapter 可用后只切换数据源，不重写页面。
 

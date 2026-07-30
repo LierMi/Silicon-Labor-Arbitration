@@ -1,133 +1,191 @@
 /**
- * 案件数据一致性校验
+ * 案件数据一致性校验（黑客松分级版）
  *
- * 这些不是"锦上添花的检查"，是把 AGENTS.md 的产品不变量写成代码：
- *   - AI 意见的 cites 不得为空，且必须引用真实存在的证据
- *   - 主观条款必须是 undecidable，客观条款不得是 undecidable
- *   - Direct 路径的证据不得标成 Moss 来源
- *   - 有 undecidable 就必须有冻结金额
+ * 分级原则不是"工程是否严谨"，而是**会不会毁掉 Demo**：
  *
- * 规则引擎与 AI 层在写入前都应先跑一遍这里。
+ *   P0  砸掉核心主张或当场穿帮 —— 必须修
+ *   P1  台上会出现明显破绽     —— 必须修
+ *   P2  洁癖 / 边界情况         —— 黑客松阶段放宽，只提示，不拦
+ *
+ * `assertValidCase` 只对 P0/P1 抛错。P2 用 `listP2` 自己看。
  */
 
 import type { Case } from "./case.js";
+import { TOTAL_WEIGHT_BPS } from "./case.js";
 import { CASE_STATUSES } from "./status.js";
 
+export type Severity = "P0" | "P1" | "P2";
+
 export interface ValidationIssue {
-  level: "error" | "warn";
+  level: Severity;
   code: string;
   message: string;
 }
 
+/** 占位符：Gate 3 / Gate 4 之前允许存在，不计入任何级别 */
+export const PENDING = "PENDING";
+const isPending = (v: unknown) => v === PENDING;
+
 export function validateCase(c: Case): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
-  const err = (code: string, message: string) =>
-    issues.push({ level: "error", code, message });
-  const warn = (code: string, message: string) =>
-    issues.push({ level: "warn", code, message });
+  const at = (level: Severity, code: string, message: string) =>
+    issues.push({ level, code, message });
 
   const evidenceIds = new Set(c.evidence.map((e) => e.id));
   const requirementIds = new Set(c.requirements.map((r) => r.id));
 
-  if (!CASE_STATUSES.includes(c.status)) {
-    err("STATUS_UNKNOWN", `未知状态 ${c.status}`);
-  }
+  // ────────────────────────────────────────────────
+  // P0：砸掉核心主张，或评委当场能戳穿
+  // ────────────────────────────────────────────────
 
-  // ── 条款与判定一一对应 ──
+  // 主观条款被判了 —— 直接毁掉 C4 高潮和整个立意
   for (const r of c.requirements) {
     const result = c.ruleResults.find((x) => x.id === r.id);
-    if (!result) {
-      err("RULE_MISSING", `条款 ${r.id} 缺少判定结果`);
-      continue;
-    }
-    if (r.type === "subjective" && result.verdict !== "undecidable") {
-      err(
+    if (r.type === "subjective" && result && result.verdict !== "undecidable") {
+      at(
+        "P0",
         "SUBJECTIVE_DECIDED",
-        `主观条款 ${r.id} 被判成 ${result.verdict}——主观条款必须保持 undecidable`,
+        `主观条款 ${r.id} 被判成 ${result.verdict} —— 主观条款必须保持 undecidable，这是产品立场`,
       );
-    }
-    if (r.type === "objective" && result.verdict === "undecidable") {
-      warn("OBJECTIVE_UNDECIDED", `客观条款 ${r.id} 判成 undecidable，请确认是否缺证据`);
-    }
-  }
-  for (const result of c.ruleResults) {
-    if (!requirementIds.has(result.id)) {
-      err("RULE_ORPHAN", `判定结果 ${result.id} 找不到对应条款`);
-    }
-    if (result.verdict === "undecidable" && !result.reason) {
-      err("UNDECIDABLE_NO_REASON", `${result.id} 判为 undecidable 但没有写明原因`);
-    }
-    for (const b of result.basis) {
-      if (!evidenceIds.has(b)) {
-        err("RULE_BASIS_UNKNOWN", `${result.id} 引用了不存在的证据 ${b}`);
-      }
     }
   }
 
-  // ── AI 意见：引用为空即拒绝 ──
+  // AI 意见没有引用证据 —— 违背我们对评委的核心承诺
   for (const a of c.aiArguments) {
     if (a.cites.length === 0) {
-      err("AI_NO_CITES", `${a.role} 意见没有引用任何证据——引用为空的意见必须被拒绝`);
-    }
-    for (const cite of a.cites) {
-      if (!evidenceIds.has(cite)) {
-        err("AI_CITE_UNKNOWN", `${a.role} 引用了不存在的证据 ${cite}`);
-      }
-    }
-    for (const u of a.uncertain) {
-      if (!requirementIds.has(u)) {
-        err("AI_UNCERTAIN_UNKNOWN", `${a.role} 标注了不存在的条款 ${u}`);
-      }
+      at("P0", "AI_NO_CITES", `${a.role} 意见没有引用任何证据 —— 引用为空必须被拒绝`);
     }
   }
 
-  // ── 证据来源不得伪装 ──
+  // Direct 路径证据冒充 Moss —— 路演口径造假
   for (const e of c.evidence) {
-    if (e.kind === "moss_pre_sign_explanation") {
-      if (e.source !== "moss") {
-        err("E3_SOURCE", `${e.id} 是 Moss 签前证据，来源必须是 moss`);
-      }
-      if (!e.mossPreSign) {
-        err("E3_EMPTY", `${e.id} 缺少结构化的 mossPreSign——E3 不能只是一段文本`);
-      }
-    }
     if (e.kind === "direct_tx" && e.source === "moss") {
-      err("DIRECT_FAKED_AS_MOSS", `${e.id} 是 Direct 路径交易，不得标成 Moss 来源`);
+      at("P0", "DIRECT_FAKED_AS_MOSS", `${e.id} 是 Direct 路径交易，不得标成 Moss 来源`);
     }
   }
 
-  // ── 结算：有 undecidable 就必须有冻结 ──
+  // 权重必须齐全且总和为 10000 —— 否则"金额可复算"这一主张不成立
+  const missingWeight = c.requirements.filter((r) => typeof r.weightBps !== "number");
+  if (missingWeight.length > 0) {
+    at(
+      "P0",
+      "WEIGHT_MISSING",
+      `条款缺少 weightBps：${missingWeight.map((r) => r.id).join(", ")} —— 金额将失去来源`,
+    );
+  } else {
+    const sumBps = c.requirements.reduce((a, r) => a + r.weightBps, 0);
+    if (sumBps !== TOTAL_WEIGHT_BPS) {
+      at("P0", "WEIGHT_SUM", `权重之和为 ${sumBps} bps，必须等于 ${TOTAL_WEIGHT_BPS}`);
+    }
+  }
+
   const hasUndecided = c.ruleResults.some((r) => r.verdict === "undecidable");
   const s = c.settlementProposal;
+
   if (s) {
     const frozen = Number(s.frozen);
+    // 有不可裁决却不冻结 —— 立场自相矛盾
     if (hasUndecided && !(frozen > 0)) {
-      err(
+      at(
+        "P0",
         "NO_FROZEN_FOR_UNDECIDABLE",
-        "存在不可裁决条款，但冻结金额为 0——不可裁决的部分必须冻结等待人类终审",
+        "存在不可裁决条款但冻结金额为 0 —— 不可裁决的部分必须冻结等待人类终审",
       );
     }
-    if (!hasUndecided && frozen > 0) {
-      warn("FROZEN_WITHOUT_UNDECIDABLE", "没有不可裁决条款却冻结了资金，请确认原因");
-    }
-    if (c.onchain.amount !== undefined) {
+    // 钱对不平 —— 评委心算一下就露馅
+    if (c.onchain.amount !== undefined && !isPending(c.onchain.amount)) {
       const total = Number(s.toAgent) + Number(s.toClient) + frozen;
       if (Math.abs(total - Number(c.onchain.amount)) > 1e-9) {
-        err(
-          "SETTLEMENT_SUM",
-          `结算总额 ${total} 与托管金额 ${c.onchain.amount} 不一致`,
-        );
+        at("P0", "SETTLEMENT_SUM", `结算总额 ${total} 与托管金额 ${c.onchain.amount} 不一致`);
       }
     }
-  } else if (c.status === "Settled") {
-    err("SETTLED_NO_PROPOSAL", "状态为已结算但没有结算方案");
   }
 
-  // ── 责任链 ──
+  // ────────────────────────────────────────────────
+  // P1：台上会出现明显破绽
+  // ────────────────────────────────────────────────
+
+  // 条款没有判定 —— 裁决页少一行
+  for (const r of c.requirements) {
+    if (!c.ruleResults.some((x) => x.id === r.id)) {
+      at("P1", "RULE_MISSING", `条款 ${r.id} 缺少判定结果`);
+    }
+  }
+
+  for (const result of c.ruleResults) {
+    // 不可裁决没写原因 —— UI 空章位旁边没字可显示
+    if (result.verdict === "undecidable" && !result.reason) {
+      at("P1", "UNDECIDABLE_NO_REASON", `${result.id} 判为 undecidable 但没写明原因`);
+    }
+    // 引用了不存在的证据 —— 点击角标会空
+    for (const b of result.basis) {
+      if (!evidenceIds.has(b)) {
+        at("P1", "RULE_BASIS_UNKNOWN", `${result.id} 引用了不存在的证据 ${b}`);
+      }
+    }
+  }
+
+  for (const a of c.aiArguments) {
+    for (const cite of a.cites) {
+      if (!evidenceIds.has(cite)) {
+        at("P1", "AI_CITE_UNKNOWN", `${a.role} 引用了不存在的证据 ${cite}`);
+      }
+    }
+  }
+
+  // E3 只有一句话没有结构 —— 我们刚在文档里强调过它不是一段文本
+  for (const e of c.evidence) {
+    if (e.kind === "moss_pre_sign_explanation" && !e.mossPreSign) {
+      at("P1", "E3_EMPTY", `${e.id} 缺少结构化的 mossPreSign —— E3 不能只是一段文本`);
+    }
+  }
+
+  // ────────────────────────────────────────────────
+  // P2：黑客松阶段放宽，只提示
+  // ────────────────────────────────────────────────
+
+  if (!CASE_STATUSES.includes(c.status)) {
+    at("P2", "STATUS_UNKNOWN", `未知状态 ${c.status}`);
+  }
+
+  for (const r of c.requirements) {
+    const result = c.ruleResults.find((x) => x.id === r.id);
+    if (r.type === "objective" && result?.verdict === "undecidable") {
+      at("P2", "OBJECTIVE_UNDECIDED", `客观条款 ${r.id} 判成 undecidable，确认是否缺证据`);
+    }
+  }
+
+  for (const result of c.ruleResults) {
+    if (!requirementIds.has(result.id)) {
+      at("P2", "RULE_ORPHAN", `判定结果 ${result.id} 找不到对应条款`);
+    }
+  }
+
+  for (const a of c.aiArguments) {
+    for (const u of a.uncertain) {
+      if (!requirementIds.has(u)) {
+        at("P2", "AI_UNCERTAIN_UNKNOWN", `${a.role} 标注了不存在的条款 ${u}`);
+      }
+    }
+  }
+
+  for (const e of c.evidence) {
+    if (e.kind === "moss_pre_sign_explanation" && e.source !== "moss") {
+      at("P2", "E3_SOURCE", `${e.id} 是 Moss 签前证据，来源建议标成 moss`);
+    }
+  }
+
+  if (s && !hasUndecided && Number(s.frozen) > 0) {
+    at("P2", "FROZEN_WITHOUT_UNDECIDABLE", "没有不可裁决条款却冻结了资金，确认原因");
+  }
+  if (!s && c.status === "Settled") {
+    at("P2", "SETTLED_NO_PROPOSAL", "状态为已结算但没有结算方案");
+  }
+
   for (const hop of c.responsibilityChain) {
     for (const ref of hop.evidenceRefs) {
       if (!evidenceIds.has(ref)) {
-        err("HOP_EVIDENCE_UNKNOWN", `责任链 ${hop.id} 引用了不存在的证据 ${ref}`);
+        at("P2", "HOP_EVIDENCE_UNKNOWN", `责任链 ${hop.id} 引用了不存在的证据 ${ref}`);
       }
     }
   }
@@ -135,11 +193,28 @@ export function validateCase(c: Case): ValidationIssue[] {
   return issues;
 }
 
+/** 必须修的（P0 + P1） */
+export function listBlocking(c: Case): ValidationIssue[] {
+  return validateCase(c).filter((i) => i.level !== "P2");
+}
+
+/** 只是提醒的（P2），黑客松阶段不拦 */
+export function listP2(c: Case): ValidationIssue[] {
+  return validateCase(c).filter((i) => i.level === "P2");
+}
+
+/** 只对 P0/P1 抛错。P2 不阻塞开发。 */
 export function assertValidCase(c: Case): void {
-  const errors = validateCase(c).filter((i) => i.level === "error");
-  if (errors.length > 0) {
+  const blocking = listBlocking(c);
+  if (blocking.length > 0) {
     throw new Error(
-      `案件 ${c.caseNo} 校验失败：\n` + errors.map((e) => `  [${e.code}] ${e.message}`).join("\n"),
+      `案件 ${c.caseNo} 校验失败：\n` +
+        blocking.map((e) => `  [${e.level} ${e.code}] ${e.message}`).join("\n"),
     );
   }
+}
+
+export function formatIssues(issues: ValidationIssue[]): string {
+  if (issues.length === 0) return "✅ 无问题";
+  return issues.map((i) => `[${i.level} ${i.code}] ${i.message}`).join("\n");
 }

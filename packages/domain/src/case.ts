@@ -34,7 +34,18 @@ export interface Requirement {
   expect: unknown;
   /** 人类可读描述，UI 直接显示 */
   label: string;
+  /**
+   * 该条款占总金额的权重，单位基点（1 bps = 0.01%，全部条款之和必须 = 10000）。
+   *
+   * ⚠️ 必须在 createTask **之前**确定，并随 canonical requirements 一起被
+   * `requirementsHash` 承诺上链。争议发生后不得由 AI 或规则引擎临时改动——
+   * 否则"金额可复算"这一主张就不成立了。
+   */
+  weightBps: number;
 }
+
+/** 权重总和必须等于 10000 bps */
+export const TOTAL_WEIGHT_BPS = 10_000;
 
 // ────────────────────────────────────────────────────────────
 // 证据
@@ -68,6 +79,32 @@ export interface Evidence {
   txHash?: string;
   /** kind === "moss_pre_sign_explanation" 时必填 */
   mossPreSign?: MossPreSignEvidence;
+  /** kind === "delivery" 时必填：交付物的机器可读事实 */
+  delivery?: DeliveryFacts;
+}
+
+/**
+ * 交付物的结构化事实。
+ *
+ * 规则引擎只读这里，**不读 `text` 里的自然语言描述**——
+ * 「规则引擎不是另一个 AI」这句话的落地方式就是：它只吃结构化输入。
+ *
+ * 这些字段必须由固定的解析器产生，且可重放：
+ *   - mimeType / hasAlpha 来自**字节解析**，不能靠文件扩展名
+ *   - submittedAt 必须来自链上 `DeliverySubmitted` 的 block timestamp，
+ *     **不能用客户端时钟**（客户端时钟可以伪造，链上时间不行）
+ */
+export interface DeliveryFacts {
+  fileName: string;
+  /** 由字节解析得出，如 "image/png" */
+  mimeType: string;
+  /** PNG alpha 通道是否存在且被使用 */
+  hasAlpha: boolean;
+  byteSize: number;
+  /** 链上 DeliverySubmitted 的 block timestamp，ISO 8601 */
+  submittedAt: string;
+  /** 解析器版本，用于复算时锁定行为 */
+  parsedBy: string;
 }
 
 // ────────────────────────────────────────────────────────────
