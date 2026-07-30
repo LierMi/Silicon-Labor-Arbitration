@@ -4,7 +4,6 @@ pragma solidity 0.8.24;
 import {TaskEscrow} from "../src/TaskEscrow.sol";
 
 interface Vm {
-    function chainId(uint256 newChainId) external;
     function deal(address account, uint256 newBalance) external;
     function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData) external;
     function expectRevert(bytes calldata revertData) external;
@@ -17,6 +16,8 @@ contract TaskEscrowTest {
 
     TaskEscrow private escrow;
     address private constant CLIENT = address(0xC11E17);
+    address private constant SETTLEMENT_AUTHORITY = address(0xA11CE);
+    address private constant AUTHORITY_ADMIN = address(0xAD111);
     bytes32 private constant REQUIREMENTS_HASH = keccak256("potato-case-requirements-v1");
     uint256 private constant AMOUNT = 0.2 ether;
     uint256 private constant START_TIME = 1_754_044_800;
@@ -29,7 +30,7 @@ contract TaskEscrowTest {
     function setUp() public {
         vm.warp(START_TIME);
         vm.deal(CLIENT, 10 ether);
-        escrow = new TaskEscrow();
+        escrow = new TaskEscrow(SETTLEMENT_AUTHORITY, AUTHORITY_ADMIN);
     }
 
     function test_CreateTaskLocksFundsStoresCommitmentAndEmitsFrozenEvent() public {
@@ -45,7 +46,7 @@ contract TaskEscrowTest {
         _assertEq(taskId, expectedTaskId, "unexpected task id");
         _assertEq(address(escrow).balance, AMOUNT, "escrow did not retain funds");
 
-        (address client, uint256 amount, bytes32 requirementsHash, uint256 deadline) = escrow.tasks(taskId);
+        (address client,, uint256 amount, bytes32 requirementsHash,,, uint256 deadline,,,,) = escrow.tasks(taskId);
         _assertEq(client, CLIENT, "wrong client");
         _assertEq(amount, AMOUNT, "wrong amount");
         _assertEq(requirementsHash, REQUIREMENTS_HASH, "wrong requirements hash");
@@ -63,12 +64,6 @@ contract TaskEscrowTest {
         _assertEq(address(escrow).balance, AMOUNT, "duplicate changed escrow balance");
     }
 
-    function test_RevertDeployOnMonadTestnetUntilEscrowLifecycleExists() public {
-        vm.chainId(10_143);
-        vm.expectRevert(abi.encodeWithSelector(TaskEscrow.Gate3IncompleteLifecycle.selector, 10_143));
-        new TaskEscrow();
-    }
-
     function testFuzz_CreateTaskRetainsExactEscrowAmount(uint96 rawAmount, bytes32 rawRequirementsHash, uint64 offset)
         public
     {
@@ -81,7 +76,7 @@ contract TaskEscrowTest {
         bytes32 taskId = escrow.createTask{value: amount}(requirementsHash, deadline);
 
         _assertEq(address(escrow).balance, amount, "escrow amount changed");
-        (, uint256 storedAmount, bytes32 storedHash, uint256 storedDeadline) = escrow.tasks(taskId);
+        (,, uint256 storedAmount, bytes32 storedHash,,, uint256 storedDeadline,,,,) = escrow.tasks(taskId);
         _assertEq(storedAmount, amount, "stored amount changed");
         _assertEq(storedHash, requirementsHash, "stored hash changed");
         _assertEq(storedDeadline, deadline, "stored deadline changed");
