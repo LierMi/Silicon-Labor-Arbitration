@@ -89,6 +89,23 @@ export function checkArguments(c: Case, args: AiArgument[]): AiRejection[] {
         });
       }
     }
+    // 正文方括号里只能是真实的证据编号——UI 上它是可点击的角标
+    for (const m of a.text.matchAll(/\[([^\]]+)\]/g)) {
+      const inner = m[1]!;
+      if (!evidenceIds.has(inner)) {
+        rejections.push({
+          reason: "BAD_BRACKET",
+          detail: `${a.role} 正文里的 [${inner}] 不是证据编号。条款编号请直接写在句子里，不要加方括号`,
+        });
+      }
+    }
+    // 长度：三份意见要在界面上并排显示
+    if (a.text.length > 160) {
+      rejections.push({
+        reason: "TOO_LONG",
+        detail: `${a.role} 正文 ${a.text.length} 字，超过 160 字上限`,
+      });
+    }
     if (AMOUNT_PATTERN.test(a.text)) {
       rejections.push({
         reason: "AMOUNT_IN_TEXT",

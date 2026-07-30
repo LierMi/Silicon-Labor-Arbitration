@@ -88,6 +88,8 @@ SDK 会自己在 baseURL 后面拼 `/v1/messages`。写成 `https://api.gonkarou
 | `UNKNOWN_UNCERTAIN` | 标注了不存在的条款 |
 | `AMOUNT_IN_TEXT` | 正文出现金额或比例 |
 | `MISSING_ROLE` / `DUPLICATE_ROLE` | 三个角色不齐或重复 |
+| `BAD_BRACKET` | 正文方括号里不是证据编号（UI 上它是可点击角标，点了要能跳） |
+| `TOO_LONG` | 正文超过 160 字（三份意见要并排显示） |
 
 已验证：8 个反例全部被拦下（合格样本通过；空引用、假证据编号、漏标 C4、假条款号、`0.15 MON`、`75%`、缺角色、角色重复各自命中对应代码）。
 
@@ -130,3 +132,21 @@ max_tokens: 16000
 ```
 
 `inputHash` 是喂给模型的完整输入的 SHA-256，`outputHash` 是输出的。事后可以复算比对。
+
+
+---
+
+## 路演当天不要调 API
+
+土豆案的三份意见**已经真实生成并固化进 `@sla/domain` 的 fixture**：
+
+```ts
+freshPotatoCase().aiArguments   // 直接就有，不发任何网络请求
+```
+
+固化的来源、模型、prompt 版本和输入输出哈希都写在 fixture 的注释里，可追溯。
+
+**理由：**网络、额度、模型拒答，任何一个出问题都会让 demo 卡在最关键的那一页。
+现场调 API 换来的"真实感"，评委看不出来；卡住十秒，评委一定看得出来。
+
+要重新生成：改完 prompt 后在 `packages/ai` 跑一次，把新结果替换进 fixture。
