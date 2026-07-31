@@ -297,9 +297,21 @@ npx tsx scripts/concurrency-demo.ts 30
 30 个独立任务并发创建，记录真实 tx hash、确认时间、gas。
 
 ```bash
-pnpm install
-cp .env.example .env.local     # 填 RPC / API Key
-pnpm dev
+# ⚠️ 必须带 --recurse-submodules。vendor/moss 是 submodule，
+#    不带的话它是空目录，pnpm install 会报 ENOENT 且看不出原因。
+git clone --recurse-submodules https://github.com/LierMi/Silicon-Labor-Arbitration.git
+
+# 已经 clone 过的：git pull 不会自动更新 submodule，装依赖时会自动补
+pnpm install                   # postinstall 会跑 git submodule update --init
+
+cp packages/ai/.env.example packages/ai/.env.local   # 填 GONKA_API_KEY
+pnpm typecheck                 # 检查全部 packages
+```
+
+合约测试需要 [Foundry](https://getfoundry.sh)：
+
+```bash
+pnpm test:contracts            # 33 个测试，含 50 万次调用的资金不变量
 ```
 
 合约：
