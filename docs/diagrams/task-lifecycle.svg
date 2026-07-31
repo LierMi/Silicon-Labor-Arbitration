@@ -109,7 +109,7 @@
         <rect x="647" y="278" width="126" height="58" rx="7" class="c-cloud" stroke-width="1.5"/>
         <text x="657" y="292" class="t-cloud" font-size="7" font-weight="700">04</text>
         <text x="710" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Manual Review</text>
-        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">Subjective funds frozen · Human decides</text>
+        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">Undecidable portion frozen</text>
 
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
@@ -119,7 +119,7 @@
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
         <text x="556" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Settled</text>
-        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">All portions released</text>
+        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">Objective + human portions released</text>
 
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
@@ -134,10 +134,10 @@
         <text x="402" y="359" class="t-backend" font-size="8" text-anchor="middle">acceptDelivery()</text>
         <rect x="364.15" y="212" width="75.7" height="16" rx="4" class="c-mask"/>
         <text x="402" y="223" class="t-security" font-size="8" text-anchor="middle">openDispute()</text>
-        <rect x="419.1" y="372" width="119.80000000000001" height="16" rx="4" class="c-mask"/>
-        <text x="479" y="383" class="t-backend" font-size="8" text-anchor="middle">settle() all objective</text>
-        <rect x="525.5" y="286" width="61" height="16" rx="4" class="c-mask"/>
-        <text x="556" y="297" class="t-security" font-size="8" text-anchor="middle">frozen &gt; 0</text>
+        <rect x="431.35" y="372" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
+        <text x="479" y="383" class="t-backend" font-size="8" text-anchor="middle">settle() frozen=0</text>
+        <rect x="508.35" y="286" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
+        <text x="556" y="297" class="t-security" font-size="8" text-anchor="middle">settle() frozen&gt;0</text>
         <rect x="590.25" y="372" width="85.5" height="16" rx="4" class="c-mask"/>
         <text x="633" y="383" class="t-messagebus" font-size="8" text-anchor="middle">releaseFrozen()</text>
 

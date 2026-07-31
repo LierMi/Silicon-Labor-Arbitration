@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.10.0">
-  <title>TaskEscrow · State Machine Diagram</title>
+  <title>TaskEscrow · On-chain State Machine Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -525,14 +525,14 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>TaskEscrow · State Machine</h1>
+        <h1>TaskEscrow · On-chain State Machine</h1>
       </div>
-      <p class="subtitle">On-chain state transitions: Created → Delivery → Settlement on Monad Testnet</p>
+      <p class="subtitle">8 contract states: creation → delivery → accept | dispute → settle → manual review</p>
     </div>
 
     <!-- Main Diagram -->
     <div class="diagram-container">
-      <svg viewBox="0 0 980 660" role="img" aria-label="TaskEscrow · State Machine — On-chain state transitions: Created → Delivery → Settlement on Monad Testnet (lifecycle diagram)">
+      <svg viewBox="0 0 980 660" role="img" aria-label="TaskEscrow · On-chain State Machine — 8 contract states: creation → delivery → accept | dispute → settle → manual review (lifecycle diagram)">
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -598,7 +598,7 @@
         <rect x="647" y="278" width="126" height="58" rx="7" class="c-cloud" stroke-width="1.5"/>
         <text x="657" y="292" class="t-cloud" font-size="7" font-weight="700">04</text>
         <text x="710" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Manual Review</text>
-        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">Subjective funds frozen · Human decides</text>
+        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">Undecidable portion frozen</text>
 
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
@@ -608,7 +608,7 @@
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
         <text x="556" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Settled</text>
-        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">All portions released</text>
+        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">Objective + human portions released</text>
 
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
@@ -623,10 +623,10 @@
         <text x="402" y="359" class="t-backend" font-size="8" text-anchor="middle">acceptDelivery()</text>
         <rect x="364.15" y="212" width="75.7" height="16" rx="4" class="c-mask"/>
         <text x="402" y="223" class="t-security" font-size="8" text-anchor="middle">openDispute()</text>
-        <rect x="419.1" y="372" width="119.80000000000001" height="16" rx="4" class="c-mask"/>
-        <text x="479" y="383" class="t-backend" font-size="8" text-anchor="middle">settle() all objective</text>
-        <rect x="525.5" y="286" width="61" height="16" rx="4" class="c-mask"/>
-        <text x="556" y="297" class="t-security" font-size="8" text-anchor="middle">frozen &gt; 0</text>
+        <rect x="431.35" y="372" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
+        <text x="479" y="383" class="t-backend" font-size="8" text-anchor="middle">settle() frozen=0</text>
+        <rect x="508.35" y="286" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
+        <text x="556" y="297" class="t-security" font-size="8" text-anchor="middle">settle() frozen&gt;0</text>
         <rect x="590.25" y="372" width="85.5" height="16" rx="4" class="c-mask"/>
         <text x="633" y="383" class="t-messagebus" font-size="8" text-anchor="middle">releaseFrozen()</text>
 
@@ -662,9 +662,18 @@
           <h3>Dispute Path</h3>
         </div>
         <ul>
-          <li>&bull; Delivered → Disputed → Manual Review → Settled</li>
-          <li>&bull; Rule engine splits by weightBps</li>
-          <li>&bull; Undecidable portion frozen for human</li>
+          <li>&bull; Delivered → Disputed → settle(): objective splits paid, frozen&gt;0 → Manual Review</li>
+          <li>&bull; releaseFrozen() releases the subjective portion after human decision</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>Expiry</h3>
+        </div>
+        <ul>
+          <li>&bull; Created → Refunded when deadline passes (refundExpiredTask)</li>
         </ul>
       </div>
     </div>

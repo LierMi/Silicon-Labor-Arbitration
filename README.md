@@ -182,29 +182,36 @@ Moss 让用户用自然语言表达链上任务，**在签名前解释将要发�
 
 <img src="docs/diagrams/architecture.svg" alt="System Architecture" width="100%">
 
-**三层架构：**
+**当前实现（monorepo packages）：**
 
 | 层 | 说明 |
 |---|---|
-| **Browser Side** | Next.js UI + 钱包签名边界。Moss 不进入浏览器。 |
-| **Silicon App (Server)** | `MossBridge`（唯一 Moss seam）→ `Rule Engine`（确定性检查）→ `AI Explanation`（三路意见，标记不确定） |
-| **Moss Fork + Monad Testnet** | Team Moss Fork Runtime → `silicon-arbitration` Protocol → Simulator → `TaskEscrow` 合约 |
+| **Verification & Tooling** | `scripts/e2e-verify.ts`（全生命周期验证）、`concurrency-demo.ts`、Foundry 测试 |
+| **Silicon Packages** | `Domain`（共享类型）→ `Rule Engine`（确定性检查器）→ `AI Explanation`（三路意见）→ `MossBridge`（唯一 Moss seam） |
+| **Moss Fork (vendor/moss)** | Testnet Runtime → `silicon-arbitration` Protocol → Trace Simulator |
+| **Monad Testnet** | `TaskEscrow` 合约（已部署 `0x6704...FFCcF`，chain 10143） |
+
+**Moss 边界：** Moss 只覆盖 `createTask`（构造 → 模拟 → E3 签前证据）。`assignAgent`、`submitDelivery`、`acceptDelivery`、`openDispute`、`settle` 全部通过 viem 直接调用，不标记为 Moss verified。
+
+> UI（Next.js + typed mock adapter）与 API Server 为规划中模块，后续以 MossBridge 为唯一 seam 接入，不直接依赖 Moss 内部实现。
 
 ### 端到端流程
 
 <img src="docs/diagrams/e2e-flow.svg" alt="E2E Flow" width="100%">
 
-**签名前：** 用户输入 → MossBridge 构造未签交易 → Simulator 在 Testnet 模拟 → 无 Warn 则生成 E3 签前证据  
-**签名边界：** 用户查看解释后显式签名，Moss 从不签名或广播  
-**签名后：** 交易确认 → TaskCreated 事件 → 将真实 tx hash 绑定到 E3
+**Moss Path（创建任务）：** 用户输入 → MossBridge 构造未签交易 → Simulator 在 Testnet 模拟 → 无 Warning 则生成 E3 签前证据 → 用户查看后显式签名 → 交易确认发出 TaskCreated 事件。
+
+**Direct Path（后续生命周期）：** `assignAgent → submitDelivery → acceptDelivery`（viem 直接调用）→ 争议时 `openDispute → settle`（规则引擎按 `weightBps` 分账）→ 无法自动裁决的部分冻结为 Manual Review。
+
+**签名边界：** 钱包是唯一签名与广播边界。Moss 从不签名、从不广播；Direct Path 交易不得标为 Moss verified。
 
 ### TaskEscrow 状态机
 
 <img src="docs/diagrams/task-lifecycle.svg" alt="Task Lifecycle" width="100%">
 
 **Happy Path:** Created → Delivered → Accepted（全款归 Agent）  
-**Dispute Path:** Delivered → Disputed → 规则引擎按 `weightBps` 分账 → 主观部分冻结为 Manual Review  
-**Expiry:** Created → Refunded（截止时间到，无人交付）
+**Dispute Path:** Delivered → Disputed → `settle()` 客观部分按 `weightBps` 分账；`frozen>0` 则进入 Manual Review，`releaseFrozen()` 人类终审后释放  → Settled  
+**Expiry:** Created → Refunded（截止时间到，无人交付，`refundExpiredTask`）
 
 > 完整交互版（含 dark/light 主题切换、PNG/SVG 导出）见 `docs/diagrams/architecture.html`、`docs/diagrams/e2e-flow.html`、`docs/diagrams/task-lifecycle.html`。
 
