@@ -1,0 +1,14 @@
+{
+  "repository": "https://github.com/LierMi/moss.git",
+  "commit": "b413dfeb13b615fa07e8099ef2f4e7449c4c574e",
+  "branch": "main",
+  "pinnedAt": "2026-07-31T00:00:00Z",
+  "note": "Team moss fork baseline. Testnet Runtime (#1) and upstream-sync (#2) and silicon-arbitration Protocol (#3) all merged into moss main.",
+  "protocols": {
+    "silicon-arbitration": {
+      "status": "merged",
+      "pr": "https://github.com/LierMi/moss/pull/3",
+      "note": "createTask Capability + TaskCreated Receipt parser. Included in pinned commit b413dfe."
+    }
+  }
+}

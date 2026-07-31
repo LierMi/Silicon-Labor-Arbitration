@@ -245,14 +245,17 @@ export const POTATO_CASE: Case = {
     frozen: "0.05",
   },
 
-  // ── 链上引用（Gate 3 已冻结；部署引用待 Gate 4）────────────
+  // ── 链上引用（Gate 4 已部署 Monad Testnet）────────────
   onchain: {
     chainId: 10143,
+    taskEscrowAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
     createTaskAbiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
     // ⚠️ 展示与规则比较用。**不要传给 createTask** —— 用 deadlineFromNow()。
     deadline: "2026-08-01T12:00:00Z",
     amount: "0.2",
     confirmed: false,
+    deploymentTxHash: "0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34",
+    deploymentBlockNumber: 49534792,
   },
 };
 

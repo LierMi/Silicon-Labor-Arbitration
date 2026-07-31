@@ -20,6 +20,7 @@ contracts/out/
 contracts/cache/
 contracts/broadcast/
 contracts/lib/
+cache/
 
 # ---- 日志 ----
 *.log

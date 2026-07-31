@@ -1,0 +1,12 @@
+{
+  "name": "@sla/scripts",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "viem": "^2.54.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "~5.9.0"
+  }
+}

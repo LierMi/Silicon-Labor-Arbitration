@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "End-to-End Task Creation · Moss Path",
+    "subtitle": "createTask via MossBridge → simulate → E3 → wallet sign → on-chain confirm",
+    "output": "e2e-flow.html"
+  },
+  "lanes": [
+    { "id": "user", "label": "User / Wallet" },
+    { "id": "app", "label": "Silicon Packages (Server-side)" },
+    { "id": "moss", "label": "Moss + Monad Testnet" }
+  ],
+  "phases": [
+    { "id": "prep", "label": "1. Prepare", "fromCol": 0, "toCol": 1 },
+    { "id": "sim", "label": "2. Simulate & E3", "fromCol": 2, "toCol": 3 },
+    { "id": "sign", "label": "3. Sign & Confirm", "fromCol": 4, "toCol": 5 }
+  ],
+  "mainPath": ["input", "mossbridge", "simulate", "e3", "sign", "created"],
+  "nodes": [
+    { "id": "input", "lane": "user", "col": 0, "type": "frontend", "label": "User Input", "sublabel": "Task + MON amount" },
+    { "id": "mossbridge", "lane": "app", "col": 1, "type": "backend", "label": "MossBridge", "sublabel": "prepareCreateTask()", "width": 110 },
+    { "id": "simulate", "lane": "moss", "col": 2, "type": "cloud", "label": "Simulate", "sublabel": "Capability → unsigned tx", "tag": "debug_traceCall" },
+    { "id": "e3", "lane": "app", "col": 3, "type": "security", "label": "Verify & E3", "sublabel": "No warnings → evidence", "tag": "gate", "width": 110 },
+    { "id": "sign", "lane": "user", "col": 4, "type": "security", "label": "Wallet Sign", "sublabel": "User reviews & signs" },
+    { "id": "created", "lane": "moss", "col": 5, "type": "cloud", "label": "TaskCreated", "sublabel": "Tx confirmed on-chain", "width": 100 }
+  ],
+  "edges": [
+    { "from": "input", "to": "mossbridge", "variant": "emphasis" },
+    { "from": "mossbridge", "to": "simulate", "fromSide": "bottom", "toSide": "top", "route": "straight" },
+    { "from": "simulate", "to": "e3", "fromSide": "bottom", "toSide": "top", "route": "straight" },
+    { "from": "e3", "to": "sign", "variant": "emphasis" },
+    { "from": "sign", "to": "created", "fromSide": "bottom", "toSide": "top", "route": "straight" }
+  ],
+  "groups": [
+    { "id": "moss-block", "label": "Moss covers ONLY createTask", "lane": "moss", "fromCol": 0, "toCol": 5, "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Moss Path (this flow)", "items": ["MossBridge builds capability + unsigned tx, simulates on Testnet", "E3 pre-sign evidence generated (canonical hash)", "Warnings → BLOCK; wallet signs only after clean simulation"] },
+    { "dot": "amber", "title": "Direct Path (post-creation)", "items": ["assignAgent → submitDelivery → acceptDelivery via viem", "openDispute → settle: rule engine splits by weightBps", "Undecidable portion frozen → Manual Review", "Direct-path txs are NOT marked as Moss-verified"] },
+    { "dot": "violet", "title": "Evidence", "items": ["E3 binds Moss commit + simulation + wallet consistency", "Post-sign tx hash anchors the responsibility chain"] }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Silicon Labor Arbitration · System Architecture (Current)",
+    "subtitle": "Monorepo packages + Moss Fork + Monad Testnet — UI/API planned as typed-mock adapter",
+    "output": "architecture.html"
+  },
+  "components": [
+    { "id": "e2e", "type": "external", "label": "Verification Scripts", "sublabel": "e2e-verify · concurrency-demo · forge test", "pos": [40, 60], "size": [200, 62] },
+
+    { "id": "domain", "type": "database", "label": "Domain Types", "sublabel": "Case · Evidence · E3", "pos": [40, 180], "size": [130, 62], "tag": "shared schemas" },
+    { "id": "rules", "type": "backend", "label": "Rule Engine", "sublabel": "Deterministic checkers", "pos": [210, 180], "size": [130, 62], "tag": "pure functions" },
+    { "id": "ai", "type": "backend", "label": "AI Explanation", "sublabel": "Prosecution / Defense / Audit", "pos": [380, 180], "size": [150, 62] },
+    { "id": "mossbridge", "type": "backend", "label": "MossBridge", "sublabel": "prepareCreateTask()", "pos": [580, 180], "size": [140, 62], "tag": "only Moss seam" },
+    { "id": "ui", "type": "frontend", "label": "Next.js UI", "sublabel": "typed mock adapter", "pos": [790, 180], "size": [150, 62], "tag": "planned" },
+
+    { "id": "moss-runtime", "type": "backend", "label": "Testnet Runtime", "sublabel": "monadTestnetRuntime", "pos": [280, 340], "size": [150, 62] },
+    { "id": "moss-protocol", "type": "backend", "label": "Protocol Package", "sublabel": "silicon-arbitration", "pos": [470, 340], "size": [150, 62], "tag": "createTask only" },
+    { "id": "moss-sim", "type": "cloud", "label": "Trace Simulator", "sublabel": "TraceCall + Receipt parser", "pos": [660, 340], "size": [150, 62] },
+
+    { "id": "taskescrow", "type": "cloud", "label": "TaskEscrow", "sublabel": "0x6704...FFCcF", "pos": [280, 500], "size": [150, 62], "tag": "Monad Testnet 10143" },
+    { "id": "monad-rpc", "type": "cloud", "label": "Monad RPC", "sublabel": "testnet-rpc.monad.xyz", "pos": [560, 500], "size": [170, 62] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Verification & Tooling", "wraps": ["e2e"] },
+    { "kind": "region", "label": "Silicon Packages (monorepo)", "wraps": ["domain", "rules", "ai", "mossbridge", "ui"] },
+    { "kind": "region", "label": "Moss Fork (vendor/moss submodule)", "wraps": ["moss-runtime", "moss-protocol", "moss-sim"] },
+    { "kind": "security-group", "label": "Monad Testnet", "wraps": ["taskescrow", "monad-rpc"] }
+  ],
+  "connections": [
+    { "from": "e2e", "to": "taskescrow", "label": "direct viem txs", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "orthogonal-v", "labelDy": 75, "labelDx": -40 },
+    { "from": "domain", "to": "rules", "label": "Case types", "variant": "dashed", "labelDy": 55 },
+    { "from": "domain", "to": "ai", "label": "Case types", "variant": "dashed", "labelDy": 55 },
+    { "from": "domain", "to": "mossbridge", "label": "E3 types", "variant": "dashed", "labelDy": 55 },
+    { "from": "rules", "to": "ai", "label": "undecidable → explain", "variant": "dashed", "labelDy": -60 },
+    { "from": "mossbridge", "to": "moss-runtime", "label": "Runtime API", "fromSide": "bottom", "toSide": "top", "route": "orthogonal-v" },
+    { "from": "moss-runtime", "to": "moss-protocol", "label": "registry.use()", "labelDy": 55 },
+    { "from": "moss-protocol", "to": "moss-sim", "label": "action()", "fromSide": "top", "toSide": "top", "labelDy": -60 },
+    { "from": "moss-sim", "to": "monad-rpc", "label": "debug_traceCall", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "route": "orthogonal-v", "labelDy": 40 },
+    { "from": "monad-rpc", "to": "taskescrow", "label": "JSON-RPC" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Current State", "items": ["Moss only covers createTask (prepare → simulate → E3)", "All later writes go direct via viem (assignAgent, submitDelivery, acceptDelivery)", "e2e-verify.ts proves full lifecycle on-chain"] },
+    { "dot": "amber", "title": "Planned", "items": ["Next.js UI + API server (typed mock adapter first)", "Wallet becomes the only signing boundary", "MossBridge stays the only seam — UI never touches Moss internals"] },
+    { "dot": "violet", "title": "Chain", "items": ["Monad Testnet chain ID 10143", "TaskEscrow deployed + ABI hash pinned in deployments/monad-testnet.json", "vendor/moss pinned via moss.lock.json commit"] }
+  ]
+}

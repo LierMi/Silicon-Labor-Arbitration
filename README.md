@@ -178,6 +178,43 @@ Moss 让用户用自然语言表达链上任务，**在签名前解释将要发�
 我们把用户看到的签前解释原文，与 Capability、未签交易、模拟 Receipt、Moss/Protocol/ABI 版本、语义映射和 canonical hash 一起组成案件的第一份证据 `E3`。
 当事情没按这份可重算、可追溯的签前证据发生时，它才具有归责价值。
 
+### 系统架构
+
+<img src="docs/diagrams/architecture.svg" alt="System Architecture" width="100%">
+
+**当前实现（monorepo packages）：**
+
+| 层 | 说明 |
+|---|---|
+| **Verification & Tooling** | `scripts/e2e-verify.ts`（全生命周期验证）、`concurrency-demo.ts`、Foundry 测试 |
+| **Silicon Packages** | `Domain`（共享类型）→ `Rule Engine`（确定性检查器）→ `AI Explanation`（三路意见）→ `MossBridge`（唯一 Moss seam） |
+| **Moss Fork (vendor/moss)** | Testnet Runtime → `silicon-arbitration` Protocol → Trace Simulator |
+| **Monad Testnet** | `TaskEscrow` 合约（已部署 `0x6704...FFCcF`，chain 10143） |
+
+**Moss 边界：** Moss 只覆盖 `createTask`（构造 → 模拟 → E3 签前证据）。`assignAgent`、`submitDelivery`、`acceptDelivery`、`openDispute`、`settle` 全部通过 viem 直接调用，不标记为 Moss verified。
+
+> UI（Next.js + typed mock adapter）与 API Server 为规划中模块，后续以 MossBridge 为唯一 seam 接入，不直接依赖 Moss 内部实现。
+
+### 端到端流程
+
+<img src="docs/diagrams/e2e-flow.svg" alt="E2E Flow" width="100%">
+
+**Moss Path（创建任务）：** 用户输入 → MossBridge 构造未签交易 → Simulator 在 Testnet 模拟 → 无 Warning 则生成 E3 签前证据 → 用户查看后显式签名 → 交易确认发出 TaskCreated 事件。
+
+**Direct Path（后续生命周期）：** `assignAgent → submitDelivery → acceptDelivery`（viem 直接调用）→ 争议时 `openDispute → settle`（规则引擎按 `weightBps` 分账）→ 无法自动裁决的部分冻结为 Manual Review。
+
+**签名边界：** 钱包是唯一签名与广播边界。Moss 从不签名、从不广播；Direct Path 交易不得标为 Moss verified。
+
+### TaskEscrow 状态机
+
+<img src="docs/diagrams/task-lifecycle.svg" alt="Task Lifecycle" width="100%">
+
+**Happy Path:** Created → Delivered → Accepted（全款归 Agent）  
+**Dispute Path:** Delivered → Disputed → `settle()` 客观部分按 `weightBps` 分账；`frozen>0` 则进入 Manual Review，`releaseFrozen()` 人类终审后释放  → Settled  
+**Expiry:** Created → Refunded（截止时间到，无人交付，`refundExpiredTask`）
+
+> 完整交互版（含 dark/light 主题切换、PNG/SVG 导出）见 `docs/diagrams/architecture.html`、`docs/diagrams/e2e-flow.html`、`docs/diagrams/task-lifecycle.html`。
+
 ---
 
 ## 路线图：从仲裁到审计
@@ -202,7 +239,62 @@ Moss 让用户用自然语言表达链上任务，**在签名前解释将要发�
 
 ## 快速开始
 
-> **当前状态：架构与执行文档阶段。** 下列命令是目标工程入口；在 `package.json`、Next.js 与 Foundry 工程落地并经全新 clone 验证前，不应视为已可执行的安装说明。当前阻塞见 [06 · 技术风险与决策清单](docs/06-技术风险与决策清单.md)。
+> **当前状态：开发阶段。** 合约已部署 Monad Testnet，Moss Protocol 和 MossBridge 已实现并通过 live simulation。下列命令需要完成 PR 合并、依赖安装和钱包配置后才能完整执行。
+
+### 前置条件
+
+- Node.js ≥ 22、pnpm、Foundry
+- Monad Testnet RPC（`https://testnet-rpc.monad.xyz`，chain ID `10143`）
+- 有 MON 测试币的 Testnet 钱包
+
+### 合约
+
+```bash
+cd contracts
+cp .env.example .env  # 填入 DEPLOYER_PRIVATE_KEY、SETTLEMENT_AUTHORITY_ADDRESS、AUTHORITY_ADMIN_ADDRESS
+forge build
+forge test -vvv        # 33 tests, 2 fuzz @ 1000 runs, 1 stateful invariant @ 1000 runs / 500k calls
+```
+
+已部署合约：
+
+| 字段 | 值 |
+|---|---|
+| 合约地址 | `0x67040374b8A9756586De0885f01d1291cE8FFCcF` |
+| 链 | Monad Testnet（10143） |
+| 部署交易 | `0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34` |
+| 部署区块 | 49534792 |
+| Moss-facing ABI hash | `0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5` |
+
+### Moss 集成
+
+```bash
+git submodule update --init --recursive  # vendor/moss
+```
+
+Moss live simulation 已通过：
+
+```text
+Protocol: silicon-arbitration | Method: createTask
+Reverted: false | Gas: 217,941 | Warnings: 0
+Receipt: TaskCreated (taskId, client, amount, reqHash, deadline)
+```
+
+### E2E 验证
+
+```bash
+cd scripts && npm install && npx tsx e2e-verify.ts
+```
+
+全生命周期：`createTask → assignAgent → submitDelivery → acceptDelivery → status=Accepted`
+
+### 并发 Demo
+
+```bash
+npx tsx scripts/concurrency-demo.ts 30
+```
+
+30 个独立任务并发创建，记录真实 tx hash、确认时间、gas。
 
 ```bash
 pnpm install
