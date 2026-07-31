@@ -1,0 +1,28 @@
+{
+  "chainId": 10143,
+  "chainName": "Monad Testnet",
+  "contractName": "TaskEscrow",
+  "contractAddress": "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
+  "deploymentTxHash": "0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34",
+  "deploymentBlockNumber": 49534792,
+  "gasUsed": 1399868,
+  "constructorArgs": {
+    "settlementAuthority": "0x650cd30a58e6893169F41CaC9379D02e7E34653F",
+    "authorityAdmin": "0x95574426252B979d3f662c5f0f666C71822B55DB"
+  },
+  "solidityVersion": "0.8.24",
+  "evmVersion": "cancun",
+  "optimizerRuns": 200,
+  "runtimeBytecodeSize": 6021,
+  "runtimeBytecodeHash_sha256": "0xce635b68e84a9b6ee971f7b9768956b9c96a612edf659a2e0b877d85e5432497",
+  "initCodeHash_keccak": "0x761457002d892e3f48070f50b2af880de772e7247a9fc5a2876c205258fb213a",
+  "mossFacingAbiHash": "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
+  "deployedAt": "2026-07-30T15:20:00Z",
+  "sourceCommit": "beb2a20353e3fed59ea8fe8c71f0bbdacb873684",
+  "verifiedOnChain": {
+    "initCodeMatch": true,
+    "constructorArgsMatch": true,
+    "immutableValuesInRuntimeCode": true,
+    "note": "Runtime bytecode differs from forge inspect deployedBytecode because authorityAdmin is immutable and forge inspect does not embed immutable values. Init code and constructor args verified by exact match."
+  }
+}
