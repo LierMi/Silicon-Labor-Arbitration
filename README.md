@@ -178,6 +178,36 @@ Moss 让用户用自然语言表达链上任务，**在签名前解释将要发�
 我们把用户看到的签前解释原文，与 Capability、未签交易、模拟 Receipt、Moss/Protocol/ABI 版本、语义映射和 canonical hash 一起组成案件的第一份证据 `E3`。
 当事情没按这份可重算、可追溯的签前证据发生时，它才具有归责价值。
 
+### 系统架构
+
+<img src="docs/diagrams/architecture.svg" alt="System Architecture" width="100%">
+
+**三层架构：**
+
+| 层 | 说明 |
+|---|---|
+| **Browser Side** | Next.js UI + 钱包签名边界。Moss 不进入浏览器。 |
+| **Silicon App (Server)** | `MossBridge`（唯一 Moss seam）→ `Rule Engine`（确定性检查）→ `AI Explanation`（三路意见，标记不确定） |
+| **Moss Fork + Monad Testnet** | Team Moss Fork Runtime → `silicon-arbitration` Protocol → Simulator → `TaskEscrow` 合约 |
+
+### 端到端流程
+
+<img src="docs/diagrams/e2e-flow.svg" alt="E2E Flow" width="100%">
+
+**签名前：** 用户输入 → MossBridge 构造未签交易 → Simulator 在 Testnet 模拟 → 无 Warn 则生成 E3 签前证据  
+**签名边界：** 用户查看解释后显式签名，Moss 从不签名或广播  
+**签名后：** 交易确认 → TaskCreated 事件 → 将真实 tx hash 绑定到 E3
+
+### TaskEscrow 状态机
+
+<img src="docs/diagrams/task-lifecycle.svg" alt="Task Lifecycle" width="100%">
+
+**Happy Path:** Created → Delivered → Accepted（全款归 Agent）  
+**Dispute Path:** Delivered → Disputed → 规则引擎按 `weightBps` 分账 → 主观部分冻结为 Manual Review  
+**Expiry:** Created → Refunded（截止时间到，无人交付）
+
+> 完整交互版（含 dark/light 主题切换、PNG/SVG 导出）见 `docs/diagrams/architecture.html`、`docs/diagrams/e2e-flow.html`、`docs/diagrams/task-lifecycle.html`。
+
 ---
 
 ## 路线图：从仲裁到审计

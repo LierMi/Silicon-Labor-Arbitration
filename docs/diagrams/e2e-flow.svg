@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 528" width="720" height="528">
+<style>
+
+.c-mask       { fill: #0f172a; stroke: none; }
+.c-frontend   { fill: rgba(8,51,68,0.4);   stroke: #22d3ee; }
+.c-backend    { fill: rgba(6,78,59,0.4);    stroke: #34d399; }
+.c-database   { fill: rgba(76,29,149,0.4);  stroke: #a78bfa; }
+.c-cloud      { fill: rgba(120,53,15,0.3);  stroke: #fbbf24; }
+.c-security   { fill: rgba(136,19,55,0.4);  stroke: #fb7185; }
+.c-external   { fill: rgba(30,41,59,0.5);   stroke: #94a3b8; }
+.c-messagebus { fill: rgba(251,146,60,0.3); stroke: #fb923c; }
+.c-grid       { fill: none; stroke: #1e293b; }
+.t-primary    { fill: #ffffff; }
+.t-muted      { fill: #94a3b8; }
+.t-dim        { fill: #475569; }
+.t-frontend   { fill: #22d3ee; }
+.t-backend    { fill: #34d399; }
+.t-database   { fill: #a78bfa; }
+.t-cloud      { fill: #fbbf24; }
+.t-security   { fill: #fb7185; }
+.t-external   { fill: #94a3b8; }
+.t-messagebus { fill: #fb923c; }
+.a-default    { stroke: #64748b; fill: none; }
+.a-emphasis   { stroke: #34d399; fill: none; }
+.a-security   { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
+.a-dashed     { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
+.m-default    { fill: #64748b; }
+.m-emphasis   { fill: #34d399; }
+.m-security   { fill: #fb7185; }
+.m-dashed     { fill: #a78bfa; }
+.c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
+.c-region     { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
+.c-lane       { fill: rgba(15,23,42,0.22); stroke: #334155; stroke-dasharray: 6,6; }
+.sv-panel     { fill: rgba(15,23,42,0.5); stroke: #1e293b; }
+/* Card dots */
+.t-cyan    { fill: #22d3ee; }
+.t-emerald { fill: #34d399; }
+.t-violet  { fill: #a78bfa; }
+.t-amber   { fill: #fbbf24; }
+.t-rose    { fill: #fb7185; }
+.t-orange  { fill: #fb923c; }
+.t-slate   { fill: #94a3b8; }
+
+</style>
+
+        <!-- Definitions -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- Swimlanes -->
+        <rect x="40" y="52" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / User / Wallet</text>
+
+        <rect x="40" y="176" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / Silicon App (Server)</text>
+
+        <rect x="40" y="300" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <text x="54" y="322" class="t-dim" font-size="10" font-weight="600">03 / Moss + Monad Testnet</text>
+
+        <!-- Phase headers -->
+        <line x1="42" y1="35" x2="266" y2="35" class="a-default" stroke-width="1.1"/>
+        <rect x="42" y="27" width="224" height="16" rx="4" class="c-mask"/>
+        <text x="154" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">1. Prepare</text>
+        <line x1="254" y1="35" x2="476" y2="35" class="a-default" stroke-width="1.1"/>
+        <rect x="254" y="27" width="222" height="16" rx="4" class="c-mask"/>
+        <text x="365" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">2. Moss Simulate &amp; E3</text>
+        <line x1="454" y1="35" x2="671" y2="35" class="a-default" stroke-width="1.1"/>
+        <rect x="454" y="27" width="217" height="16" rx="4" class="c-mask"/>
+        <text x="562.5" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">3. Wallet Sign &amp; Confirm</text>
+
+        <!-- Workflow groups -->
+        <rect x="250" y="338" width="230" height="58" rx="9" class="c-lane" stroke-width="1"/>
+        <text x="260" y="352" class="t-backend" font-size="7" font-weight="600">Moss Simulation &amp; E3</text>
+
+        <!-- Edge paths -->
+        <path d="M 134 119 L 134 166 L 165 166 L 165 243" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 220 269 L 220 290 L 300 290 L 300 333" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 346 367 L 346 290 L 370 290 L 370 243" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 490 243 L 490 166 L 440 166 L 440 119" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 500 145 L 500 166 L 625 166 L 625 217" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+
+        <!-- Nodes -->
+        <rect x="42" y="93" width="92" height="52" rx="6" class="c-mask"/>
+        <rect x="42" y="93" width="92" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
+        <text x="88" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">User Input</text>
+        <text x="88" y="131" class="t-muted" font-size="8" text-anchor="middle">Task + MON amount</text>
+
+        <rect x="165" y="217" width="110" height="52" rx="6" class="c-mask"/>
+        <rect x="165" y="217" width="110" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="220" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Prepare Task</text>
+        <text x="220" y="255" class="t-muted" font-size="8" text-anchor="middle">Requirements → MossBridge</text>
+
+        <rect x="254" y="333" width="92" height="68" rx="6" class="c-mask"/>
+        <rect x="254" y="333" width="92" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="300" y="354" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Moss Simulate</text>
+        <text x="300" y="371" class="t-muted" font-size="8" text-anchor="middle">Capability → tx → TraceCall</text>
+        <text x="300" y="389" class="t-cloud" font-size="7" text-anchor="middle">debug_traceCall</text>
+
+        <rect x="370" y="209" width="120" height="68" rx="6" class="c-mask"/>
+        <rect x="370" y="209" width="120" height="68" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="430" y="230" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Verify &amp; Build E3</text>
+        <text x="430" y="247" class="t-muted" font-size="8" text-anchor="middle">No warnings → canon. evidence</text>
+        <text x="430" y="265" class="t-security" font-size="7" text-anchor="middle">gate</text>
+
+        <rect x="440" y="93" width="120" height="52" rx="6" class="c-mask"/>
+        <rect x="440" y="93" width="120" height="52" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="500" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Sign &amp; Broadcast</text>
+        <text x="500" y="131" class="t-muted" font-size="8" text-anchor="middle">Same tx → wallet confirms</text>
+
+        <rect x="575" y="217" width="100" height="52" rx="6" class="c-mask"/>
+        <rect x="575" y="217" width="100" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="625" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Bind E3</text>
+        <text x="625" y="255" class="t-muted" font-size="8" text-anchor="middle">Tx receipt → evidence</text>
+
+        <!-- Edge labels -->
+
+
+
+
+
+
+        <!-- Legend -->
+        <text x="175" y="428" class="t-primary" font-size="10" font-weight="600">Legend</text>
+        <rect x="175" y="440" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+        <text x="195" y="448" class="t-muted" font-size="7">User UI</text>
+        <rect x="260" y="440" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+        <text x="280" y="448" class="t-muted" font-size="7">Agent logic</text>
+        <rect x="370" y="440" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+        <text x="390" y="448" class="t-muted" font-size="7">Policy</text>
+        <rect x="455" y="440" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
+        <text x="475" y="448" class="t-muted" font-size="7">Tool action</text>
+        <rect x="565" y="440" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+        <text x="585" y="448" class="t-muted" font-size="7">Context / trace</text>
+      
+</svg>

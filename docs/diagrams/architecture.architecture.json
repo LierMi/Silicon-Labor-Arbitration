@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Silicon Labor Arbitration · System Architecture",
+    "subtitle": "Multi-layer architecture: Browser → App Server → MossBridge → Moss Fork → Monad Testnet",
+    "output": "architecture.html"
+  },
+  "components": [
+    { "id": "browser", "type": "external", "label": "Browser", "sublabel": "Next.js UI", "pos": [180, 60], "size": [124, 62] },
+    { "id": "wallet", "type": "security", "label": "Wallet", "sublabel": "Sign & Broadcast", "pos": [460, 60], "size": [130, 62], "tag": "signing boundary" },
+    { "id": "api", "type": "backend", "label": "API Server", "sublabel": "Orchestration · Evidence", "pos": [180, 180], "size": [130, 62] },
+    { "id": "mossbridge", "type": "backend", "label": "MossBridge", "sublabel": "prepareCreateTask()", "pos": [440, 180], "size": [140, 62], "tag": "only Moss seam" },
+    { "id": "rules", "type": "backend", "label": "Rule Engine", "sublabel": "Deterministic checks", "pos": [700, 180], "size": [130, 62] },
+    { "id": "ai", "type": "backend", "label": "AI Explanation", "sublabel": "Prosecution / Defense / Audit", "pos": [900, 180], "size": [148, 62] },
+    { "id": "moss-runtime", "type": "backend", "label": "Moss Runtime", "sublabel": "Monad Testnet Runtime", "pos": [320, 320], "size": [136, 62] },
+    { "id": "moss-protocol", "type": "backend", "label": "Protocol Package", "sublabel": "silicon-arbitration", "pos": [540, 320], "size": [142, 62] },
+    { "id": "moss-sim", "type": "cloud", "label": "Moss Simulator", "sublabel": "TraceCall + Receipt", "pos": [760, 320], "size": [148, 62] },
+    { "id": "taskescrow", "type": "cloud", "label": "TaskEscrow", "sublabel": "0x6704...FFCcF", "pos": [280, 460], "size": [142, 62], "tag": "Monad Testnet 10143" },
+    { "id": "monad-rpc", "type": "cloud", "label": "Monad RPC", "sublabel": "testnet-rpc.monad.xyz", "pos": [600, 460], "size": [150, 62] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Browser Side", "wraps": ["browser", "wallet"] },
+    { "kind": "region", "label": "Silicon Application (Server)", "wraps": ["api", "mossbridge", "rules", "ai"] },
+    { "kind": "region", "label": "Moss Fork (vendor/moss)", "wraps": ["moss-runtime", "moss-protocol", "moss-sim"] },
+    { "kind": "security-group", "label": "Monad Testnet", "wraps": ["taskescrow", "monad-rpc"] }
+  ],
+  "connections": [
+    { "from": "browser", "to": "api", "label": "HTTPS", "variant": "emphasis" },
+    { "from": "api", "to": "mossbridge", "label": "prepareTask()" },
+    { "from": "mossbridge", "to": "moss-runtime", "label": "Runtime API", "fromSide": "bottom", "toSide": "top" },
+    { "from": "moss-runtime", "to": "moss-protocol", "label": "registry.use()" },
+    { "from": "moss-protocol", "to": "moss-sim", "label": "action()", "labelDy": -72 },
+    { "from": "moss-sim", "to": "monad-rpc", "label": "debug_traceCall", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "from": "monad-rpc", "to": "taskescrow", "label": "JSON-RPC" },
+    { "from": "api", "to": "rules", "label": "runRules()", "labelDx": 60, "labelDy": 55 },
+    { "from": "rules", "to": "ai", "label": "undecidable", "labelDx": 70, "labelDy": 55 },
+    { "from": "wallet", "to": "taskescrow", "label": "sign & broadcast", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "route": "orthogonal-v" },
+    { "from": "api", "to": "wallet", "label": "unsigned tx", "variant": "security", "fromSide": "right", "toSide": "left", "labelDy": 70 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "User Facing", "items": ["Next.js UI with typed adapter", "Wallet is the signing boundary — Moss never signs"] },
+    { "dot": "emerald", "title": "Server Core", "items": ["MossBridge is the only Moss seam", "Rule engine: deterministic, no AI in money path", "AI layer: 3-way argument, marks 'undecidable'"] },
+    { "dot": "violet", "title": "Chain", "items": ["Monad Testnet chain ID 10143", "TaskEscrow manages full task lifecycle", "E3 pre-sign evidence binds Moss commit + simulation"] }
+  ]
+}

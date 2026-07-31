@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1118 610" width="1118" height="610">
+<style>
+
+.c-mask       { fill: #0f172a; stroke: none; }
+.c-frontend   { fill: rgba(8,51,68,0.4);   stroke: #22d3ee; }
+.c-backend    { fill: rgba(6,78,59,0.4);    stroke: #34d399; }
+.c-database   { fill: rgba(76,29,149,0.4);  stroke: #a78bfa; }
+.c-cloud      { fill: rgba(120,53,15,0.3);  stroke: #fbbf24; }
+.c-security   { fill: rgba(136,19,55,0.4);  stroke: #fb7185; }
+.c-external   { fill: rgba(30,41,59,0.5);   stroke: #94a3b8; }
+.c-messagebus { fill: rgba(251,146,60,0.3); stroke: #fb923c; }
+.c-grid       { fill: none; stroke: #1e293b; }
+.t-primary    { fill: #ffffff; }
+.t-muted      { fill: #94a3b8; }
+.t-dim        { fill: #475569; }
+.t-frontend   { fill: #22d3ee; }
+.t-backend    { fill: #34d399; }
+.t-database   { fill: #a78bfa; }
+.t-cloud      { fill: #fbbf24; }
+.t-security   { fill: #fb7185; }
+.t-external   { fill: #94a3b8; }
+.t-messagebus { fill: #fb923c; }
+.a-default    { stroke: #64748b; fill: none; }
+.a-emphasis   { stroke: #34d399; fill: none; }
+.a-security   { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
+.a-dashed     { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
+.m-default    { fill: #64748b; }
+.m-emphasis   { fill: #34d399; }
+.m-security   { fill: #fb7185; }
+.m-dashed     { fill: #a78bfa; }
+.c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
+.c-region     { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
+.c-lane       { fill: rgba(15,23,42,0.22); stroke: #334155; stroke-dasharray: 6,6; }
+.sv-panel     { fill: rgba(15,23,42,0.5); stroke: #1e293b; }
+/* Card dots */
+.t-cyan    { fill: #22d3ee; }
+.t-emerald { fill: #34d399; }
+.t-violet  { fill: #a78bfa; }
+.t-amber   { fill: #fbbf24; }
+.t-rose    { fill: #fb7185; }
+.t-orange  { fill: #fb923c; }
+.t-slate   { fill: #94a3b8; }
+
+</style>
+
+        <!-- Definitions -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- Boundaries (behind everything) -->
+        <rect x="150" y="30" width="470" height="112" rx="12" class="c-region" stroke-width="1"/>
+        <text x="158" y="48" class="t-cloud" font-size="9" font-weight="600">Browser Side</text>
+
+        <rect x="150" y="150" width="928" height="112" rx="12" class="c-region" stroke-width="1"/>
+        <text x="158" y="168" class="t-cloud" font-size="9" font-weight="600">Silicon Application (Server)</text>
+
+        <rect x="290" y="290" width="648" height="112" rx="12" class="c-region" stroke-width="1"/>
+        <text x="298" y="308" class="t-cloud" font-size="9" font-weight="600">Moss Fork (vendor/moss)</text>
+
+        <rect x="250" y="430" width="530" height="112" rx="8" class="c-security-group" stroke-width="1"/>
+        <text x="258" y="448" class="t-security" font-size="9" font-weight="600">Monad Testnet</text>
+
+        <!-- Connection paths (before components for correct z-order) -->
+        <path d="M 304 91 L 250 91 Q 242 91 242 99 L 242 203 Q 242 211 234 211 L 180 211" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 310 211 L 440 211" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 510 242 L 457 242 Q 449 242 449 250 L 449 312 Q 449 320 441 320 L 388 320" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 456 351 L 540 351" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 682 351 L 760 351" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 834 382 L 762.5 382 Q 754.5 382 754.5 390 L 754.5 452 Q 754.5 460 746.5 460 L 675 460" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 600 491 L 422 491" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 310 211 L 700 211" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 830 211 L 900 211" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 525 122 L 525 283 Q 525 291 517 291 L 359 291 Q 351 291 351 299 L 351 460" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 310 211 L 377 211 Q 385 211 385 203 L 385 99 Q 385 91 393 91 L 460 91" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+
+        <!-- Components -->
+        <rect x="180" y="60" width="124" height="62" rx="6" class="c-mask"/>
+        <rect x="180" y="60" width="124" height="62" rx="6" class="c-external" stroke-width="1.5"/>
+        <text x="242" y="89" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Browser</text>
+        <text x="242" y="105" class="t-muted" font-size="9" text-anchor="middle">Next.js UI</text>
+
+        <rect x="460" y="60" width="130" height="62" rx="6" class="c-mask"/>
+        <rect x="460" y="60" width="130" height="62" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="525" y="89" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Wallet</text>
+        <text x="525" y="105" class="t-muted" font-size="9" text-anchor="middle">Sign &amp; Broadcast</text>
+        <text x="525" y="114" class="t-security" font-size="7" text-anchor="middle">signing boundary</text>
+
+        <rect x="180" y="180" width="130" height="62" rx="6" class="c-mask"/>
+        <rect x="180" y="180" width="130" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="245" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">API Server</text>
+        <text x="245" y="225" class="t-muted" font-size="9" text-anchor="middle">Orchestration · Evidence</text>
+
+        <rect x="440" y="180" width="140" height="62" rx="6" class="c-mask"/>
+        <rect x="440" y="180" width="140" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="510" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MossBridge</text>
+        <text x="510" y="225" class="t-muted" font-size="9" text-anchor="middle">prepareCreateTask()</text>
+        <text x="510" y="234" class="t-backend" font-size="7" text-anchor="middle">only Moss seam</text>
+
+        <rect x="700" y="180" width="130" height="62" rx="6" class="c-mask"/>
+        <rect x="700" y="180" width="130" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="765" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Rule Engine</text>
+        <text x="765" y="225" class="t-muted" font-size="9" text-anchor="middle">Deterministic checks</text>
+
+        <rect x="900" y="180" width="148" height="62" rx="6" class="c-mask"/>
+        <rect x="900" y="180" width="148" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="974" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">AI Explanation</text>
+        <text x="974" y="225" class="t-muted" font-size="9" text-anchor="middle">Prosecution / Defense / Audit</text>
+
+        <rect x="320" y="320" width="136" height="62" rx="6" class="c-mask"/>
+        <rect x="320" y="320" width="136" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="388" y="349" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Moss Runtime</text>
+        <text x="388" y="365" class="t-muted" font-size="9" text-anchor="middle">Monad Testnet Runtime</text>
+
+        <rect x="540" y="320" width="142" height="62" rx="6" class="c-mask"/>
+        <rect x="540" y="320" width="142" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="611" y="349" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Protocol Package</text>
+        <text x="611" y="365" class="t-muted" font-size="9" text-anchor="middle">silicon-arbitration</text>
+
+        <rect x="760" y="320" width="148" height="62" rx="6" class="c-mask"/>
+        <rect x="760" y="320" width="148" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="834" y="349" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Moss Simulator</text>
+        <text x="834" y="365" class="t-muted" font-size="9" text-anchor="middle">TraceCall + Receipt</text>
+
+        <rect x="280" y="460" width="142" height="62" rx="6" class="c-mask"/>
+        <rect x="280" y="460" width="142" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="351" y="489" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TaskEscrow</text>
+        <text x="351" y="505" class="t-muted" font-size="9" text-anchor="middle">0x6704...FFCcF</text>
+        <text x="351" y="514" class="t-cloud" font-size="7" text-anchor="middle">Monad Testnet 10143</text>
+
+        <rect x="600" y="460" width="150" height="62" rx="6" class="c-mask"/>
+        <rect x="600" y="460" width="150" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="675" y="489" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Monad RPC</text>
+        <text x="675" y="505" class="t-muted" font-size="9" text-anchor="middle">testnet-rpc.monad.xyz</text>
+
+        <!-- Connection labels -->
+        <rect x="225" y="131" width="34" height="14" rx="3" class="c-mask"/>
+        <text x="242" y="141" class="t-backend" font-size="8" text-anchor="middle">HTTPS</text>
+        <rect x="338.8" y="191" width="72.4" height="14" rx="3" class="c-mask"/>
+        <text x="375" y="201" class="t-muted" font-size="8" text-anchor="middle">prepareTask()</text>
+        <rect x="417.6" y="261" width="62.8" height="14" rx="3" class="c-mask"/>
+        <text x="449" y="271" class="t-muted" font-size="8" text-anchor="middle">Runtime API</text>
+        <rect x="459.4" y="331" width="77.2" height="14" rx="3" class="c-mask"/>
+        <text x="498" y="341" class="t-muted" font-size="8" text-anchor="middle">registry.use()</text>
+        <rect x="696.8" y="259" width="48.4" height="14" rx="3" class="c-mask"/>
+        <text x="721" y="269" class="t-muted" font-size="8" text-anchor="middle">action()</text>
+        <rect x="713.5" y="401" width="82" height="14" rx="3" class="c-mask"/>
+        <text x="754.5" y="411" class="t-messagebus" font-size="8" text-anchor="middle">debug_traceCall</text>
+        <rect x="486.8" y="471" width="48.4" height="14" rx="3" class="c-mask"/>
+        <text x="511" y="481" class="t-muted" font-size="8" text-anchor="middle">JSON-RPC</text>
+        <rect x="536" y="246" width="58" height="14" rx="3" class="c-mask"/>
+        <text x="565" y="256" class="t-muted" font-size="8" text-anchor="middle">runRules()</text>
+        <rect x="903.6" y="246" width="62.8" height="14" rx="3" class="c-mask"/>
+        <text x="935" y="256" class="t-muted" font-size="8" text-anchor="middle">undecidable</text>
+        <rect x="394.6" y="271" width="86.8" height="14" rx="3" class="c-mask"/>
+        <text x="438" y="281" class="t-backend" font-size="8" text-anchor="middle">sign &amp; broadcast</text>
+        <rect x="353.6" y="201" width="62.8" height="14" rx="3" class="c-mask"/>
+        <text x="385" y="211" class="t-security" font-size="8" text-anchor="middle">unsigned tx</text>
+
+        <!-- Legend -->
+        <text x="40" y="581" class="t-primary" font-size="9" font-weight="600">Legend</text>
+        <rect x="40" y="586" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
+        <text x="60" y="594" class="t-muted" font-size="8">External</text>
+        <rect x="138" y="586" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+        <text x="158" y="594" class="t-muted" font-size="8">Security</text>
+        <rect x="236" y="586" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+        <text x="256" y="594" class="t-muted" font-size="8">Backend</text>
+        <rect x="329" y="586" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+        <text x="349" y="594" class="t-muted" font-size="8">Cloud</text>
+      
+</svg>

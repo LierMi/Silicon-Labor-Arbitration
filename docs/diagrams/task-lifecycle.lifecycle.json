@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "TaskEscrow · State Machine",
+    "subtitle": "On-chain state transitions: Created → Delivery → Settlement on Monad Testnet",
+    "output": "task-lifecycle.html"
+  },
+  "lanes": [
+    { "id": "main", "label": "Task Lifecycle" },
+    { "id": "dispute", "label": "Dispute Resolution" },
+    { "id": "terminal", "label": "Terminal Outcomes" }
+  ],
+  "states": [
+    { "id": "created", "type": "start", "label": "Created", "lane": "main", "col": 0, "step": "01", "sublabel": "Funds locked · reqHash committed" },
+    { "id": "delivered", "type": "active", "label": "Delivered", "lane": "main", "col": 2, "step": "02", "sublabel": "Agent submitted delivery hash" },
+    { "id": "disputed", "type": "active", "label": "Disputed", "lane": "dispute", "col": 0, "step": "03", "sublabel": "caseId created · Rules run" },
+    { "id": "review", "type": "waiting", "label": "Manual Review", "lane": "dispute", "col": 2, "step": "04", "sublabel": "Subjective funds frozen · Human decides" },
+    { "id": "accepted", "type": "success", "label": "Accepted", "lane": "terminal", "col": 0, "sublabel": "Full escrow → agent" },
+    { "id": "settled", "type": "success", "label": "Settled", "lane": "terminal", "col": 1, "sublabel": "All portions released" },
+    { "id": "refunded", "type": "success", "label": "Refunded", "lane": "terminal", "col": 2, "sublabel": "No delivery · deadline passed" }
+  ],
+  "transitions": [
+    { "from": "created", "to": "delivered", "label": "submitDelivery()", "variant": "emphasis" },
+    { "from": "created", "to": "refunded", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "from": "delivered", "to": "accepted", "label": "acceptDelivery()", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelDy": 50 },
+    { "from": "delivered", "to": "disputed", "label": "openDispute()", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "from": "disputed", "to": "settled", "label": "settle() all objective", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" },
+    { "from": "disputed", "to": "review", "label": "frozen > 0", "variant": "security" },
+    { "from": "review", "to": "settled", "label": "releaseFrozen()", "variant": "dashed", "fromSide": "bottom", "toSide": "top" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Happy Path", "items": ["Created → Delivered → Accepted", "Full escrow released to agent"] },
+    { "dot": "amber", "title": "Dispute Path", "items": ["Delivered → Disputed → Manual Review → Settled", "Rule engine splits by weightBps", "Undecidable portion frozen for human"] }
+  ]
+}
