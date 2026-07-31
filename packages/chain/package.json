@@ -1,0 +1,13 @@
+{
+  "name": "@sla/chain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chain config, TaskEscrow ABI, tx builders and wagmi hooks. Direct path only — createTask P0 goes through @sla/moss-bridge.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts", "./hooks": "./src/hooks.ts" },
+  "dependencies": { "@sla/domain": "workspace:*", "viem": "^2.21.0" },
+  "peerDependencies": { "react": "^18 || ^19", "wagmi": "^2.12.0" },
+  "scripts": { "typecheck": "tsc --noEmit" }
+}
