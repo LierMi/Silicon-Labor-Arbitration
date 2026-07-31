@@ -271,6 +271,8 @@ export interface ChainHop {
 export interface OnchainRefs {
   chainId: number;
   taskEscrowAddress?: string;
+  deploymentTxHash?: string;
+  deploymentBlockNumber?: number;
   createTaskAbiHash: string;
   taskId?: string;
   createTaskTxHash?: string;

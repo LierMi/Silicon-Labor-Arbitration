@@ -1,0 +1,20 @@
+{
+  "name": "@sla/moss-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deep module that wraps Moss: discover → load → action → simulate → preSignEvidence. Callers must not depend on Moss internals.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@sla/domain": "workspace:*",
+    "@themoss/core": "file:../../../moss/packages/core",
+    "@themoss/simulator": "file:../../../moss/packages/simulator",
+    "@themoss/system": "file:../../../moss/packages/system",
+    "@themoss/protocol-silicon-arbitration": "file:../../../moss/packages/protocols/silicon-arbitration",
+    "viem": "^2.54.3"
+  },
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "devDependencies": { "typescript": "~5.9.0" }
+}
