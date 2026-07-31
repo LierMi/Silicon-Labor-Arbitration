@@ -14,10 +14,15 @@
   "evmVersion": "cancun",
   "optimizerRuns": 200,
   "runtimeBytecodeSize": 6021,
-  "runtimeBytecodeHash": "0xce635b68e84a9b6ee971f7b9768956b9c96a612edf659a2e0b877d85e5432497",
-  "initCodeHash": "0x761457002d892e3f48070f50b2af880de772e7247a9fc5a2876c205258fb213a",
+  "runtimeBytecodeHash_sha256": "0xce635b68e84a9b6ee971f7b9768956b9c96a612edf659a2e0b877d85e5432497",
+  "initCodeHash_keccak": "0x761457002d892e3f48070f50b2af880de772e7247a9fc5a2876c205258fb213a",
   "mossFacingAbiHash": "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
   "deployedAt": "2026-07-30T15:20:00Z",
   "sourceCommit": "beb2a20353e3fed59ea8fe8c71f0bbdacb873684",
-  "verifiedOnChain": true
+  "verifiedOnChain": {
+    "initCodeMatch": true,
+    "constructorArgsMatch": true,
+    "immutableValuesInRuntimeCode": true,
+    "note": "Runtime bytecode differs from forge inspect deployedBytecode because authorityAdmin is immutable and forge inspect does not embed immutable values. Init code and constructor args verified by exact match."
+  }
 }
