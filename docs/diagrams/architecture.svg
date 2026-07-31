@@ -1,49 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1118 610" width="1118" height="610">
 <style>
-  @media (prefers-color-scheme: light) {
-
-  .c-mask       { fill: #ffffff; stroke: none; }
-  .c-frontend   { fill: rgba(8,145,178,0.15); stroke: #0891b2; }
-  .c-backend    { fill: rgba(5,150,105,0.15); stroke: #059669; }
-  .c-database   { fill: rgba(124,58,237,0.12); stroke: #7c3aed; }
-  .c-cloud      { fill: rgba(217,119,6,0.12); stroke: #d97706; }
-  .c-security   { fill: rgba(225,29,72,0.12); stroke: #e11d48; }
-  .c-external   { fill: rgba(100,116,139,0.12); stroke: #64748b; }
-  .c-messagebus { fill: rgba(234,88,12,0.12); stroke: #ea580c; }
-  .c-grid       { fill: none; stroke: #e2e8f0; }
-  .t-primary    { fill: #0f172a; }
-  .t-muted      { fill: #64748b; }
-  .t-dim        { fill: #94a3b8; }
-  .t-frontend   { fill: #0891b2; }
-  .t-backend    { fill: #059669; }
-  .t-database   { fill: #7c3aed; }
-  .t-cloud      { fill: #d97706; }
-  .t-security   { fill: #e11d48; }
-  .t-external   { fill: #64748b; }
-  .t-messagebus { fill: #ea580c; }
-  .a-default    { stroke: #94a3b8; fill: none; }
-  .a-emphasis   { stroke: #059669; fill: none; }
-  .a-security   { stroke: #e11d48; fill: none; stroke-dasharray: 5,5; }
-  .a-dashed     { stroke: #7c3aed; fill: none; stroke-dasharray: 4,4; }
-  .m-default    { fill: #94a3b8; }
-  .m-emphasis   { fill: #059669; }
-  .m-security   { fill: #e11d48; }
-  .m-dashed     { fill: #7c3aed; }
-  .c-security-group { fill: transparent; stroke: #e11d48; stroke-dasharray: 4,4; }
-  .c-region     { fill: rgba(217,119,6,0.06); stroke: #d97706; stroke-dasharray: 8,4; }
-  .c-lane       { fill: rgba(248,250,252,0.65); stroke: #cbd5e1; stroke-dasharray: 6,6; }
-  .sv-panel     { fill: #ffffff; stroke: #e2e8f0; }
-  .t-cyan    { fill: #0891b2; }
-  .t-emerald { fill: #059669; }
-  .t-violet  { fill: #7c3aed; }
-  .t-amber   { fill: #d97706; }
-  .t-rose    { fill: #e11d48; }
-  .t-orange  { fill: #ea580c; }
-  .t-slate   { fill: #64748b; }
-
-  }
-  @media (prefers-color-scheme: dark) {
 
   .c-mask       { fill: #0f172a; stroke: none; }
   .c-frontend   { fill: rgba(8,51,68,0.4);   stroke: #22d3ee; }
@@ -84,50 +41,8 @@
   .t-orange  { fill: #fb923c; }
   .t-slate   { fill: #94a3b8; }
 
-  }
-  /* Fallback: dark theme when prefers-color-scheme is unsupported */
-
-  .c-mask       { fill: #ffffff; stroke: none; }
-  .c-frontend   { fill: rgba(8,145,178,0.15); stroke: #0891b2; }
-  .c-backend    { fill: rgba(5,150,105,0.15); stroke: #059669; }
-  .c-database   { fill: rgba(124,58,237,0.12); stroke: #7c3aed; }
-  .c-cloud      { fill: rgba(217,119,6,0.12); stroke: #d97706; }
-  .c-security   { fill: rgba(225,29,72,0.12); stroke: #e11d48; }
-  .c-external   { fill: rgba(100,116,139,0.12); stroke: #64748b; }
-  .c-messagebus { fill: rgba(234,88,12,0.12); stroke: #ea580c; }
-  .c-grid       { fill: none; stroke: #e2e8f0; }
-  .t-primary    { fill: #0f172a; }
-  .t-muted      { fill: #64748b; }
-  .t-dim        { fill: #94a3b8; }
-  .t-frontend   { fill: #0891b2; }
-  .t-backend    { fill: #059669; }
-  .t-database   { fill: #7c3aed; }
-  .t-cloud      { fill: #d97706; }
-  .t-security   { fill: #e11d48; }
-  .t-external   { fill: #64748b; }
-  .t-messagebus { fill: #ea580c; }
-  .a-default    { stroke: #94a3b8; fill: none; }
-  .a-emphasis   { stroke: #059669; fill: none; }
-  .a-security   { stroke: #e11d48; fill: none; stroke-dasharray: 5,5; }
-  .a-dashed     { stroke: #7c3aed; fill: none; stroke-dasharray: 4,4; }
-  .m-default    { fill: #94a3b8; }
-  .m-emphasis   { fill: #059669; }
-  .m-security   { fill: #e11d48; }
-  .m-dashed     { fill: #7c3aed; }
-  .c-security-group { fill: transparent; stroke: #e11d48; stroke-dasharray: 4,4; }
-  .c-region     { fill: rgba(217,119,6,0.06); stroke: #d97706; stroke-dasharray: 8,4; }
-  .c-lane       { fill: rgba(248,250,252,0.65); stroke: #cbd5e1; stroke-dasharray: 6,6; }
-  .sv-panel     { fill: #ffffff; stroke: #e2e8f0; }
-  .t-cyan    { fill: #0891b2; }
-  .t-emerald { fill: #059669; }
-  .t-violet  { fill: #7c3aed; }
-  .t-amber   { fill: #d97706; }
-  .t-rose    { fill: #e11d48; }
-  .t-orange  { fill: #ea580c; }
-  .t-slate   { fill: #64748b; }
-
-
 </style>
+<rect width="100%" height="100%" fill="#020617" />
 
         <!-- Definitions -->
         <defs>
