@@ -9,10 +9,10 @@
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
     "@sla/domain": "workspace:*",
-    "@themoss/core": "file:../../../moss/packages/core",
-    "@themoss/simulator": "file:../../../moss/packages/simulator",
-    "@themoss/system": "file:../../../moss/packages/system",
-    "@themoss/protocol-silicon-arbitration": "file:../../../moss/packages/protocols/silicon-arbitration",
+    "@themoss/core": "file:../../vendor/moss/packages/core",
+    "@themoss/simulator": "file:../../vendor/moss/packages/simulator",
+    "@themoss/system": "file:../../vendor/moss/packages/system",
+    "@themoss/protocol-silicon-arbitration": "file:../../vendor/moss/packages/protocols/silicon-arbitration",
     "viem": "^2.54.3"
   },
   "scripts": { "typecheck": "tsc --noEmit" },

@@ -1,0 +1,6 @@
+packages:
+  - packages/*
+  - vendor/moss/packages/*
+  - vendor/moss/packages/protocols/*
+allowBuilds:
+  esbuild: set this to true or false
