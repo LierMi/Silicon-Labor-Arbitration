@@ -1,46 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 528" width="720" height="528">
 <style>
+  @media (prefers-color-scheme: light) {
 
-.c-mask       { fill: #0f172a; stroke: none; }
-.c-frontend   { fill: rgba(8,51,68,0.4);   stroke: #22d3ee; }
-.c-backend    { fill: rgba(6,78,59,0.4);    stroke: #34d399; }
-.c-database   { fill: rgba(76,29,149,0.4);  stroke: #a78bfa; }
-.c-cloud      { fill: rgba(120,53,15,0.3);  stroke: #fbbf24; }
-.c-security   { fill: rgba(136,19,55,0.4);  stroke: #fb7185; }
-.c-external   { fill: rgba(30,41,59,0.5);   stroke: #94a3b8; }
-.c-messagebus { fill: rgba(251,146,60,0.3); stroke: #fb923c; }
-.c-grid       { fill: none; stroke: #1e293b; }
-.t-primary    { fill: #ffffff; }
-.t-muted      { fill: #94a3b8; }
-.t-dim        { fill: #475569; }
-.t-frontend   { fill: #22d3ee; }
-.t-backend    { fill: #34d399; }
-.t-database   { fill: #a78bfa; }
-.t-cloud      { fill: #fbbf24; }
-.t-security   { fill: #fb7185; }
-.t-external   { fill: #94a3b8; }
-.t-messagebus { fill: #fb923c; }
-.a-default    { stroke: #64748b; fill: none; }
-.a-emphasis   { stroke: #34d399; fill: none; }
-.a-security   { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
-.a-dashed     { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
-.m-default    { fill: #64748b; }
-.m-emphasis   { fill: #34d399; }
-.m-security   { fill: #fb7185; }
-.m-dashed     { fill: #a78bfa; }
-.c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
-.c-region     { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
-.c-lane       { fill: rgba(15,23,42,0.22); stroke: #334155; stroke-dasharray: 6,6; }
-.sv-panel     { fill: rgba(15,23,42,0.5); stroke: #1e293b; }
-/* Card dots */
-.t-cyan    { fill: #22d3ee; }
-.t-emerald { fill: #34d399; }
-.t-violet  { fill: #a78bfa; }
-.t-amber   { fill: #fbbf24; }
-.t-rose    { fill: #fb7185; }
-.t-orange  { fill: #fb923c; }
-.t-slate   { fill: #94a3b8; }
+  .c-mask       { fill: #ffffff; stroke: none; }
+  .c-frontend   { fill: rgba(8,145,178,0.15); stroke: #0891b2; }
+  .c-backend    { fill: rgba(5,150,105,0.15); stroke: #059669; }
+  .c-database   { fill: rgba(124,58,237,0.12); stroke: #7c3aed; }
+  .c-cloud      { fill: rgba(217,119,6,0.12); stroke: #d97706; }
+  .c-security   { fill: rgba(225,29,72,0.12); stroke: #e11d48; }
+  .c-external   { fill: rgba(100,116,139,0.12); stroke: #64748b; }
+  .c-messagebus { fill: rgba(234,88,12,0.12); stroke: #ea580c; }
+  .c-grid       { fill: none; stroke: #e2e8f0; }
+  .t-primary    { fill: #0f172a; }
+  .t-muted      { fill: #64748b; }
+  .t-dim        { fill: #94a3b8; }
+  .t-frontend   { fill: #0891b2; }
+  .t-backend    { fill: #059669; }
+  .t-database   { fill: #7c3aed; }
+  .t-cloud      { fill: #d97706; }
+  .t-security   { fill: #e11d48; }
+  .t-external   { fill: #64748b; }
+  .t-messagebus { fill: #ea580c; }
+  .a-default    { stroke: #94a3b8; fill: none; }
+  .a-emphasis   { stroke: #059669; fill: none; }
+  .a-security   { stroke: #e11d48; fill: none; stroke-dasharray: 5,5; }
+  .a-dashed     { stroke: #7c3aed; fill: none; stroke-dasharray: 4,4; }
+  .m-default    { fill: #94a3b8; }
+  .m-emphasis   { fill: #059669; }
+  .m-security   { fill: #e11d48; }
+  .m-dashed     { fill: #7c3aed; }
+  .c-security-group { fill: transparent; stroke: #e11d48; stroke-dasharray: 4,4; }
+  .c-region     { fill: rgba(217,119,6,0.06); stroke: #d97706; stroke-dasharray: 8,4; }
+  .c-lane       { fill: rgba(248,250,252,0.65); stroke: #cbd5e1; stroke-dasharray: 6,6; }
+  .sv-panel     { fill: #ffffff; stroke: #e2e8f0; }
+  .t-cyan    { fill: #0891b2; }
+  .t-emerald { fill: #059669; }
+  .t-violet  { fill: #7c3aed; }
+  .t-amber   { fill: #d97706; }
+  .t-rose    { fill: #e11d48; }
+  .t-orange  { fill: #ea580c; }
+  .t-slate   { fill: #64748b; }
+
+  }
+  @media (prefers-color-scheme: dark) {
+
+  .c-mask       { fill: #0f172a; stroke: none; }
+  .c-frontend   { fill: rgba(8,51,68,0.4);   stroke: #22d3ee; }
+  .c-backend    { fill: rgba(6,78,59,0.4);    stroke: #34d399; }
+  .c-database   { fill: rgba(76,29,149,0.4);  stroke: #a78bfa; }
+  .c-cloud      { fill: rgba(120,53,15,0.3);  stroke: #fbbf24; }
+  .c-security   { fill: rgba(136,19,55,0.4);  stroke: #fb7185; }
+  .c-external   { fill: rgba(30,41,59,0.5);   stroke: #94a3b8; }
+  .c-messagebus { fill: rgba(251,146,60,0.3); stroke: #fb923c; }
+  .c-grid       { fill: none; stroke: #1e293b; }
+  .t-primary    { fill: #ffffff; }
+  .t-muted      { fill: #94a3b8; }
+  .t-dim        { fill: #475569; }
+  .t-frontend   { fill: #22d3ee; }
+  .t-backend    { fill: #34d399; }
+  .t-database   { fill: #a78bfa; }
+  .t-cloud      { fill: #fbbf24; }
+  .t-security   { fill: #fb7185; }
+  .t-external   { fill: #94a3b8; }
+  .t-messagebus { fill: #fb923c; }
+  .a-default    { stroke: #64748b; fill: none; }
+  .a-emphasis   { stroke: #34d399; fill: none; }
+  .a-security   { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
+  .a-dashed     { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
+  .m-default    { fill: #64748b; }
+  .m-emphasis   { fill: #34d399; }
+  .m-security   { fill: #fb7185; }
+  .m-dashed     { fill: #a78bfa; }
+  .c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
+  .c-region     { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
+  .c-lane       { fill: rgba(15,23,42,0.22); stroke: #334155; stroke-dasharray: 6,6; }
+  .sv-panel     { fill: rgba(15,23,42,0.5); stroke: #1e293b; }
+  .t-cyan    { fill: #22d3ee; }
+  .t-emerald { fill: #34d399; }
+  .t-violet  { fill: #a78bfa; }
+  .t-amber   { fill: #fbbf24; }
+  .t-rose    { fill: #fb7185; }
+  .t-orange  { fill: #fb923c; }
+  .t-slate   { fill: #94a3b8; }
+
+  }
+  /* Fallback: dark theme when prefers-color-scheme is unsupported */
+
+  .c-mask       { fill: #ffffff; stroke: none; }
+  .c-frontend   { fill: rgba(8,145,178,0.15); stroke: #0891b2; }
+  .c-backend    { fill: rgba(5,150,105,0.15); stroke: #059669; }
+  .c-database   { fill: rgba(124,58,237,0.12); stroke: #7c3aed; }
+  .c-cloud      { fill: rgba(217,119,6,0.12); stroke: #d97706; }
+  .c-security   { fill: rgba(225,29,72,0.12); stroke: #e11d48; }
+  .c-external   { fill: rgba(100,116,139,0.12); stroke: #64748b; }
+  .c-messagebus { fill: rgba(234,88,12,0.12); stroke: #ea580c; }
+  .c-grid       { fill: none; stroke: #e2e8f0; }
+  .t-primary    { fill: #0f172a; }
+  .t-muted      { fill: #64748b; }
+  .t-dim        { fill: #94a3b8; }
+  .t-frontend   { fill: #0891b2; }
+  .t-backend    { fill: #059669; }
+  .t-database   { fill: #7c3aed; }
+  .t-cloud      { fill: #d97706; }
+  .t-security   { fill: #e11d48; }
+  .t-external   { fill: #64748b; }
+  .t-messagebus { fill: #ea580c; }
+  .a-default    { stroke: #94a3b8; fill: none; }
+  .a-emphasis   { stroke: #059669; fill: none; }
+  .a-security   { stroke: #e11d48; fill: none; stroke-dasharray: 5,5; }
+  .a-dashed     { stroke: #7c3aed; fill: none; stroke-dasharray: 4,4; }
+  .m-default    { fill: #94a3b8; }
+  .m-emphasis   { fill: #059669; }
+  .m-security   { fill: #e11d48; }
+  .m-dashed     { fill: #7c3aed; }
+  .c-security-group { fill: transparent; stroke: #e11d48; stroke-dasharray: 4,4; }
+  .c-region     { fill: rgba(217,119,6,0.06); stroke: #d97706; stroke-dasharray: 8,4; }
+  .c-lane       { fill: rgba(248,250,252,0.65); stroke: #cbd5e1; stroke-dasharray: 6,6; }
+  .sv-panel     { fill: #ffffff; stroke: #e2e8f0; }
+  .t-cyan    { fill: #0891b2; }
+  .t-emerald { fill: #059669; }
+  .t-violet  { fill: #7c3aed; }
+  .t-amber   { fill: #d97706; }
+  .t-rose    { fill: #e11d48; }
+  .t-orange  { fill: #ea580c; }
+  .t-slate   { fill: #64748b; }
+
 
 </style>
 
