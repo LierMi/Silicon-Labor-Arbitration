@@ -1,9 +1,9 @@
 {
   "repository": "https://github.com/LierMi/moss.git",
-  "commit": "b413dfeb13b615fa07e8099ef2f4e7449c4c574e",
+  "commit": "b00ed2db0454219e468e8a0e4928c364a869fb79",
   "branch": "main",
   "pinnedAt": "2026-07-31T00:00:00Z",
-  "note": "Team moss fork baseline. Testnet Runtime (#1) and upstream-sync (#2) and silicon-arbitration Protocol (#3) all merged into moss main.",
+  "note": "Team moss fork baseline. Testnet Runtime (#1), upstream-sync (#2), silicon-arbitration Protocol (#3), and lockfile fix (#4) all merged into moss main.",
   "protocols": {
     "silicon-arbitration": {
       "status": "merged",
