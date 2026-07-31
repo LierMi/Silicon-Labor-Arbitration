@@ -258,7 +258,7 @@ export async function buildE3(
   const e3: Omit<E3Evidence, "canonicalPayloadHash"> = {
     explanation,
     chainId: 10143,
-    mossCommit: "PENDING", // Filled when vendor/moss submodule is pinned
+    mossCommit: "5d70524e83a6c5338a8db3b933e9726396365786",
     protocolVersion: "0.1.0",
     contractAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
     abiHash:

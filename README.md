@@ -202,7 +202,62 @@ Moss 让用户用自然语言表达链上任务，**在签名前解释将要发�
 
 ## 快速开始
 
-> **当前状态：架构与执行文档阶段。** 下列命令是目标工程入口；在 `package.json`、Next.js 与 Foundry 工程落地并经全新 clone 验证前，不应视为已可执行的安装说明。当前阻塞见 [06 · 技术风险与决策清单](docs/06-技术风险与决策清单.md)。
+> **当前状态：开发阶段。** 合约已部署 Monad Testnet，Moss Protocol 和 MossBridge 已实现并通过 live simulation。下列命令需要完成 PR 合并、依赖安装和钱包配置后才能完整执行。
+
+### 前置条件
+
+- Node.js ≥ 22、pnpm、Foundry
+- Monad Testnet RPC（`https://testnet-rpc.monad.xyz`，chain ID `10143`）
+- 有 MON 测试币的 Testnet 钱包
+
+### 合约
+
+```bash
+cd contracts
+cp .env.example .env  # 填入 DEPLOYER_PRIVATE_KEY、SETTLEMENT_AUTHORITY_ADDRESS、AUTHORITY_ADMIN_ADDRESS
+forge build
+forge test -vvv        # 33 tests, 2 fuzz @ 1000 runs, 1 stateful invariant @ 1000 runs / 500k calls
+```
+
+已部署合约：
+
+| 字段 | 值 |
+|---|---|
+| 合约地址 | `0x67040374b8A9756586De0885f01d1291cE8FFCcF` |
+| 链 | Monad Testnet（10143） |
+| 部署交易 | `0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34` |
+| 部署区块 | 49534792 |
+| Moss-facing ABI hash | `0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5` |
+
+### Moss 集成
+
+```bash
+git submodule update --init --recursive  # vendor/moss
+```
+
+Moss live simulation 已通过：
+
+```text
+Protocol: silicon-arbitration | Method: createTask
+Reverted: false | Gas: 217,941 | Warnings: 0
+Receipt: TaskCreated (taskId, client, amount, reqHash, deadline)
+```
+
+### E2E 验证
+
+```bash
+cd scripts && npm install && npx tsx e2e-verify.ts
+```
+
+全生命周期：`createTask → assignAgent → submitDelivery → acceptDelivery → status=Accepted`
+
+### 并发 Demo
+
+```bash
+npx tsx scripts/concurrency-demo.ts 30
+```
+
+30 个独立任务并发创建，记录真实 tx hash、确认时间、gas。
 
 ```bash
 pnpm install
