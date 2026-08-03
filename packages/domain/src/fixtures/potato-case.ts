@@ -1,11 +1,11 @@
 /**
- * 土豆案 —— Demo 的标准样例数据
+ * 土豆案 - Demo 的标准样例数据
  *
- * 用户付 0.2 MON 要一只橙色的猫，Agent 交付了一颗土豆，
- * 并解释"这是对猫这一概念的后现代重构"。
+ * 用户用 0.2 MON 要一只橙色猫，Agent 交付了一颗土豆，
+ * 并解释“这是对猫这一概念的后现代重构”。
  *
- * ⚠️ C4「是一只猫」必须保持 undecidable。
- *    那是 Demo 的高潮，不是待修的 bug，任何人不许把它优化掉。
+ * C4“是一只猫”必须保持 undecidable。
+ * 那是 Demo 的高潮，不是待修的 bug，任何人不许把它优化掉。
  */
 
 import type { Case } from "../case.js";
@@ -21,7 +21,6 @@ export const POTATO_CASE: Case = {
   createdAt: "2026-08-01T09:00:00Z",
   isMock: true,
 
-  // ── 验收条件 ────────────────────────────────────────────
   requirements: [
     {
       id: "C1",
@@ -57,7 +56,6 @@ export const POTATO_CASE: Case = {
     },
   ],
 
-  // ── 证据 ────────────────────────────────────────────────
   evidence: [
     {
       id: "E1",
@@ -76,13 +74,12 @@ export const POTATO_CASE: Case = {
       ts: "2026-08-01T11:42:00Z",
       hash: "0xdel0000000000000000000000000000000000000000000000000000000000002",
       text: "potato.png（PNG，含 alpha 通道）。Agent 附言：这是对猫这一概念的后现代重构。",
-      // 规则引擎只读这里，不读上面的 text
       delivery: {
         fileName: "potato.png",
-        mimeType: "image/png", // 由字节解析得出，不是看扩展名
+        mimeType: "image/png",
         hasAlpha: true,
         byteSize: 184_320,
-        submittedAt: "2026-08-01T11:42:00Z", // 应来自链上 DeliverySubmitted 的 block timestamp
+        submittedAt: "2026-08-01T11:42:00Z",
         parsedBy: "png-parser-v1",
       },
     },
@@ -97,10 +94,11 @@ export const POTATO_CASE: Case = {
           "你将创建一个 Agent 委托任务，并把 0.2 MON 锁入托管合约。资金在验收通过或仲裁结算前不会释放。若对方未按约定交付，可发起争议。",
         chainId: 10143,
         rpcFingerprint: "https://testnet-rpc.monad.xyz",
-        mossCommit: "PENDING", // 待 Neo 填入团队 Moss 基线 commit
+        mossCommit: "PENDING",
         protocolVersion: "silicon-arbitration@0.1.0",
-        contractAddress: "PENDING", // 待 Gate 4 部署后填入
-        abiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
+        contractAddress: "PENDING",
+        abiHash:
+          "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
         capabilityParams: {
           requirementsHash:
             "0xreq0000000000000000000000000000000000000000000000000000000000001",
@@ -118,7 +116,6 @@ export const POTATO_CASE: Case = {
           receipt: { status: "PENDING" },
           warnings: [],
         },
-        // 语义损失显式记录，不伪装成等价（docs/08 §5.3）
         semantics: {
           domainAction: "commission",
           mossCoordinate: { protocol: "silicon-arbitration", method: "createTask" },
@@ -132,7 +129,6 @@ export const POTATO_CASE: Case = {
     },
   ],
 
-  // ── 规则判定 ────────────────────────────────────────────
   ruleResults: [
     { id: "C1", verdict: "satisfied", basis: ["E2"] },
     { id: "C2", verdict: "satisfied", basis: ["E2"] },
@@ -145,43 +141,30 @@ export const POTATO_CASE: Case = {
     },
   ],
 
-  // ── AI 三路意见（真实生成后固化）────────────────────────
-  //
-  // ⚠️ 这不是手写的样例，是 @sla/ai 真实调用 Gonka 生成、通过全部校验后固化下来的。
-  //    provider: gonka / model: moonshotai/Kimi-K2.6
-  //    promptVersion: ai-arguments-v1
-  //    inputHash: 7230915549dcbe1c…
-  //    outputHash: 33b82e707d56ea76…
-  //    generatedAt: 2026-07-30T13:29:28.696Z
-  //
-  // 路演当天读这份固化数据，**不现场调 API** —— 网络、额度、模型拒答
-  // 任何一个出问题都会让 demo 卡在最关键的一页。
-  // 要重新生成：packages/ai 里跑一次，把新结果替换到这里。
   aiArguments: [
     {
       role: "prosecution",
       text:
-        "交付物文件名为 potato.png，Agent 附言亦称其为「对猫这一概念的后现代重构」[E2]，画面主体明显偏离「猫」的约定。主 Agent 在需求转译时已将「适合儿童产品」压缩为「儿童向配色」，造成关键约束丢失[E1]。C4 无法由规则层自动裁决。",
+        "交付物文件名为 potato.png，Agent 附言亦称其为“对猫这一概念的后现代重构”[E2]，画面主体明显偏离“猫”的约定。主 Agent 在需求转译时已将“适合儿童产品”压缩为“儿童向配色”，造成关键约束丢失[E1]。C4 无法由规则层自动裁决。",
       cites: ["E1", "E2"],
       uncertain: ["C4"],
     },
     {
       role: "defense",
       text:
-        "客观验收项 C1、C2、C3 均已满足，交付时间为 11:42，文件格式 PNG 且含透明通道[E2]。原始需求中「适合儿童产品」与「猫」均属主观描述，事前未约定风格边界或相似度阈值，存在解释空间[E1]。C4 仍待人工判定。",
+        "客观验收项 C1、C2、C3 均已满足，交付时间为 11:42，文件格式 PNG 且含透明通道[E2]。原始需求中“适合儿童产品”与“猫”均属主观描述，事前未约定风格边界或相似度阈值，存在解释空间[E1]。C4 仍待人工判定。",
       cites: ["E1", "E2"],
       uncertain: ["C4"],
     },
     {
       role: "audit",
       text:
-        "委托人签前已获资金托管与争议机制告知[E3]。插画 Agent 在生成时已被提示「主体相似度偏低」，却未回退或提请人工确认，而是直接交付[E2]。缺少依据表明委托人在最终输出前曾审阅过草图或中间版本。",
+        "委托人签前已获资金托管与争议机制告知[E3]。插画 Agent 在生成时已被提示“主体相似度偏低”，却未回退或提请人工确认，而是直接交付[E2]。缺少依据表明委托人在最终输出前曾审阅过草图或中间版本。",
       cites: ["E2", "E3"],
       uncertain: ["C4"],
     },
   ],
 
-  // ── 责任链 ──────────────────────────────────────────────
   responsibilityChain: [
     {
       id: "H1",
@@ -189,7 +172,7 @@ export const POTATO_CASE: Case = {
       actorRole: "human",
       authority: "自有资金 0.2 MON",
       sawWarning: null,
-      action: "提出需求：适合儿童产品的橙色猫，透明背景，PNG，12:00 前",
+      action: "提出需求：适合儿童产品的橙色猫，透明背景，PNG，12:00 前交付",
       ts: "2026-08-01T09:00:00Z",
       evidenceRefs: ["E1", "E3"],
     },
@@ -199,10 +182,10 @@ export const POTATO_CASE: Case = {
       actorRole: "orchestrator",
       authority: "预算 0.2 MON，截止 12:00",
       sawWarning: null,
-      action: "将需求转译为「橙色猫科动物主题插画，儿童向配色」并派发",
+      action: "将需求转译为“橙色猫科动物主题插画，儿童向配色”并派发",
       ts: "2026-08-01T09:04:00Z",
       evidenceRefs: ["E1"],
-      intentDrift: "「适合儿童产品」被压缩为「儿童向配色」，产品用途约束丢失",
+      intentDrift: "“适合儿童产品”被压缩为“儿童向配色”，产品用途约束丢失",
     },
     {
       id: "H3",
@@ -213,7 +196,7 @@ export const POTATO_CASE: Case = {
       action: "忽略相似度警告，继续生成并交付 potato.png",
       ts: "2026-08-01T11:40:00Z",
       evidenceRefs: ["E2"],
-      intentDrift: "主体从「猫」漂移为「土豆」，且以风格解释合理化",
+      intentDrift: "主体从“猫”漂移为“土豆”，且以风格解释合理化",
     },
     {
       id: "H4",
@@ -237,24 +220,22 @@ export const POTATO_CASE: Case = {
     },
   ],
 
-  // ── 结算 ────────────────────────────────────────────────
-  // 0.15 支付 + 0.05 冻结 = 0.2 MON。冻结部分对应 C4，等人类终审。
   settlementProposal: {
     toAgent: "0.15",
     toClient: "0",
     frozen: "0.05",
   },
 
-  // ── 链上引用（Gate 4 已部署 Monad Testnet）────────────
   onchain: {
     chainId: 10143,
     taskEscrowAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
-    createTaskAbiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
-    // ⚠️ 展示与规则比较用。**不要传给 createTask** —— 用 deadlineFromNow()。
+    createTaskAbiHash:
+      "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
     deadline: "2026-08-01T12:00:00Z",
     amount: "0.2",
     confirmed: false,
-    deploymentTxHash: "0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34",
+    deploymentTxHash:
+      "0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34",
     deploymentBlockNumber: 49534792,
   },
 };

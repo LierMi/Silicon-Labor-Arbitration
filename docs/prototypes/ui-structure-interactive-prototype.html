@@ -1,0 +1,1317 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>硅基劳动仲裁院 - UI Structure Interactive Prototype</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --paper: #efe4d0;
+      --paper-2: #e2d2b9;
+      --paper-3: #f8f1e4;
+      --ink: #211d18;
+      --muted: #786b59;
+      --line: rgba(33, 29, 24, .2);
+      --line-strong: rgba(33, 29, 24, .48);
+      --green: #12372f;
+      --green-2: #1f5146;
+      --red: #9b261f;
+      --red-soft: rgba(155, 38, 31, .12);
+      --yellow: #c59a45;
+      --yellow-soft: rgba(197, 154, 69, .18);
+      --shadow: rgba(37, 26, 15, .22);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(197, 154, 69, .18), transparent 31%),
+        linear-gradient(135deg, #ead9bf 0%, #d9c5a7 48%, #b9aa90 100%);
+      font-family: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .prototype {
+      width: min(1480px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .screen {
+      min-height: 900px;
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr) 330px;
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(rgba(255, 255, 255, .15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .12) 1px, transparent 1px),
+        var(--paper);
+      background-size: 28px 28px;
+      box-shadow: 0 34px 110px var(--shadow);
+      overflow: hidden;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, var(--green), #102c27);
+      color: #f7efdf;
+      border-right: 1px solid rgba(255, 255, 255, .16);
+    }
+
+    .brand {
+      padding: 26px 22px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, .18);
+    }
+
+    .brand-mark {
+      width: 60px;
+      height: 60px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border: 2px solid rgba(247, 239, 223, .84);
+      border-radius: 50%;
+      color: #f7efdf;
+      font-weight: 700;
+      letter-spacing: .06em;
+      transform: rotate(-8deg);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: rgba(247, 239, 223, .68);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.08;
+      font-weight: 650;
+      letter-spacing: .02em;
+    }
+
+    .case-meta {
+      display: grid;
+      gap: 8px;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, .14);
+      color: rgba(247, 239, 223, .82);
+      font-size: 12px;
+    }
+
+    .case-meta strong {
+      color: #fff6e6;
+      font-weight: 650;
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+      padding: 18px 12px;
+    }
+
+    .nav button {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      align-items: center;
+      min-height: 48px;
+      color: rgba(247, 239, 223, .75);
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 0 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      color: #fff6e6;
+      background: rgba(255, 255, 255, .08);
+      border-color: rgba(255, 255, 255, .14);
+    }
+
+    .nav b {
+      color: rgba(247, 239, 223, .44);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .08em;
+    }
+
+    .sidebar-foot {
+      margin-top: auto;
+      padding: 18px 22px 24px;
+      color: rgba(247, 239, 223, .62);
+      font-size: 12px;
+      line-height: 1.6;
+      border-top: 1px solid rgba(255, 255, 255, .14);
+    }
+
+    .main {
+      min-width: 0;
+      position: relative;
+      padding: 30px;
+      overflow: hidden;
+    }
+
+    .main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(155, 38, 31, .14) 0 1px, transparent 1px) 72px 0 / 72px 100%,
+        radial-gradient(circle at 80% 16%, rgba(18, 55, 47, .1), transparent 32%);
+      mix-blend-mode: multiply;
+    }
+
+    .panel {
+      display: none;
+      position: relative;
+      min-height: 830px;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.02;
+      font-weight: 650;
+      letter-spacing: -.02em;
+    }
+
+    .section-head p {
+      max-width: 560px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: rgba(248, 241, 228, .72);
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      background: var(--paper-3);
+      color: var(--ink);
+      padding: 10px 14px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 rgba(33, 29, 24, .08);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      border-color: var(--green);
+      background: var(--green);
+      color: #f7efdf;
+    }
+
+    .btn.red {
+      border-color: var(--red);
+      background: var(--red);
+      color: #fff4e5;
+    }
+
+    .dossier-stage {
+      min-height: 650px;
+      display: grid;
+      place-items: center;
+    }
+
+    .folder {
+      width: min(720px, 88%);
+      min-height: 460px;
+      position: relative;
+      padding: 48px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.18), transparent 36%),
+        #c9a46f;
+      border: 1px solid rgba(83, 55, 20, .36);
+      box-shadow: 0 32px 70px rgba(60, 39, 16, .25);
+      transform: rotate(-1.2deg);
+    }
+
+    .folder::before {
+      content: "";
+      position: absolute;
+      top: -32px;
+      left: 0;
+      width: 230px;
+      height: 34px;
+      background: #d7b67e;
+      border: 1px solid rgba(83, 55, 20, .32);
+      border-bottom: 0;
+    }
+
+    .folder-grid {
+      display: grid;
+      grid-template-columns: 1fr 160px;
+      gap: 28px;
+      align-items: end;
+    }
+
+    .folder h2 {
+      margin: 0 0 18px;
+      font-size: 52px;
+      line-height: .98;
+      font-weight: 650;
+    }
+
+    .folder p {
+      max-width: 510px;
+      margin: 0 0 34px;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .stamp-ring {
+      width: 148px;
+      height: 148px;
+      display: grid;
+      place-items: center;
+      border: 4px double var(--red);
+      border-radius: 50%;
+      color: var(--red);
+      font-weight: 800;
+      letter-spacing: .08em;
+      transform: rotate(-14deg);
+      opacity: .84;
+    }
+
+    .archive-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .case-card,
+    .paper-card,
+    .evidence-card,
+    .clause-card,
+    .argument-card,
+    .ledger-card,
+    .report-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.36), transparent 48%),
+        rgba(248, 241, 228, .76);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 28px rgba(33, 29, 24, .08);
+    }
+
+    .case-card {
+      min-height: 188px;
+      padding: 18px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .case-card.main-case {
+      background:
+        linear-gradient(135deg, rgba(155, 38, 31, .12), transparent 45%),
+        rgba(248, 241, 228, .84);
+      border-color: var(--line-strong);
+    }
+
+    .case-card small,
+    .paper-card small,
+    .evidence-card small,
+    .clause-card small,
+    .argument-card small,
+    .report-card small {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .case-card h3,
+    .paper-card h3,
+    .clause-card h3,
+    .argument-card h3,
+    .report-card h3 {
+      margin: 10px 0 10px;
+      font-size: 20px;
+      line-height: 1.22;
+    }
+
+    .case-card p,
+    .paper-card p,
+    .clause-card p,
+    .argument-card p,
+    .report-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      padding: 5px 8px;
+      background: rgba(239, 228, 208, .76);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .tag.red {
+      border-color: rgba(155, 38, 31, .34);
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .tag.green {
+      border-color: rgba(18, 55, 47, .3);
+      color: var(--green);
+    }
+
+    .case-file {
+      display: grid;
+      grid-template-columns: 1.2fr .9fr;
+      gap: 22px;
+    }
+
+    .paper-card {
+      padding: 22px;
+      min-height: 520px;
+      position: relative;
+    }
+
+    .paper-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 62px;
+      border-left: 1px solid rgba(155, 38, 31, .28);
+    }
+
+    .paper-body {
+      position: relative;
+      z-index: 1;
+      padding-left: 58px;
+    }
+
+    .evidence-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .evidence-card {
+      padding: 16px;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .evidence-card:hover,
+    .evidence-card.active {
+      transform: translateY(-2px) rotate(-.4deg);
+      border-color: var(--red);
+      background: rgba(255, 247, 229, .92);
+    }
+
+    .evidence-card h4 {
+      margin: 8px 0;
+      font-size: 15px;
+    }
+
+    .chain-space {
+      min-height: 650px;
+      position: relative;
+      perspective: 1200px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(circle at 50% 45%, rgba(248, 241, 228, .85), transparent 34%),
+        rgba(18, 55, 47, .08);
+    }
+
+    .chain-layer {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      min-height: 126px;
+      padding: 16px 18px;
+      border: 1px solid var(--line-strong);
+      background: rgba(248, 241, 228, .82);
+      box-shadow: 0 22px 48px rgba(33, 29, 24, .12);
+      transform: rotateX(58deg) rotateZ(-4deg);
+      transition: opacity .25s ease, transform .25s ease, border-color .25s ease;
+      cursor: pointer;
+    }
+
+    .chain-layer.active {
+      border-color: var(--red);
+      opacity: 1 !important;
+      transform: rotateX(52deg) rotateZ(-4deg) translateY(-10px) scale(1.02) !important;
+    }
+
+    .chain-layer:nth-child(1) { top: 44px; opacity: 1; }
+    .chain-layer:nth-child(2) { top: 152px; opacity: .86; transform: rotateX(58deg) rotateZ(-4deg) translateZ(-80px); }
+    .chain-layer:nth-child(3) { top: 260px; opacity: .72; transform: rotateX(58deg) rotateZ(-4deg) translateZ(-160px); }
+    .chain-layer:nth-child(4) { top: 368px; opacity: .58; transform: rotateX(58deg) rotateZ(-4deg) translateZ(-240px); }
+    .chain-layer:nth-child(5) { top: 476px; opacity: .48; transform: rotateX(58deg) rotateZ(-4deg) translateZ(-320px); }
+
+    .chain-layer header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 12px;
+    }
+
+    .chain-layer h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .chain-fields {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .evidence-pile,
+    .clause-board {
+      display: grid;
+      gap: 12px;
+    }
+
+    .game-card {
+      border: 1px dashed var(--line-strong);
+      background: rgba(248, 241, 228, .62);
+      padding: 14px;
+    }
+
+    .game-evidence {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: rgba(248, 241, 228, .88);
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .game-evidence.selected {
+      outline: 2px solid var(--red);
+      background: rgba(255, 247, 229, .96);
+    }
+
+    .clause-card {
+      min-height: 136px;
+      display: grid;
+      grid-template-columns: 70px 1fr 120px;
+      gap: 16px;
+      align-items: center;
+      padding: 16px;
+      transition: border-color .18s ease, transform .18s ease;
+    }
+
+    .clause-card.matched {
+      border-color: rgba(18, 55, 47, .46);
+    }
+
+    .clause-id {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border: 1px solid var(--line-strong);
+      color: var(--green);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .drop-zone {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .drop-zone.filled {
+      border-style: solid;
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-soft);
+      font-weight: 650;
+    }
+
+    .arguments-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .argument-card {
+      min-height: 380px;
+      padding: 18px;
+    }
+
+    .cite {
+      border: 1px solid rgba(155, 38, 31, .28);
+      background: var(--red-soft);
+      color: var(--red);
+      padding: 1px 5px;
+      cursor: pointer;
+      font-size: .92em;
+    }
+
+    .stamp-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 22px;
+    }
+
+    .ruling-sheet {
+      min-height: 610px;
+      position: relative;
+      padding: 24px;
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(90deg, transparent 0 52px, rgba(155, 38, 31, .24) 53px, transparent 54px),
+        rgba(248, 241, 228, .84);
+      box-shadow: 0 18px 45px rgba(33, 29, 24, .12);
+    }
+
+    .ruling-row {
+      display: grid;
+      grid-template-columns: 70px 1fr 128px;
+      gap: 18px;
+      align-items: center;
+      min-height: 118px;
+      border-bottom: 1px solid var(--line);
+      padding-left: 54px;
+    }
+
+    .stamp-cell {
+      height: 78px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed var(--line-strong);
+      position: relative;
+    }
+
+    .stamp-print {
+      width: 82px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border: 3px double var(--red);
+      color: var(--red);
+      font-size: 16px;
+      font-weight: 800;
+      transform: rotate(-7deg);
+      opacity: .84;
+    }
+
+    .stamp-print.hidden {
+      opacity: 0;
+    }
+
+    .stamp-cell.hovering::after {
+      content: "";
+      width: 78px;
+      height: 24px;
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: rgba(33, 29, 24, .22);
+      filter: blur(8px);
+      animation: breathe 1.8s ease-in-out infinite;
+    }
+
+    .stamp-object {
+      width: 88px;
+      height: 88px;
+      position: absolute;
+      right: 60px;
+      top: 378px;
+      z-index: 3;
+      transform: translateY(-74px);
+      animation: hover-stamp 1.7s ease-in-out infinite;
+    }
+
+    .stamp-object::before {
+      content: "";
+      position: absolute;
+      left: 26px;
+      top: 0;
+      width: 34px;
+      height: 46px;
+      border-radius: 18px 18px 6px 6px;
+      background: #493022;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
+    }
+
+    .stamp-object::after {
+      content: "待";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 88px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      background: var(--red);
+      color: #fff4e5;
+      font-weight: 800;
+      border-radius: 6px 6px 2px 2px;
+      box-shadow: 0 16px 28px rgba(33, 29, 24, .22);
+    }
+
+    .ledger-card {
+      padding: 18px;
+    }
+
+    .ledger-line {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ledger-line:last-child {
+      border-bottom: 0;
+    }
+
+    .ledger-line strong {
+      color: var(--red);
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .report-card {
+      padding: 18px;
+      min-height: 180px;
+    }
+
+    .inspector {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: rgba(248, 241, 228, .62);
+      border-left: 1px solid var(--line-strong);
+      padding: 24px 20px;
+    }
+
+    .inspector h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .inspector-box {
+      border: 1px solid var(--line);
+      background: rgba(255, 248, 234, .62);
+      padding: 14px;
+    }
+
+    .inspector-box h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+
+    .inspector-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .progress {
+      height: 10px;
+      border: 1px solid var(--line);
+      background: rgba(33, 29, 24, .08);
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: var(--value, 0%);
+      background: var(--green);
+      transition: width .2s ease;
+    }
+
+    .mini-ledger {
+      display: grid;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .mini-ledger div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .mini-ledger strong {
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    @keyframes hover-stamp {
+      0%, 100% { transform: translateY(-74px) rotate(-1deg); }
+      50% { transform: translateY(-68px) rotate(1deg); }
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: .62; transform: translateX(-50%) scale(.96); }
+      50% { opacity: .9; transform: translateX(-50%) scale(1.08); }
+    }
+
+    @media (max-width: 1180px) {
+      .screen {
+        grid-template-columns: 210px 1fr;
+      }
+
+      .inspector {
+        grid-column: 1 / -1;
+        border-left: 0;
+        border-top: 1px solid var(--line-strong);
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 820px) {
+      .prototype {
+        padding: 12px;
+      }
+
+      .screen,
+      .case-file,
+      .game-grid,
+      .stamp-stage,
+      .report-grid,
+      .arguments-grid,
+      .archive-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+      }
+
+      .nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .main {
+        padding: 20px;
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-head h2 {
+        font-size: 34px;
+      }
+
+      .inspector {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="prototype">
+    <div class="screen">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">SLA</div>
+          <p class="eyebrow">Silicon Labor Arbitration</p>
+          <h1>硅基劳动仲裁院</h1>
+        </div>
+        <div class="case-meta">
+          <span>卷宗 <strong>SLA-2026-0001</strong></span>
+          <span>状态 <strong>已出判定</strong></span>
+          <span>标记 <strong>Mock data / Demo</strong></span>
+        </div>
+        <nav class="nav" aria-label="原型章节">
+          <button class="active" data-panel="opening"><b>01</b><span>卷宗封面</span></button>
+          <button data-panel="archive"><b>02</b><span>案件大厅</span></button>
+          <button data-panel="casefile"><b>03</b><span>案情开卷</span></button>
+          <button data-panel="chain"><b>04</b><span>责任链</span></button>
+          <button data-panel="game"><b>05</b><span>归因小游戏</span></button>
+          <button data-panel="arguments"><b>06</b><span>交叉质询</span></button>
+          <button data-panel="settlement"><b>07</b><span>结算盖章</span></button>
+          <button data-panel="report"><b>08</b><span>归档报告</span></button>
+        </nav>
+        <div class="sidebar-foot">
+          做卷宗，不做判决机。系统只处理可测量事实，主观条件交还给人。
+        </div>
+      </aside>
+
+      <main class="main">
+        <section class="panel active" id="opening">
+          <div class="dossier-stage">
+            <div class="folder">
+              <div class="folder-grid">
+                <div>
+                  <p class="eyebrow">Case file / Mock arbitration demo</p>
+                  <h2>一份没有署名的责任</h2>
+                  <p>当人类把行动委托给 AI，责任不能也一起被委托掉。打开卷宗后，用户将像办案员一样翻证据、还原链条、尝试盖章，并亲眼看到 C4 的章停在半空。</p>
+                  <button class="btn primary" data-jump="casefile">打开卷宗</button>
+                </div>
+                <div class="stamp-ring">待复核</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="archive">
+          <div class="section-head">
+            <div>
+              <span class="badge">Archive grid</span>
+              <h2>案件大厅</h2>
+              <p>大厅不是 dashboard，而是一排可检索卷宗。主案突出，其他案件保持半透明，暗示这套系统可以处理更多 Agent 劳动争议。</p>
+            </div>
+            <button class="btn primary" data-jump="casefile">进入主案</button>
+          </div>
+          <div class="archive-grid">
+            <article class="case-card main-case" data-jump="casefile">
+              <small>SLA-2026-0001</small>
+              <h3>橙色猫插画交付争议</h3>
+              <p>Agent 交付 potato.png，并称其为对猫这一概念的后现代重构。</p>
+              <div class="status-row">
+                <span class="tag green">已出判定</span>
+                <span class="tag red">C4 待人工复核</span>
+                <span class="tag">0.2 MON</span>
+              </div>
+            </article>
+            <article class="case-card">
+              <small>SLA-2026-0002</small>
+              <h3>Logo SVG 授权范围争议</h3>
+              <p>授权链完整，但执行 Agent 调用了未声明的字体源。</p>
+              <div class="status-row"><span class="tag">已归档</span><span class="tag">示例占位</span></div>
+            </article>
+            <article class="case-card">
+              <small>SLA-2026-0003</small>
+              <h3>数据清洗交付缺列争议</h3>
+              <p>可测量字段已还原，主观质量评价转入人工复核。</p>
+              <div class="status-row"><span class="tag">待开卷</span><span class="tag">示例占位</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="casefile">
+          <div class="section-head">
+            <div>
+              <span class="badge">Case file</span>
+              <h2>案情开卷</h2>
+              <p>先让用户看懂纠纷，不急着给结论。左边是委托与托管，右边是三份证据，点击证据会进入右侧检查器。</p>
+            </div>
+            <button class="btn primary" data-jump="chain">展开责任链</button>
+          </div>
+          <div class="case-file">
+            <article class="paper-card">
+              <div class="paper-body">
+                <small>委托书 / Requirement hash E1</small>
+                <h3>画一只适合儿童产品的橙色猫</h3>
+                <p>背景透明，PNG 格式，今天中午 12 点前交付。委托人支付 0.2 MON，资金在验收通过或仲裁结算前锁入托管合约。</p>
+                <div class="status-row">
+                  <span class="tag">截止 12:00</span>
+                  <span class="tag">PNG</span>
+                  <span class="tag">透明背景</span>
+                  <span class="tag red">是否为猫</span>
+                </div>
+                <hr style="border:0;border-top:1px solid var(--line);margin:30px 0">
+                <small>Agent delivery / E2</small>
+                <h3>potato.png</h3>
+                <p>PNG，含 alpha 通道。Agent 附言：这是对猫这一概念的后现代重构。</p>
+              </div>
+            </article>
+            <div class="evidence-stack" id="case-evidence"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="chain">
+          <div class="section-head">
+            <div>
+              <span class="badge">Exploded axonometric</span>
+              <h2>责任链爆炸视图</h2>
+              <p>每一层都是一次委托的转译。越往后，透明度越高，文字越偏，责任越难被单点归属。</p>
+            </div>
+            <button class="btn primary" data-jump="game">进入归因桌</button>
+          </div>
+          <div class="chain-space" id="chain-space"></div>
+        </section>
+
+        <section class="panel" id="game">
+          <div class="section-head">
+            <div>
+              <span class="badge">Mini game</span>
+              <h2>责任归因桌</h2>
+              <p>点击左侧证据，再点击右侧条款。C1-C3 可以被证据闭合；C4 即使完成整理，也只能进入人工复核。</p>
+            </div>
+            <button class="btn" id="reset-game">重置桌面</button>
+          </div>
+          <div class="game-grid">
+            <div class="game-card">
+              <p class="eyebrow">Evidence pile</p>
+              <div class="evidence-pile" id="game-evidence"></div>
+            </div>
+            <div class="clause-board" id="clause-board"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="arguments">
+          <div class="section-head">
+            <div>
+              <span class="badge">Rashomon panel</span>
+              <h2>AI 交叉质询</h2>
+              <p>三方意见并列出现，不抢判决权。证据角标可以点击，证据会被摔到检查器里。</p>
+            </div>
+            <button class="btn primary" data-jump="settlement">进入结算</button>
+          </div>
+          <div class="arguments-grid" id="arguments-grid"></div>
+        </section>
+
+        <section class="panel" id="settlement">
+          <div class="section-head">
+            <div>
+              <span class="badge">Stamp state machine</span>
+              <h2>裁决与资金结算</h2>
+              <p>C1-C3 的章已经落下。C4 的章停在半空，只留下影子，资金冻结，等待人类终审。</p>
+            </div>
+            <button class="btn red" id="stamp-run">重播盖章</button>
+          </div>
+          <div class="stamp-stage">
+            <div class="ruling-sheet" id="ruling-sheet"></div>
+            <aside class="ledger-card">
+              <small>Settlement proposal</small>
+              <h3>账本式资金流</h3>
+              <div class="ledger-line"><span>支付给 Agent</span><strong>0.15 MON</strong></div>
+              <div class="ledger-line"><span>退回委托人</span><strong>0 MON</strong></div>
+              <div class="ledger-line"><span>冻结复核</span><strong>0.05 MON</strong></div>
+              <button class="btn primary" style="width:100%;margin-top:22px" data-jump="report">提交人类终审</button>
+            </aside>
+          </div>
+        </section>
+
+        <section class="panel" id="report">
+          <div class="section-head">
+            <div>
+              <span class="badge">Final report</span>
+              <h2>归档报告</h2>
+              <p>最后不是判决书，而是一份事故调查报告。系统把责任找回来，摆在用户面前。</p>
+            </div>
+            <button class="btn primary" data-jump="opening">重新演示</button>
+          </div>
+          <div class="report-grid">
+            <article class="report-card">
+              <small>Finding</small>
+              <h3>可测量事实已闭合</h3>
+              <p>C1 截止时间、C2 文件格式、C3 透明背景均由 E2 支撑，合计 75% 权重。</p>
+            </article>
+            <article class="report-card">
+              <small>Boundary</small>
+              <h3>C4 保持不可裁决</h3>
+              <p>“是否是一只适合儿童产品的橙色猫”属于主观条件，规则层不得伪装成已判断。</p>
+            </article>
+            <article class="report-card">
+              <small>Responsibility</small>
+              <h3>责任在转译中漂移</h3>
+              <p>主 Agent 压缩产品用途约束，插画 Agent 忽略相似度警告，工具只按参数输出。</p>
+            </article>
+            <article class="report-card">
+              <small>Next action</small>
+              <h3>人工终审释放冻结款</h3>
+              <p>0.05 MON 对应 C4，必须由人类复核后释放或退回。</p>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <aside class="inspector">
+        <div>
+          <p class="eyebrow">Inspector</p>
+          <h2 id="inspector-title">当前卷宗</h2>
+        </div>
+        <div class="inspector-box">
+          <h3>选中证据</h3>
+          <p id="inspector-evidence">点击 E1、E2、E3 或证据角标，右侧会显示来源和正文。</p>
+        </div>
+        <div class="inspector-box">
+          <h3>归因完成度</h3>
+          <div class="progress" aria-label="归因完成度"><span id="game-progress" style="--value:0%"></span></div>
+          <p id="game-progress-text" style="margin-top:10px">0 / 4 条款已匹配。</p>
+        </div>
+        <div class="inspector-box">
+          <h3>资金账本</h3>
+          <div class="mini-ledger">
+            <div><span>托管金额</span><strong>0.2 MON</strong></div>
+            <div><span>可自动结算</span><strong>0.15 MON</strong></div>
+            <div><span>冻结复核</span><strong>0.05 MON</strong></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const evidence = [
+      {
+        id: "E1",
+        label: "原始需求与验收条件",
+        source: "offchain",
+        text: "画一只适合儿童产品的橙色猫，背景透明，PNG 格式，今天中午 12 点前交付。"
+      },
+      {
+        id: "E2",
+        label: "Agent 交付物与说明",
+        source: "offchain",
+        text: "potato.png（PNG，含 alpha 通道）。Agent 附言：这是对猫这一概念的后现代重构。"
+      },
+      {
+        id: "E3",
+        label: "Moss 签前证据",
+        source: "moss",
+        text: "用户签名前获知：0.2 MON 将锁入托管合约，资金在验收通过或仲裁结算前不会释放。"
+      }
+    ];
+
+    const chain = [
+      ["H1", "委托人", "自有资金 0.2 MON", "无", "提出需求：适合儿童产品的橙色猫，透明背景，PNG，12:00 前"],
+      ["H2", "主 Agent", "预算 0.2 MON，截止 12:00", "无", "将需求转译为儿童向配色，产品用途约束丢失"],
+      ["H3", "插画 Agent", "仅生成图像，无资金权限", "主体相似度偏低", "忽略相似度警告，继续生成并交付 potato.png"],
+      ["H4", "图像工具", "按收到的参数执行", "无", "输出 PNG，含 alpha 通道，符合格式参数"],
+      ["H5", "钱包", "用户签名授权", "无", "签署并广播创建任务交易，资金进入托管"]
+    ];
+
+    const requirements = [
+      ["C1", "在 8 月 1 日 12:00 前交付", "E2", "满足"],
+      ["C2", "文件格式为 PNG", "E2", "满足"],
+      ["C3", "背景透明", "E2", "满足"],
+      ["C4", "画的是一只适合儿童产品的橙色猫", "E1", "待人工复核"]
+    ];
+
+    const argumentsData = [
+      ["检方意见", "交付物文件名为 potato.png，Agent 附言亦称其为“对猫这一概念的后现代重构”[E2]，画面主体明显偏离“猫”的约定。主 Agent 在需求转译时已造成关键约束丢失[E1]。C4 无法由规则层自动裁决。"],
+      ["辩方意见", "客观验收项 C1、C2、C3 均已满足，交付时间为 11:42，文件格式 PNG 且含透明通道[E2]。原始需求中“适合儿童产品”与“猫”均属主观描述，存在解释空间[E1]。"],
+      ["审计意见", "委托人签前已获资金托管与争议机制告知[E3]。插画 Agent 在生成时已被提示“主体相似度偏低”，却未回退或提请人工确认，而是直接交付[E2]。"]
+    ];
+
+    const panels = [...document.querySelectorAll(".panel")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const inspectorEvidence = document.getElementById("inspector-evidence");
+    const progressBar = document.getElementById("game-progress");
+    const progressText = document.getElementById("game-progress-text");
+    let selectedEvidence = null;
+    let matched = {};
+
+    function showPanel(id) {
+      panels.forEach(panel => panel.classList.toggle("active", panel.id === id));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.panel === id));
+      document.getElementById("inspector-title").textContent = navButtons.find(button => button.dataset.panel === id)?.textContent.trim() || "当前卷宗";
+    }
+
+    function selectEvidence(id) {
+      const item = evidence.find(e => e.id === id);
+      if (!item) return;
+      selectedEvidence = id;
+      inspectorEvidence.innerHTML = `<strong>${item.id} · ${item.label}</strong><br>${item.source}<br>${item.text}`;
+      document.querySelectorAll(".game-evidence").forEach(button => {
+        button.classList.toggle("selected", button.dataset.evidence === id);
+      });
+      document.querySelectorAll(".evidence-card").forEach(card => {
+        card.classList.toggle("active", card.dataset.evidence === id);
+      });
+    }
+
+    function renderEvidence() {
+      const caseTarget = document.getElementById("case-evidence");
+      const gameTarget = document.getElementById("game-evidence");
+      caseTarget.innerHTML = evidence.map(item => `
+        <article class="evidence-card" data-evidence="${item.id}">
+          <small>${item.id} / ${item.source}</small>
+          <h4>${item.label}</h4>
+          <p>${item.text}</p>
+        </article>
+      `).join("");
+      gameTarget.innerHTML = evidence.map(item => `
+        <button class="game-evidence" data-evidence="${item.id}">
+          <small>${item.id}</small><br>
+          <strong>${item.label}</strong>
+        </button>
+      `).join("");
+    }
+
+    function renderChain() {
+      document.getElementById("chain-space").innerHTML = chain.map((hop, index) => `
+        <article class="chain-layer ${index === 0 ? "active" : ""}" data-hop="${hop[0]}">
+          <header><h3>${hop[0]} · ${hop[1]}</h3><span class="tag">${index === 0 ? "原始意图" : "第 " + (index + 1) + " 层"}</span></header>
+          <div class="chain-fields">
+            <div><small>谁</small><br>${hop[1]}</div>
+            <div><small>授权</small><br>${hop[2]}</div>
+            <div><small>警告</small><br>${hop[3]}</div>
+            <div><small>动作</small><br>${hop[4]}</div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderGame() {
+      document.getElementById("clause-board").innerHTML = requirements.map(req => `
+        <article class="clause-card ${matched[req[0]] ? "matched" : ""}" data-clause="${req[0]}">
+          <div class="clause-id">${req[0]}</div>
+          <div>
+            <small>权重 25% / ${req[3]}</small>
+            <h3>${req[1]}</h3>
+            <p>${req[0] === "C4" ? "主观条件：整理证据不等于自动裁决。" : "客观条件：证据闭合后可自动盖章。"}</p>
+          </div>
+          <div class="drop-zone ${matched[req[0]] ? "filled" : ""}">${matched[req[0]] || "选择证据后点击"}</div>
+        </article>
+      `).join("");
+      const count = Object.keys(matched).length;
+      progressBar.style.setProperty("--value", `${count / requirements.length * 100}%`);
+      progressText.textContent = `${count} / ${requirements.length} 条款已匹配。`;
+    }
+
+    function renderArguments() {
+      document.getElementById("arguments-grid").innerHTML = argumentsData.map(item => `
+        <article class="argument-card">
+          <small>AI argument</small>
+          <h3>${item[0]}</h3>
+          <p>${item[1].replace(/\[(E\d)\]/g, '<button class="cite" data-evidence="$1">[$1]</button>')}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderRuling(replay = false) {
+      const sheet = document.getElementById("ruling-sheet");
+      sheet.innerHTML = requirements.map(req => `
+        <div class="ruling-row">
+          <div class="clause-id">${req[0]}</div>
+          <div>
+            <small>权重 25% / ${req[3]}</small>
+            <h3>${req[1]}</h3>
+            <p style="margin:0;color:var(--muted);font-size:13px">${req[0] === "C4" ? "主观条件，确定性规则层无法判定。转人工复核。" : "证据 E2 支撑，规则层可判定。"}</p>
+          </div>
+          <div class="stamp-cell ${req[0] === "C4" ? "hovering" : ""}">
+            <div class="stamp-print ${req[0] === "C4" ? "hidden" : ""}">${req[3]}</div>
+          </div>
+        </div>
+      `).join("") + '<div class="stamp-object" aria-hidden="true"></div>';
+      if (replay) {
+        sheet.animate([
+          { transform: "scale(1)" },
+          { transform: "scale(1.012)" },
+          { transform: "scale(1)" }
+        ], { duration: 900, easing: "cubic-bezier(.2,.7,.2,1)" });
+      }
+    }
+
+    document.addEventListener("click", event => {
+      const jump = event.target.closest("[data-jump]");
+      if (jump) showPanel(jump.dataset.jump);
+
+      const nav = event.target.closest(".nav button");
+      if (nav) showPanel(nav.dataset.panel);
+
+      const evidenceButton = event.target.closest("[data-evidence]");
+      if (evidenceButton) selectEvidence(evidenceButton.dataset.evidence);
+
+      const clause = event.target.closest(".clause-card");
+      if (clause && selectedEvidence) {
+        matched[clause.dataset.clause] = selectedEvidence;
+        renderGame();
+      }
+
+      const layer = event.target.closest(".chain-layer");
+      if (layer) {
+        document.querySelectorAll(".chain-layer").forEach(item => item.classList.remove("active"));
+        layer.classList.add("active");
+      }
+    });
+
+    document.getElementById("reset-game").addEventListener("click", () => {
+      matched = {};
+      selectedEvidence = null;
+      renderGame();
+      selectEvidence("E1");
+    });
+
+    document.getElementById("stamp-run").addEventListener("click", () => renderRuling(true));
+
+    renderEvidence();
+    renderChain();
+    renderGame();
+    renderArguments();
+    renderRuling();
+    selectEvidence("E1");
+  </script>
+</body>
+</html>

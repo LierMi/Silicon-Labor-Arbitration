@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Silicon Labor Arbitration - Awesome Design Prototype</title>
+  <style>
+    :root {
+      --paper: #f2eadb;
+      --paper-deep: #e1d3bb;
+      --ink: #201c17;
+      --muted: #766954;
+      --line: rgba(32, 28, 23, 0.22);
+      --line-strong: rgba(32, 28, 23, 0.48);
+      --red: #9a261f;
+      --red-soft: rgba(154, 38, 31, 0.13);
+      --green: #143b32;
+      --green-soft: #dce6d9;
+      --shadow: rgba(37, 25, 12, 0.18);
+      --amber: #b07328;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 8%, rgba(176, 115, 40, 0.18), transparent 34%),
+        linear-gradient(135deg, #efe2cc 0%, #e2d1b4 42%, #d2c1a5 100%);
+      font-family: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    .prototype {
+      width: min(1440px, 100%);
+      min-height: 900px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .screen {
+      min-height: 844px;
+      display: grid;
+      grid-template-columns: 256px 1fr;
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+        var(--paper);
+      background-size: 26px 26px;
+      box-shadow: 0 30px 90px var(--shadow);
+      overflow: hidden;
+    }
+
+    aside {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--line-strong);
+      background:
+        linear-gradient(180deg, rgba(20, 59, 50, 0.96), rgba(20, 59, 50, 0.90)),
+        var(--green);
+      color: #f8efe1;
+    }
+
+    .brand {
+      padding: 28px 24px 22px;
+      border-bottom: 1px solid rgba(248, 239, 225, 0.18);
+    }
+
+    .seal-mark {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border: 2px solid rgba(248, 239, 225, 0.82);
+      border-radius: 50%;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      letter-spacing: 0.08em;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      line-height: 1.18;
+    }
+
+    .brand p {
+      margin: 10px 0 0;
+      color: rgba(248, 239, 225, 0.70);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .nav {
+      padding: 18px 12px;
+    }
+
+    .nav button {
+      width: 100%;
+      margin: 4px 0;
+      padding: 13px 13px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: rgba(248, 239, 225, 0.72);
+      text-align: left;
+      font: inherit;
+      font-size: 14px;
+      cursor: default;
+    }
+
+    .nav button.active {
+      color: #fff8ec;
+      border-color: rgba(248, 239, 225, 0.36);
+      background: rgba(248, 239, 225, 0.09);
+    }
+
+    .nav small {
+      display: block;
+      margin-top: 4px;
+      color: rgba(248, 239, 225, 0.50);
+      font-size: 11px;
+      letter-spacing: 0.03em;
+    }
+
+    .aside-note {
+      margin-top: auto;
+      padding: 20px 24px 24px;
+      border-top: 1px solid rgba(248, 239, 225, 0.18);
+      color: rgba(248, 239, 225, 0.68);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    main {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      padding: 24px 30px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 251, 241, 0.42);
+    }
+
+    .case-kicker {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .case-title {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+
+    .case-subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .badges {
+      display: flex;
+      align-items: start;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 420px;
+    }
+
+    .badge {
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 251, 241, 0.56);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .badge.strong {
+      color: var(--green);
+      border-color: rgba(20, 59, 50, 0.36);
+      background: var(--green-soft);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.42fr) minmax(330px, 0.72fr);
+      gap: 24px;
+      padding: 26px 30px;
+      min-width: 0;
+    }
+
+    .panel {
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(180deg, rgba(255, 251, 241, 0.74), rgba(240, 230, 210, 0.52));
+      box-shadow: 0 16px 36px rgba(70, 48, 26, 0.08);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 17px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 500;
+    }
+
+    .panel-meta {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .ruling-list {
+      position: relative;
+      padding: 20px 18px 22px;
+    }
+
+    .requirement {
+      position: relative;
+      display: grid;
+      grid-template-columns: 78px 1fr 168px;
+      align-items: center;
+      min-height: 112px;
+      border-bottom: 1px solid rgba(32, 28, 23, 0.14);
+    }
+
+    .requirement:last-child {
+      border-bottom: 0;
+    }
+
+    .requirement-id {
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 251, 241, 0.62);
+      color: var(--green);
+      font-family: Georgia, serif;
+      font-size: 18px;
+    }
+
+    .requirement-copy h3 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 500;
+    }
+
+    .requirement-copy p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stamp-slot {
+      position: relative;
+      height: 82px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed rgba(154, 38, 31, 0.28);
+      background: rgba(255, 251, 241, 0.22);
+    }
+
+    .stamp {
+      width: 116px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border: 3px solid var(--red);
+      border-radius: 50%;
+      color: var(--red);
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      transform: rotate(-4deg);
+      opacity: 0.82;
+      mix-blend-mode: multiply;
+    }
+
+    .stamp.done:nth-child(1) {
+      transform: rotate(-5.5deg);
+      opacity: 0.77;
+    }
+
+    .stamp-slot::after {
+      content: "";
+      position: absolute;
+      inset: 12px 20px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(154, 38, 31, 0.08), transparent 58%);
+      pointer-events: none;
+    }
+
+    .undecidable {
+      min-height: 144px;
+      background: linear-gradient(90deg, rgba(154, 38, 31, 0.05), transparent 40%);
+    }
+
+    .hovering-stamp {
+      position: absolute;
+      right: 44px;
+      top: -32px;
+      width: 118px;
+      height: 102px;
+      display: grid;
+      place-items: end center;
+      filter: drop-shadow(0 28px 24px rgba(37, 25, 12, 0.28));
+      animation: tremble 2.8s ease-in-out infinite;
+      z-index: 3;
+    }
+
+    .stamp-body {
+      width: 86px;
+      height: 44px;
+      border-radius: 10px 10px 18px 18px;
+      background: linear-gradient(180deg, #4a291e, #2b1712);
+      border: 1px solid rgba(32, 28, 23, 0.62);
+    }
+
+    .stamp-handle {
+      position: absolute;
+      top: 1px;
+      width: 44px;
+      height: 48px;
+      border-radius: 22px 22px 12px 12px;
+      background: linear-gradient(180deg, #6d4431, #321c15);
+      border: 1px solid rgba(32, 28, 23, 0.72);
+    }
+
+    .empty-slot {
+      height: 92px;
+      border-color: rgba(32, 28, 23, 0.28);
+      background: radial-gradient(ellipse at center, rgba(32, 28, 23, 0.12), transparent 58%);
+    }
+
+    .empty-slot .stamp {
+      opacity: 0;
+    }
+
+    .frozen-note {
+      position: absolute;
+      right: 18px;
+      bottom: 12px;
+      color: var(--red);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .side-stack {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 18px;
+    }
+
+    .money-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 18px;
+    }
+
+    .money-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      padding: 15px 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 251, 241, 0.42);
+    }
+
+    .money-row span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .money-row strong {
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .money-row.frozen {
+      border-color: rgba(154, 38, 31, 0.34);
+      background: var(--red-soft);
+    }
+
+    .human-review {
+      padding: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .human-review button {
+      width: 100%;
+      padding: 16px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      font: inherit;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      cursor: default;
+    }
+
+    .chain {
+      padding: 17px 18px 20px;
+    }
+
+    .chain-step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      padding-bottom: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chain-step:last-child {
+      padding-bottom: 0;
+    }
+
+    .chain-dot {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      border-radius: 50%;
+      color: var(--green);
+      font-family: Georgia, serif;
+      font-size: 12px;
+    }
+
+    .chain-step strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .evidence {
+      padding: 16px 18px 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    .evidence-item {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(32, 28, 23, 0.13);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .evidence-item:last-child {
+      border-bottom: 0;
+    }
+
+    .evidence-item mark {
+      margin-right: 8px;
+      padding: 2px 6px;
+      background: rgba(20, 59, 50, 0.12);
+      color: var(--green);
+      font-family: Georgia, serif;
+    }
+
+    .arguments {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 0 30px 26px;
+    }
+
+    .argument-card {
+      border: 1px solid var(--line);
+      background: rgba(255, 251, 241, 0.48);
+      padding: 15px 16px;
+      min-height: 150px;
+    }
+
+    .argument-card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .argument-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.66;
+    }
+
+    .cite {
+      color: var(--green);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .resource-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 30px 20px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .resource-strip span {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      background: rgba(255, 251, 241, 0.32);
+    }
+
+    @keyframes tremble {
+      0%, 100% {
+        transform: translateY(0) rotate(-3deg);
+      }
+      35% {
+        transform: translate(2px, -2px) rotate(-2.2deg);
+      }
+      62% {
+        transform: translate(-1px, 1px) rotate(-3.7deg);
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .prototype {
+        padding: 0;
+      }
+
+      .screen {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        display: none;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .workspace,
+      .arguments,
+      .resource-strip {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .topbar,
+      .arguments,
+      .requirement {
+        grid-template-columns: 1fr;
+      }
+
+      .badges {
+        justify-content: flex-start;
+      }
+
+      .case-title {
+        font-size: 25px;
+      }
+
+      .stamp-slot {
+        width: 168px;
+        margin-top: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="prototype">
+    <div class="screen">
+      <aside aria-label="Prototype navigation">
+        <div class="brand">
+          <div class="seal-mark">SLA</div>
+          <h1>硅基劳动<br>仲裁院</h1>
+          <p>The unfinished verdict</p>
+        </div>
+        <div class="nav">
+          <button type="button">案件大厅<small>Case intake</small></button>
+          <button type="button">责任时间线<small>Evidence-backed chain</small></button>
+          <button class="active" type="button">裁决与资金结算<small>Objective rules only</small></button>
+          <button type="button">AI 交叉质询<small>Three-sided arguments</small></button>
+        </div>
+        <div class="aside-note">
+          Awesome Design 资源流：Prototype / Mockup / Style Guide / Color / Font。这里只借方法，不借模板味。
+        </div>
+      </aside>
+
+      <main>
+        <section class="topbar" aria-label="Case header">
+          <div>
+            <p class="case-kicker">SLA-2026-0001 · Mock dossier</p>
+            <h2 class="case-title">橙色猫插画交付争议</h2>
+            <p class="case-subtitle">Agent 按时交付 potato.png，但 C4「是不是猫」进入人工复核。</p>
+          </div>
+          <div class="badges" aria-label="Case metadata">
+            <span class="badge strong">Ruling proposed</span>
+            <span class="badge">Moss E3 preserved</span>
+            <span class="badge">Monad Testnet 10143</span>
+            <span class="badge">0.2 MON escrow</span>
+          </div>
+        </section>
+
+        <section class="workspace">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">规则判定</h2>
+              <span class="panel-meta">每条验收条件权重 25%</span>
+            </div>
+            <div class="ruling-list">
+              <article class="requirement">
+                <div class="requirement-id">C1</div>
+                <div class="requirement-copy">
+                  <h3>在 8 月 1 日 12:00 前交付</h3>
+                  <p>11:42 提交，证据来自 E2。</p>
+                </div>
+                <div class="stamp-slot" aria-label="C1 satisfied">
+                  <div class="stamp done">满足</div>
+                </div>
+              </article>
+
+              <article class="requirement">
+                <div class="requirement-id">C2</div>
+                <div class="requirement-copy">
+                  <h3>文件格式为 PNG</h3>
+                  <p>字节解析结果为 image/png。</p>
+                </div>
+                <div class="stamp-slot" aria-label="C2 satisfied">
+                  <div class="stamp done" style="transform: rotate(-2.5deg); opacity: .86;">满足</div>
+                </div>
+              </article>
+
+              <article class="requirement">
+                <div class="requirement-id">C3</div>
+                <div class="requirement-copy">
+                  <h3>背景透明</h3>
+                  <p>PNG 含 alpha 通道。</p>
+                </div>
+                <div class="stamp-slot" aria-label="C3 satisfied">
+                  <div class="stamp done" style="transform: rotate(-6.2deg); opacity: .79;">满足</div>
+                </div>
+              </article>
+
+              <article class="requirement undecidable">
+                <div class="requirement-id">C4</div>
+                <div class="requirement-copy">
+                  <h3>画的是一只适合儿童产品的橙色猫</h3>
+                  <p>主观条件，确定性规则层无法判定。转人工复核。</p>
+                </div>
+                <div class="stamp-slot empty-slot" aria-label="C4 undecidable">
+                  <div class="hovering-stamp" aria-hidden="true">
+                    <div class="stamp-handle"></div>
+                    <div class="stamp-body"></div>
+                  </div>
+                  <div class="stamp">待定</div>
+                </div>
+                <div class="frozen-note">空章位 · 0.05 MON 冻结</div>
+              </article>
+            </div>
+          </div>
+
+          <div class="side-stack">
+            <section class="panel" aria-label="Settlement proposal">
+              <div class="panel-header">
+                <h2 class="panel-title">资金结算</h2>
+                <span class="panel-meta">字符串金额</span>
+              </div>
+              <div class="money-grid">
+                <div class="money-row">
+                  <span>支付给 Agent</span>
+                  <strong>0.15</strong>
+                </div>
+                <div class="money-row">
+                  <span>退回给委托人</span>
+                  <strong>0</strong>
+                </div>
+                <div class="money-row frozen">
+                  <span>C4 冻结复核</span>
+                  <strong>0.05</strong>
+                </div>
+              </div>
+              <div class="human-review">
+                <button type="button">人工终审</button>
+              </div>
+            </section>
+
+            <section class="panel" aria-label="Responsibility chain preview">
+              <div class="panel-header">
+                <h2 class="panel-title">责任链预览</h2>
+                <span class="panel-meta">5 hops</span>
+              </div>
+              <div class="chain">
+                <div class="chain-step">
+                  <div class="chain-dot">H1</div>
+                  <div><strong>委托人</strong>提出需求并签署托管任务。</div>
+                </div>
+                <div class="chain-step">
+                  <div class="chain-dot">H2</div>
+                  <div><strong>主 Agent</strong>将「儿童产品」压缩为「儿童向配色」。</div>
+                </div>
+                <div class="chain-step">
+                  <div class="chain-dot">H3</div>
+                  <div><strong>插画 Agent</strong>忽略主体相似度偏低警告。</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel" aria-label="Evidence">
+              <div class="panel-header">
+                <h2 class="panel-title">证据角标</h2>
+                <span class="panel-meta">Clickable later</span>
+              </div>
+              <div class="evidence">
+                <div class="evidence-item"><mark>E1</mark>原始需求与验收条件</div>
+                <div class="evidence-item"><mark>E2</mark>Agent 交付物与说明</div>
+                <div class="evidence-item"><mark>E3</mark>Moss 签前证据</div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="arguments" aria-label="AI arguments">
+          <article class="argument-card">
+            <h3>检方意见</h3>
+            <p>交付物文件名为 potato.png，附言称其为「后现代重构」<span class="cite">[E2]</span>。关键约束在转译时丢失 <span class="cite">[E1]</span>。</p>
+          </article>
+          <article class="argument-card">
+            <h3>辩方意见</h3>
+            <p>C1、C2、C3 均已满足；「适合儿童产品」和「猫」没有约定相似度阈值，C4 待人工判定 <span class="cite">[E1][E2]</span>。</p>
+          </article>
+          <article class="argument-card">
+            <h3>审计意见</h3>
+            <p>签前托管与争议机制已告知 <span class="cite">[E3]</span>。插画 Agent 看到风险但未回退确认 <span class="cite">[E2]</span>。</p>
+          </article>
+        </section>
+
+        <div class="resource-strip" aria-label="Awesome Design resource categories used">
+          <span>Prototype</span>
+          <span>Mockup</span>
+          <span>Style Guide / Branding</span>
+          <span>Color</span>
+          <span>Font</span>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
