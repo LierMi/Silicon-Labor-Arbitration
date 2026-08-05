@@ -17,6 +17,7 @@ import { createTraceSimulator } from "@themoss/simulator";
 import { monadTestnetRuntime } from "@themoss/system";
 import * as siliconArbitration from "@themoss/protocol-silicon-arbitration";
 import type { MossRuntime } from "@themoss/core";
+import { canonicalJson } from "@sla/domain";
 
 // ────────────────────────────────────────────────────────────
 // Stable product types (do NOT expose Moss internals)
@@ -289,9 +290,17 @@ export async function buildE3(
     walletConsistency,
   };
 
-  // Deterministic canonical hash from sorted JSON
-  const canonicalJson = JSON.stringify(e3, Object.keys(e3).sort());
-  const hash = keccak256(toHex(canonicalJson));
+  // Deterministic canonical hash.
+  //
+  // ⚠️ 原先这里是 `JSON.stringify(e3, Object.keys(e3).sort())`。那不是排序器——
+  // 第二个参数传数组时，它是**作用于所有层级的字段白名单**，于是
+  // unsignedTx / simulation / semantics 这些嵌套对象全被清成 `{}`：
+  //
+  //   { b: 1, a: { nested: 2 } }  →  {"a":{},"b":1}
+  //
+  // 后果是两份完全不同的 E3 只要顶层基本字段一致就算出同一个哈希，
+  // "第三方可复算验证"这个作用直接失效。改用 @sla/domain 的递归规范化。
+  const hash = keccak256(toHex(canonicalJson(e3)));
 
   return { ...e3, canonicalPayloadHash: hash };
 }

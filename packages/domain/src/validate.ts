@@ -12,6 +12,7 @@
 
 import type { Case } from "./case.js";
 import { TOTAL_WEIGHT_BPS } from "./case.js";
+import { computeRequirementsHash } from "./canonical.js";
 import { CASE_STATUSES } from "./status.js";
 
 export type Severity = "P0" | "P1" | "P2";
@@ -88,6 +89,26 @@ export function validateCase(c: Case): ValidationIssue[] {
       "ESSENTIAL_MISSING",
       `条款缺少 essential 标注：${missingEssential.map((r) => r.id).join(", ")} —— 无法判断给付是否可分`,
     );
+  }
+
+  // requirementsHash 必须与条款本身对得上。
+  //
+  // 这是"0.05 可复算"这一主张的技术支点：条款在争议之前被承诺上链，
+  // 事后改不动。如果链上那个哈希跟手里的条款算不出同一个值，
+  // 要么条款被改过，要么哈希是编的——两种都让整套叙事失效。
+  if (c.onchain.requirementsHash !== undefined && !isPending(c.onchain.requirementsHash)) {
+    try {
+      const expected = computeRequirementsHash(c.requirements);
+      if (c.onchain.requirementsHash.toLowerCase() !== expected.toLowerCase()) {
+        at(
+          "P0",
+          "REQUIREMENTS_HASH_MISMATCH",
+          `链上 requirementsHash 与条款算出的不一致：链上 ${c.onchain.requirementsHash}，实算 ${expected}`,
+        );
+      }
+    } catch (e) {
+      at("P0", "REQUIREMENTS_HASH_UNCOMPUTABLE", `条款无法规范化：${(e as Error).message}`);
+    }
   }
 
   const hasUndecided = c.ruleResults.some((r) => r.verdict === "undecidable");
