@@ -9,9 +9,11 @@
     "build:moss": "pnpm -r --workspace-concurrency=1 --filter \"./vendor/moss/packages/**\" build",
     "typecheck": "pnpm build:moss && pnpm -r --filter \"./packages/*\" exec tsc --noEmit",
     "typecheck:only": "pnpm -r --filter \"./packages/*\" exec tsc --noEmit",
-    "test:contracts": "cd contracts && forge test"
+    "test:contracts": "cd contracts && forge test",
+    "test": "pnpm -r --filter \"./packages/*\" test"
   },
   "devDependencies": {
+    "tsx": "^4.23.1",
     "typescript": "^5.6.0"
   },
   "engines": {

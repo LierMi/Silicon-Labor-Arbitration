@@ -8,21 +8,15 @@
  *    那是 Demo 的高潮，不是待修的 bug，任何人不许把它优化掉。
  */
 
-import type { Case } from "../case.js";
+import type { Case, Requirement } from "../case.js";
 import { SCHEMA_VERSION } from "../case.js";
+import { computeRequirementsHash } from "../canonical.js";
 
-export const POTATO_CASE: Case = {
-  schemaVersion: SCHEMA_VERSION,
-  caseNo: "SLA-2026-0001",
-  title: "橙色猫插画交付争议",
-  status: "RulingProposed",
-  client: "0x1111111111111111111111111111111111111111",
-  agent: "agent://illustrator-01",
-  createdAt: "2026-08-01T09:00:00Z",
-  isMock: true,
-
-  // ── 验收条件 ────────────────────────────────────────────
-  requirements: [
+/**
+ * 验收条件。**单独抽出来是为了让 requirementsHash 能算出来，而不是抄进来。**
+ * 硬编码一个哈希值，等于给"条款被承诺过"这件事留了个可以撒谎的口子。
+ */
+export const POTATO_REQUIREMENTS: Requirement[] = [
     {
       id: "C1",
       type: "objective",
@@ -59,7 +53,29 @@ export const POTATO_CASE: Case = {
       weightBps: 2500,
       essential: true,
     },
-  ],
+];
+
+/**
+ * 土豆案的 requirementsHash —— **由上面的条款真实算出**。
+ *
+ * 改动任何一条条款（含 weightBps、essential），这个值都会跟着变，
+ * 于是 fixture 里的链上引用和 Moss 参数自动同步。想事后偷改条款
+ * 又让哈希对得上，做不到。
+ */
+export const POTATO_REQUIREMENTS_HASH = computeRequirementsHash(POTATO_REQUIREMENTS);
+
+export const POTATO_CASE: Case = {
+  schemaVersion: SCHEMA_VERSION,
+  caseNo: "SLA-2026-0001",
+  title: "橙色猫插画交付争议",
+  status: "RulingProposed",
+  client: "0x1111111111111111111111111111111111111111",
+  agent: "agent://illustrator-01",
+  createdAt: "2026-08-01T09:00:00Z",
+  isMock: true,
+
+  // ── 验收条件 ────────────────────────────────────────────
+  requirements: POTATO_REQUIREMENTS,
 
   // ── 证据 ────────────────────────────────────────────────
   evidence: [
@@ -69,7 +85,9 @@ export const POTATO_CASE: Case = {
       source: "offchain",
       label: "原始需求与验收条件",
       ts: "2026-08-01T09:00:00Z",
-      hash: "0xreq0000000000000000000000000000000000000000000000000000000000001",
+      // E1 就是"条款原文"这份证据，它的 hash 必须**等于**上链承诺的
+      // requirementsHash——否则档案里的条款和链上承诺的不是同一份东西。
+      hash: POTATO_REQUIREMENTS_HASH,
       text: "画一只适合儿童产品的橙色猫，背景透明，PNG 格式，今天中午 12 点前交付。",
     },
     {
@@ -106,8 +124,7 @@ export const POTATO_CASE: Case = {
         contractAddress: "PENDING", // 待 Gate 4 部署后填入
         abiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
         capabilityParams: {
-          requirementsHash:
-            "0xreq0000000000000000000000000000000000000000000000000000000000001",
+          requirementsHash: POTATO_REQUIREMENTS_HASH,
           deadline: "2026-08-01T12:00:00Z",
           amount: "0.2",
         },
@@ -268,6 +285,8 @@ export const POTATO_CASE: Case = {
     confirmed: false,
     deploymentTxHash: "0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34",
     deploymentBlockNumber: 49534792,
+    // 由 POTATO_REQUIREMENTS 真实算出，不是占位值
+    requirementsHash: POTATO_REQUIREMENTS_HASH,
   },
 };
 

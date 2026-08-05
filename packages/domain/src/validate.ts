@@ -12,6 +12,7 @@
 
 import type { Case } from "./case.js";
 import { TOTAL_WEIGHT_BPS } from "./case.js";
+import { computeRequirementsHash } from "./canonical.js";
 import { CASE_STATUSES } from "./status.js";
 
 export type Severity = "P0" | "P1" | "P2";
@@ -88,6 +89,47 @@ export function validateCase(c: Case): ValidationIssue[] {
       "ESSENTIAL_MISSING",
       `条款缺少 essential 标注：${missingEssential.map((r) => r.id).join(", ")} —— 无法判断给付是否可分`,
     );
+  }
+
+  // requirementsHash 必须与条款本身对得上。
+  //
+  // 这是"0.05 可复算"这一主张的技术支点：条款在争议之前被承诺上链，
+  // 事后改不动。如果链上那个哈希跟手里的条款算不出同一个值，
+  // 要么条款被改过，要么哈希是编的——两种都让整套叙事失效。
+  if (c.onchain.requirementsHash !== undefined && !isPending(c.onchain.requirementsHash)) {
+    try {
+      const expected = computeRequirementsHash(c.requirements);
+      if (c.onchain.requirementsHash.toLowerCase() !== expected.toLowerCase()) {
+        at(
+          "P0",
+          "REQUIREMENTS_HASH_MISMATCH",
+          `链上 requirementsHash 与条款算出的不一致：链上 ${c.onchain.requirementsHash}，实算 ${expected}`,
+        );
+      }
+    } catch (e) {
+      at("P0", "REQUIREMENTS_HASH_UNCOMPUTABLE", `条款无法规范化：${(e as Error).message}`);
+    }
+  }
+
+  // kind 为 requirement_hash 的证据，它的 hash 就必须**是**那个上链承诺的哈希。
+  //
+  // 这类证据的全部意义就是"档案里这份条款，正是链上承诺的那一份"。
+  // 挂一个占位值或对不上的值，等于档案和链上是两份东西，
+  // 而这恰恰是我们号称能防住的事。
+  for (const e of c.evidence) {
+    if (e.kind !== "requirement_hash" || e.hash === undefined || isPending(e.hash)) continue;
+    try {
+      const expected = computeRequirementsHash(c.requirements);
+      if (e.hash.toLowerCase() !== expected.toLowerCase()) {
+        at(
+          "P0",
+          "REQUIREMENT_EVIDENCE_HASH_MISMATCH",
+          `${e.id} 是条款哈希证据，但它的 hash 是 ${e.hash}，与条款实算的 ${expected} 不符`,
+        );
+      }
+    } catch {
+      // 条款本身无法规范化的情况已由 REQUIREMENTS_HASH_UNCOMPUTABLE 报告
+    }
   }
 
   const hasUndecided = c.ruleResults.some((r) => r.verdict === "undecidable");
