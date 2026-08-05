@@ -12,7 +12,7 @@
 
 import type { Case } from "./case.js";
 import { TOTAL_WEIGHT_BPS } from "./case.js";
-import { computeRequirementsHash } from "./canonical.js";
+import { computeRequirementsHash, verifyE3PayloadHash } from "./canonical.js";
 import { CASE_STATUSES } from "./status.js";
 
 export type Severity = "P0" | "P1" | "P2";
@@ -129,6 +129,39 @@ export function validateCase(c: Case): ValidationIssue[] {
       }
     } catch {
       // 条款本身无法规范化的情况已由 REQUIREMENTS_HASH_UNCOMPUTABLE 报告
+    }
+  }
+
+  // E3 的 canonicalPayloadHash 必须与它自己的内容相符。
+  //
+  // E3 是"Moss 事前解释 → 仲裁院事后追责"这条叙事的落点：
+  // 当事情没按签名前那句话发生时，那句话就是证据。
+  // 而一份能被事后编辑的解释不叫证据，所以哈希必须对得上。
+  for (const e of c.evidence) {
+    const m = e.mossPreSign;
+    if (!m || isPending(m.canonicalPayloadHash)) continue;
+    // ⚠️ 必须包 try/catch。反序列化回来的案件只要在 E3 深层含有 Date、
+    // undefined 或其他不可规范化的值，canonical 会抛错——校验器的职责是
+    // **报告问题**，不是自己崩掉。崩掉会让调用方拿不到任何一条 issue。
+    try {
+      if (typeof m.canonicalPayloadHash !== "string") {
+        at("P0", "E3_HASH_UNCOMPUTABLE", `${e.id} 的 canonicalPayloadHash 不是字符串`);
+        continue;
+      }
+      const { ok, expected } = verifyE3PayloadHash(m);
+      if (!ok) {
+        at(
+          "P0",
+          "E3_HASH_MISMATCH",
+          `${e.id} 的 canonicalPayloadHash 与内容不符：存的 ${m.canonicalPayloadHash}，实算 ${expected} —— 签前解释被改过或哈希是编的`,
+        );
+      }
+    } catch (err) {
+      at(
+        "P0",
+        "E3_HASH_UNCOMPUTABLE",
+        `${e.id} 的 E3 无法规范化，哈希无从校验：${(err as Error).message}`,
+      );
     }
   }
 

@@ -6,11 +6,13 @@
   "packageManager": "pnpm@11.15.1",
   "scripts": {
     "postinstall": "git submodule update --init --recursive",
-    "build:moss": "pnpm -r --workspace-concurrency=1 --filter \"./vendor/moss/packages/**\" build",
+    "build:moss": "pnpm -r --workspace-concurrency=1 --filter \"@themoss/protocol-silicon-arbitration...\" --filter \"@themoss/simulator...\" --filter \"@themoss/system...\" build",
     "typecheck": "pnpm build:moss && pnpm -r --filter \"./packages/*\" exec tsc --noEmit",
     "typecheck:only": "pnpm -r --filter \"./packages/*\" exec tsc --noEmit",
     "test:contracts": "cd contracts && forge test",
-    "test": "pnpm -r --filter \"./packages/*\" test"
+    "test": "pnpm build:moss && pnpm -r --filter \"./packages/*\" test",
+    "test:only": "pnpm -r --filter \"./packages/*\" test",
+    "verify": "pnpm build:moss && pnpm typecheck:only && pnpm test:only"
   },
   "devDependencies": {
     "tsx": "^4.23.1",
