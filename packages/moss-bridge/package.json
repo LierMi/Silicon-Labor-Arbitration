@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@sla/domain": "workspace:*",
-    "@themoss/core": "file:../../vendor/moss/packages/core",
-    "@themoss/protocol-silicon-arbitration": "file:../../vendor/moss/packages/protocols/silicon-arbitration",
-    "@themoss/simulator": "file:../../vendor/moss/packages/simulator",
-    "@themoss/system": "file:../../vendor/moss/packages/system",
+    "@themoss/core": "workspace:*",
+    "@themoss/protocol-silicon-arbitration": "workspace:*",
+    "@themoss/simulator": "workspace:*",
+    "@themoss/system": "workspace:*",
     "viem": "^2.54.3"
   },
   "scripts": {

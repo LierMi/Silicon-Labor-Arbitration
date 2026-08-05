@@ -360,9 +360,24 @@ forge script ...  # 部署到 Monad Testnet
 ## 本地验证
 
 ```bash
-pnpm install          # 会自动 init 子模块
-pnpm verify           # 构建 Moss + typecheck + 全部测试
+git clone --recurse-submodules <repo>     # ⚠️ 必须带 --recurse-submodules
+cd Silicon-Labor-Arbitration
+pnpm install
+pnpm verify                                # 构建 Moss + typecheck + 全部测试
 ```
+
+已经克隆过但没带那个参数：
+
+```bash
+git submodule update --init --recursive && pnpm install
+```
+
+> **为什么不能靠 `postinstall` 自动 init**
+>
+> `pnpm-workspace.yaml` 引用了 `vendor/moss/packages/*`，而 pnpm 在**任何**
+> 生命周期脚本（含 `preinstall`）之前就要解析 workspace。子模块没拉下来，
+> install 直接报 `ENOENT: scandir …/protocols/silicon-arbitration`。
+> 这个先后顺序没有脚本钩子能绕开——只能在克隆时就带上子模块。
 
 单独跑：
 
