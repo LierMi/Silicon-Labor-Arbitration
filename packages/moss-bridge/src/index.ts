@@ -17,7 +17,11 @@ import { createTraceSimulator } from "@themoss/simulator";
 import { monadTestnetRuntime } from "@themoss/system";
 import * as siliconArbitration from "@themoss/protocol-silicon-arbitration";
 import type { MossRuntime } from "@themoss/core";
-import { canonicalJson } from "@sla/domain";
+import { computeE3PayloadHash } from "@sla/domain";
+import type { MossPreSignEvidence } from "@sla/domain";
+
+/** Monad Testnet。写成常量，免得各处散落魔法数字。 */
+const MONAD_TESTNET_CHAIN_ID = 10143;
 
 // ────────────────────────────────────────────────────────────
 // Stable product types (do NOT expose Moss internals)
@@ -182,6 +186,20 @@ export interface WalletConsistencyResult {
  * @param unsignedTx The Moss unsigned transaction from prepareCreateTask.
  * @param signedTx The transaction the wallet actually signed (to, data, value, from, chainId).
  */
+/**
+ * 把 moss-bridge 内部的比对结果转成 domain 存档用的形状。
+ *
+ * 两边字段名不同不是笔误：内部关心"是否一致/差在哪些字段"，
+ * 存档关心"是否匹配/不匹配字段列表"。转换收在这一处，别处不许再手转。
+ */
+export function toArchivedWalletConsistency(
+  r: WalletConsistencyResult,
+): NonNullable<MossPreSignEvidence["walletConsistency"]> {
+  return r.consistent
+    ? { matched: true }
+    : { matched: false, mismatchFields: r.mismatches };
+}
+
 export function verifyWalletConsistency(
   unsignedTx: PreparedTask["unsignedTransaction"],
   signedTx: {
@@ -226,42 +244,21 @@ export function verifyWalletConsistency(
 // ────────────────────────────────────────────────────────────
 
 /**
- * Stable product type for the E3 pre-sign evidence.
- * Mirrors packages/domain/src/case.ts MossPreSignEvidence.
- */
-export interface E3Evidence {
-  explanation: string;
-  chainId: number;
-  mossCommit: string;
-  protocolVersion: string;
-  contractAddress: string;
-  abiHash: string;
-  capabilityParams: Record<string, unknown>;
-  unsignedTx: PreparedTask["unsignedTransaction"];
-  simulation: {
-    receipt: unknown;
-    warnings: string[];
-  };
-  semantics: {
-    domainAction: "commission";
-    mossVerb: "transfer";
-    protocol: "silicon-arbitration";
-    method: "createTask";
-    semanticMappingVersion: "create-task-v1";
-    semanticFidelity: "coarse-verb";
-    tags: string[];
-  };
-  canonicalPayloadHash: string;
-  walletConsistency?: WalletConsistencyResult;
-}
-
-/**
- * Build the canonical E3 pre-sign evidence from a prepared task.
+ * E3 证据的类型**直接复用 domain 的 `MossPreSignEvidence`**。
  *
- * This is the evidence that proves the user was shown exactly what Moss
- * simulated before signing. The canonicalPayloadHash allows third parties
- * to verify that the explanation has not been edited after the fact.
+ * ⚠️ 这里原本有一份手写的 `E3Evidence`，注释写着 "Mirrors domain"，
+ * 实际上早已漂移：缺 `rpcFingerprint`、`semantics` 少一层 `mossCoordinate`、
+ * `walletConsistency` 字段名也不同（`consistent/mismatches`
+ * vs `matched/mismatchFields`）。
+ *
+ * 后果是 `buildE3()` 的返回值**塞不进 `Case`**，而编译器不会提醒——
+ * 两个各自手写的类型之间没有任何编译期关联。
+ *
+ * 现在只留一个来源：domain 定义存档形状，moss-bridge 直接产出那个形状，
+ * 哈希也对那个形状计算。**存进案件的和算过哈希的，保证是同一个东西。**
  */
+export type E3Evidence = MossPreSignEvidence;
+
 export interface E3Provenance {
   /** 实际使用的 Moss commit。**从 moss.lock.json 读，不要抄。** */
   mossCommit: string;
@@ -269,14 +266,29 @@ export interface E3Provenance {
   protocolVersion: string;
   /** 真正传给 Capability 的参数原样记录 */
   capabilityParams: Record<string, unknown>;
+  /** 实际使用的 RPC 端点 */
+  rpcFingerprint: string;
 }
 
 /**
- * ⚠️ **provenance 必须由调用方从真实来源读取后传入，不再有默认值。**
+ * 由一次已完成的模拟，构造出**可直接存进 `Case` 的 E3 证据**。
+ *
+ * ## 两条不可违背的约束
+ *
+ * **1. provenance 必须由调用方从真实来源读取，不再有默认值。**
  *
  * 这里原先把 mossCommit 写死成 `5d70524e…`、protocolVersion 写死成 `0.1.0`，
  * 而实际用的是 `b00ed2db…` 和 `0.0.1`——证据声称的版本不是真正用的那个。
  * 一份声称可供第三方复算的证据，如果溯源字段是抄进来的，它就只是好看。
+ *
+ * **2. 产出的就是最终存档形状，哈希也对这个形状计算。**
+ *
+ * 原先本文件另有一份手写的 `E3Evidence`，与 domain 的 `MossPreSignEvidence`
+ * 已经漂移（缺 `rpcFingerprint`、`semantics` 少一层 `mossCoordinate`、
+ * `walletConsistency` 字段名不同）。于是返回值塞不进 `Case`，
+ * 而哈希盖的是那个中间形状——**第三方拿到案件档案复算不出同一个值**。
+ *
+ * 现在只有一个形状：domain 定义它，这里产出它，哈希盖它，案件存它。
  */
 export async function buildE3(
   task: PreparedTask,
@@ -284,35 +296,36 @@ export async function buildE3(
   provenance: E3Provenance,
   walletConsistency?: WalletConsistencyResult,
 ): Promise<E3Evidence> {
-  const { keccak256, toHex } = await import("viem");
-
   const e3: Omit<E3Evidence, "canonicalPayloadHash"> = {
     explanation,
-    chainId: 10143,
+    chainId: MONAD_TESTNET_CHAIN_ID,
+    rpcFingerprint: provenance.rpcFingerprint,
     mossCommit: provenance.mossCommit,
     protocolVersion: provenance.protocolVersion,
-    contractAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
+    contractAddress: task.unsignedTransaction.to,
     abiHash:
       "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
     capabilityParams: provenance.capabilityParams,
-    unsignedTx: task.unsignedTransaction,
+    // domain 的 UnsignedTx 带 chainId，PreparedTask 的不带——在这里补齐，
+    // 而不是让每个调用方各自拼一遍
+    unsignedTx: {
+      from: task.unsignedTransaction.from,
+      to: task.unsignedTransaction.to,
+      data: task.unsignedTransaction.data,
+      value: task.unsignedTransaction.value,
+      chainId: MONAD_TESTNET_CHAIN_ID,
+    },
     simulation: {
       receipt: task.receipt,
       warnings: task.warnings,
     },
     semantics: {
       domainAction: "commission",
+      mossCoordinate: { protocol: "silicon-arbitration", method: "createTask" },
       mossVerb: "transfer",
-      protocol: "silicon-arbitration",
-      method: "createTask",
       semanticMappingVersion: "create-task-v1",
       semanticFidelity: "coarse-verb",
-      tags: [
-        "task-creation",
-        "escrow",
-        "agent-work",
-        "arbitration",
-      ],
+      tags: ["task-creation", "escrow", "agent-work", "arbitration"],
     },
     // ⚠️ 未做钱包一致性校验时**整个键省略**，而不是留 undefined。
     //
@@ -322,22 +335,13 @@ export async function buildE3(
     //
     // 省略而非填 null，是因为"没做校验"和"做了但结果为空"对证据的含义
     // 完全不同，不该被压成同一个值。
-    ...(walletConsistency ? { walletConsistency } : {}),
+    ...(walletConsistency ? { walletConsistency: toArchivedWalletConsistency(walletConsistency) } : {}),
   };
 
-  // Deterministic canonical hash.
-  //
-  // ⚠️ 原先这里是 `JSON.stringify(e3, Object.keys(e3).sort())`。那不是排序器——
-  // 第二个参数传数组时，它是**作用于所有层级的字段白名单**，于是
-  // unsignedTx / simulation / semantics 这些嵌套对象全被清成 `{}`：
-  //
-  //   { b: 1, a: { nested: 2 } }  →  {"a":{},"b":1}
-  //
-  // 后果是两份完全不同的 E3 只要顶层基本字段一致就算出同一个哈希，
-  // "第三方可复算验证"这个作用直接失效。改用 @sla/domain 的递归规范化。
-  const hash = keccak256(toHex(canonicalJson(e3)));
-
-  return { ...e3, canonicalPayloadHash: hash };
+  // 哈希覆盖的就是上面这个最终形状（`computeE3PayloadHash` 会剔除
+  // `canonicalPayloadHash` 自身）。第三方拿到案件里的 E3，
+  // 跑一次 `verifyE3PayloadHash` 就能验真。
+  return { ...e3, canonicalPayloadHash: computeE3PayloadHash(e3) };
 }
 
 /**

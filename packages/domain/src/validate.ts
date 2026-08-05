@@ -140,9 +140,7 @@ export function validateCase(c: Case): ValidationIssue[] {
   for (const e of c.evidence) {
     const m = e.mossPreSign;
     if (!m || isPending(m.canonicalPayloadHash)) continue;
-    const { ok, expected } = verifyE3PayloadHash(m as unknown as Record<string, unknown> & {
-      canonicalPayloadHash: string;
-    });
+    const { ok, expected } = verifyE3PayloadHash(m);
     if (!ok) {
       at(
         "P0",

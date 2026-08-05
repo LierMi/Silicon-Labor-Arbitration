@@ -230,18 +230,21 @@ export function computeRequirementsHash(requirements: readonly Requirement[]): `
  * 所以入参是 `MossPreSignEvidence` 去掉 `canonicalPayloadHash` 本身
  * （自己不能包含自己的哈希），其余字段**原样**参与计算。
  */
-export function computeE3PayloadHash(
-  e3: Record<string, unknown> & { canonicalPayloadHash?: unknown },
-): `0x${string}` {
-  const { canonicalPayloadHash: _drop, ...rest } = e3;
+export function computeE3PayloadHash(e3: object): `0x${string}` {
+  const { canonicalPayloadHash: _drop, ...rest } = e3 as Record<string, unknown>;
   return keccak256(toHex(canonicalJson(rest)));
 }
 
-/** 校验一份 E3 的 `canonicalPayloadHash` 是否与内容相符 */
-export function verifyE3PayloadHash(e3: {
-  canonicalPayloadHash: string;
-  [k: string]: unknown;
-}): { ok: boolean; expected: string } {
+/**
+ * 校验一份 E3 的 `canonicalPayloadHash` 是否与内容相符。
+ *
+ * 入参故意写成 `object & { canonicalPayloadHash: string }` 而不是带索引签名的
+ * 形状：TypeScript 的 interface **不满足索引签名**，那样写会让
+ * `MossPreSignEvidence` 传不进来，逼调用方到处写 `as unknown as …`。
+ */
+export function verifyE3PayloadHash(
+  e3: object & { canonicalPayloadHash: string },
+): { ok: boolean; expected: string } {
   const expected = computeE3PayloadHash(e3);
   return { ok: e3.canonicalPayloadHash.toLowerCase() === expected.toLowerCase(), expected };
 }

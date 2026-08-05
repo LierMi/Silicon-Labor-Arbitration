@@ -124,6 +124,16 @@ export const POTATO_CASE: Case = {
       //               这一份是那一次模拟的快照，不是可复现常量。
       //
       //    要重新生成：packages/moss-bridge 里跑一次，把结果替换到这里。
+      // ⚠️ 不是手写的样例，是 @sla/moss-bridge 的 buildE3() 真实调用 Moss、
+      //    对 Monad Testnet 跑完 simulate 之后固化下来的。
+      //
+      //    生成时间   2026-08-05T11:10:29Z
+      //    mossCommit b00ed2db（读自 moss.lock.json，不是抄的）
+      //    模拟结果   成功，gas 218304，0 warnings
+      //    deadline   运行时计算，所以每次重跑 data 与哈希都会变——
+      //               这一份是那一次模拟的快照，不是可复现常量。
+      //
+      //    要重新生成：packages/moss-bridge 里跑一次 buildE3，替换到这里。
       mossPreSign: {
         explanation: "你将创建一个 Agent 委托任务，并把 0.2 MON 锁入托管合约。资金在验收通过或仲裁结算前不会释放。若对方未按约定交付，可发起争议。",
         chainId: 10143,
@@ -135,12 +145,12 @@ export const POTATO_CASE: Case = {
         capabilityParams: {
           "amount": "0.2",
           "requirementsHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
-          "deadline": "1785928965"
+          "deadline": "1785931812"
         },
         unsignedTx: {
           "from": "0x1111111111111111111111111111111111111111",
           "to": "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
-          "data": "0x6fbb5f622fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a731d05",
+          "data": "0x6fbb5f622fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a732824",
           "value": "0x2c68af0bb140000",
           "chainId": 10143
         },
@@ -148,13 +158,13 @@ export const POTATO_CASE: Case = {
           "receipt": {
             "kind": "receipt",
             "outcome": {
-              "taskId": "0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7",
+              "taskId": "0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2",
               "client": "0x1111111111111111111111111111111111111111",
               "amount": "200000000000000000",
               "reqHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
-              "deadline": "1785928965"
+              "deadline": "1785931812"
             },
-            "text": "Task 0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7 created by 0x1111111111111111111111111111111111111111: 200000000000000000 MON escrowed",
+            "text": "Task 0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2 created by 0x1111111111111111111111111111111111111111: 200000000000000000 MON escrowed",
             "changes": [
               {
                 "kind": "change",
@@ -179,19 +189,19 @@ export const POTATO_CASE: Case = {
                   "address": "0x67040374b8a9756586de0885f01d1291ce8ffccf",
                   "topics": [
                     "0x5bb958daa8dc2a1dff1f3a035228e85cc808e19978835e55d3dfa08e5ba5651f",
-                    "0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7",
+                    "0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2",
                     "0x0000000000000000000000001111111111111111111111111111111111111111"
                   ],
-                  "data": "0x00000000000000000000000000000000000000000000000002c68af0bb1400002fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a731d05"
+                  "data": "0x00000000000000000000000000000000000000000000000002c68af0bb1400002fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a732824"
                 },
                 "data": {
-                  "taskId": "0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7",
+                  "taskId": "0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2",
                   "client": "0x1111111111111111111111111111111111111111",
                   "amount": "200000000000000000",
                   "reqHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
-                  "deadline": "1785928965"
+                  "deadline": "1785931812"
                 },
-                "text": "Task 0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7 created: 200000000000000000 MON escrowed, deadline 1785928965"
+                "text": "Task 0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2 created: 200000000000000000 MON escrowed, deadline 1785931812"
               }
             ],
             "protocol": "silicon-arbitration"
@@ -214,7 +224,7 @@ export const POTATO_CASE: Case = {
             "arbitration"
           ]
         },
-        canonicalPayloadHash: "0x97fc9e42ecf0382bd98c90ecac4b3c13955b782b47daad4d35548b1184daf3f6",
+        canonicalPayloadHash: "0xdf22f0cd37e01111f8aaad01873764a5daf7a09c9372fd7045008f95fb1941f8",
       },
     },
   ],

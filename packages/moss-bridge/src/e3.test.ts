@@ -11,7 +11,15 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 
-import { buildE3, computeTransactionFingerprint, type PreparedTask } from "./index.js";
+import { verifyE3PayloadHash } from "@sla/domain";
+import type { Case } from "@sla/domain";
+import {
+  buildE3,
+  computeTransactionFingerprint,
+  toArchivedWalletConsistency,
+  type E3Provenance,
+  type PreparedTask,
+} from "./index.js";
 
 const TASK: PreparedTask = {
   unsignedTransaction: {
@@ -32,48 +40,117 @@ const TASK: PreparedTask = {
   },
 };
 
+const PROV: E3Provenance = {
+  mossCommit: "b00ed2db0454219e468e8a0e4928c364a869fb79",
+  protocolVersion: "silicon-arbitration@0.0.1",
+  capabilityParams: { amount: "0.2", requirementsHash: "0xabc", deadline: "1785928734" },
+  rpcFingerprint: "https://testnet-rpc.monad.xyz",
+};
+
 const EXPLANATION = "你将把 0.2 MON 锁入托管合约。";
 
-describe("buildE3", () => {
-  it("两参数调用不再抛错（省略 walletConsistency）", async () => {
-    // 回归：`{ walletConsistency }` 简写会造出值为 undefined 的自有属性，
-    // canonicalJson 拒绝 undefined，于是这个调用整个崩掉。
-    const e3 = await buildE3(TASK, EXPLANATION);
-    assert.equal(typeof e3.canonicalPayloadHash, "string");
+describe("buildE3 —— 省略 walletConsistency 的路径", () => {
+  it("不抛错（回归：undefined 自有属性曾让这个调用整个崩掉）", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
     assert.match(e3.canonicalPayloadHash, /^0x[0-9a-f]{64}$/);
   });
 
   it("省略时该键完全不存在，而不是 undefined 或 null", async () => {
-    const e3 = await buildE3(TASK, EXPLANATION);
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
     assert.equal("walletConsistency" in e3, false);
   });
 
-  it("传入 walletConsistency 时会改变哈希（有做校验 ≠ 没做）", async () => {
-    const without = await buildE3(TASK, EXPLANATION);
-    const withWc = await buildE3(TASK, EXPLANATION, { consistent: true, mismatches: [] });
+  it("传入时会改变哈希（做了校验 ≠ 没做）", async () => {
+    const without = await buildE3(TASK, EXPLANATION, PROV);
+    const withWc = await buildE3(TASK, EXPLANATION, PROV, { consistent: true, mismatches: [] });
     assert.notEqual(without.canonicalPayloadHash, withWc.canonicalPayloadHash);
   });
+});
 
-  it("哈希覆盖嵌套的 receipt —— 只改深层字段也会变", async () => {
-    const a = await buildE3(TASK, EXPLANATION);
-    const mutated: PreparedTask = {
-      ...TASK,
-      receipt: { ...(TASK.receipt as object), outcome: { taskId: "0xdifferent" } },
-    };
-    const b = await buildE3(mutated, EXPLANATION);
-    assert.notEqual(a.canonicalPayloadHash, b.canonicalPayloadHash);
+describe("buildE3 —— 产出的就是最终存档形状", () => {
+  it("返回值可直接赋给 Case 的 mossPreSign（类型统一后的核心保证）", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    // 这一行的意义在编译期：类型对不上就通不过 tsc
+    const evidence: NonNullable<Case["evidence"][number]["mossPreSign"]> = e3;
+    assert.equal(evidence.explanation, EXPLANATION);
   });
 
-  it("改签前解释会改变哈希 —— 解释不可被事后编辑", async () => {
-    const a = await buildE3(TASK, EXPLANATION);
-    const b = await buildE3(TASK, "资金随时可退，无风险。");
-    assert.notEqual(a.canonicalPayloadHash, b.canonicalPayloadHash);
+  it("带齐 domain 要求而旧类型缺失的字段", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    assert.equal(e3.rpcFingerprint, PROV.rpcFingerprint);
+    assert.deepEqual(e3.semantics.mossCoordinate, {
+      protocol: "silicon-arbitration",
+      method: "createTask",
+    });
+    assert.equal(e3.unsignedTx.chainId, 10143);
+  });
+
+  it("溯源字段原样来自 provenance，不是写死的", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    assert.equal(e3.mossCommit, PROV.mossCommit);
+    assert.equal(e3.protocolVersion, PROV.protocolVersion);
+    const other = await buildE3(TASK, EXPLANATION, { ...PROV, mossCommit: "deadbeef" });
+    assert.equal(other.mossCommit, "deadbeef");
+    assert.notEqual(other.canonicalPayloadHash, e3.canonicalPayloadHash);
+  });
+
+  it("walletConsistency 转成 domain 的字段名", async () => {
+    const ok = await buildE3(TASK, EXPLANATION, PROV, { consistent: true, mismatches: [] });
+    assert.deepEqual(ok.walletConsistency, { matched: true });
+
+    const bad = await buildE3(TASK, EXPLANATION, PROV, {
+      consistent: false,
+      mismatches: ["data mismatch"],
+    });
+    assert.deepEqual(bad.walletConsistency, { matched: false, mismatchFields: ["data mismatch"] });
+  });
+});
+
+describe("buildE3 → verifyE3PayloadHash 贯通", () => {
+  it("刚生成的 E3 立刻自校验通过", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    assert.equal(verifyE3PayloadHash(e3).ok, true);
+  });
+
+  it("改签前解释 → 校验失败（解释不可被事后编辑）", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    const tampered: typeof e3 = { ...e3, explanation: "资金随时可退，无风险。" };
+    assert.equal(verifyE3PayloadHash(tampered).ok, false);
+  });
+
+  it("改嵌套深处的 receipt → 校验失败", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    const tampered: typeof e3 = {
+      ...e3,
+      simulation: { ...e3.simulation, receipt: { kind: "receipt", outcome: { taskId: "0xEVIL" } } },
+    };
+    assert.equal(verifyE3PayloadHash(tampered).ok, false);
+  });
+
+  it("带 walletConsistency 的 E3 同样自校验通过", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV, { consistent: false, mismatches: ["to"] });
+    assert.equal(verifyE3PayloadHash(e3).ok, true);
   });
 
   it("同样输入得到同样哈希（确定性）", async () => {
-    const a = await buildE3(TASK, EXPLANATION);
-    const b = await buildE3(TASK, EXPLANATION);
+    const a = await buildE3(TASK, EXPLANATION, PROV);
+    const b = await buildE3(TASK, EXPLANATION, PROV);
     assert.equal(a.canonicalPayloadHash, b.canonicalPayloadHash);
+  });
+});
+
+describe("toArchivedWalletConsistency", () => {
+  it("一致时不带 mismatchFields", () => {
+    assert.deepEqual(toArchivedWalletConsistency({ consistent: true, mismatches: [] }), {
+      matched: true,
+    });
+  });
+
+  it("不一致时原样带出差异字段", () => {
+    assert.deepEqual(
+      toArchivedWalletConsistency({ consistent: false, mismatches: ["to", "value"] }),
+      { matched: false, mismatchFields: ["to", "value"] },
+    );
   });
 });
 
