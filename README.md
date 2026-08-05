@@ -356,3 +356,29 @@ forge script ...  # 部署到 Monad Testnet
 <b>我们没有替你做决定。</b><br>
 我们只是把责任找回来，摆在你面前。
 </p>
+
+## 本地验证
+
+```bash
+pnpm install          # 会自动 init 子模块
+pnpm verify           # 构建 Moss + typecheck + 全部测试
+```
+
+单独跑：
+
+| 命令 | 作用 |
+|---|---|
+| `pnpm build:moss` | 只构建 moss-bridge 真正依赖的 Moss 包 |
+| `pnpm typecheck` | 构建 Moss 后做类型检查 |
+| `pnpm test` | 构建 Moss 后跑测试 |
+| `pnpm test:contracts` | Foundry 合约测试（需先装 forge）|
+
+> **为什么 `build:moss` 只构建一部分**
+>
+> `vendor/moss` 里有 16 个包，其中 `@themoss/abi-tools` 缺 `@types/node`，
+> 全量构建会挂在它的 dts 步骤上。而我们只用 `core` / `simulator` /
+> `system` / `protocol-silicon-arbitration` 四个，
+> 所以按 `--filter "<pkg>..."`（含依赖）精确构建，既绕开了那个失败，
+> 也快得多。
+>
+> 上游修好 `abi-tools` 之后可以放开，但**没有理由为了构建用不到的包而失败**。
