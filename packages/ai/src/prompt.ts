@@ -46,7 +46,12 @@ export const SYSTEM_PROMPT = `你是「硅基劳动仲裁院」的意见生成�
  * ⚠️ 刻意剔除的字段：
  *   - settlementProposal（金额）—— AI 不该看见钱
  *   - requirement.weightBps（权重）—— 看见权重就等于看见钱
+ *   - requirement.essential（是否核心条款）—— 知道"核心条款判不了就全额冻结"，
+ *     等于知道自己这句话值多少钱。**别加进去。**
  *   - evidence.mossPreSign 的完整结构 —— 只给签前解释原文，其余是技术元数据
+ *
+ * 下面用的是**允许清单**（逐个挑字段），不是排除清单。
+ * 将来 Requirement 加了新字段，默认不会漏进 prompt —— 这是刻意的。
  */
 export function buildUserInput(c: Case): string {
   const requirements = c.requirements.map((r) => {

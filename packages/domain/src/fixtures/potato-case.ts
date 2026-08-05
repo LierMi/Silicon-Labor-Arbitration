@@ -30,6 +30,7 @@ export const POTATO_CASE: Case = {
       expect: "2026-08-01T12:00:00Z",
       label: "在 8 月 1 日 12:00 前交付",
       weightBps: 2500,
+      essential: false,
     },
     {
       id: "C2",
@@ -38,6 +39,7 @@ export const POTATO_CASE: Case = {
       expect: "PNG",
       label: "文件格式为 PNG",
       weightBps: 2500,
+      essential: false,
     },
     {
       id: "C3",
@@ -46,6 +48,7 @@ export const POTATO_CASE: Case = {
       expect: true,
       label: "背景透明",
       weightBps: 2500,
+      essential: false,
     },
     {
       id: "C4",
@@ -54,6 +57,7 @@ export const POTATO_CASE: Case = {
       expect: true,
       label: "画的是一只适合儿童产品的橙色猫",
       weightBps: 2500,
+      essential: true,
     },
   ],
 
@@ -239,10 +243,18 @@ export const POTATO_CASE: Case = {
 
   // ── 结算 ────────────────────────────────────────────────
   // 0.15 支付 + 0.05 冻结 = 0.2 MON。冻结部分对应 C4，等人类终审。
+  // C4 是核心条款（essential）且不可裁决 → 全额冻结。
+  //
+  // 不是 0.15/0/0.05。按权重先付 75% 的前提是"条款可分割、价值可累加"，
+  // 而一张按时交付、PNG、背景透明的**土豆**图，对委托人的价值是零——
+  // 三条腿的桌子不值一张桌子的 75%。
+  //
+  // 规则引擎仍然算得出 0.15（见 essentialOverride.wouldHaveBeen），
+  // 但它主动不动手。**能算，但克制**，这是 demo 要展示的东西。
   settlementProposal: {
-    toAgent: "0.15",
+    toAgent: "0",
     toClient: "0",
-    frozen: "0.05",
+    frozen: "0.2",
   },
 
   // ── 链上引用（Gate 4 已部署 Monad Testnet）────────────

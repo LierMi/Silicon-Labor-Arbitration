@@ -79,8 +79,32 @@ export function validateCase(c: Case): ValidationIssue[] {
     }
   }
 
+  // essential 必须显式声明 —— 它和 weightBps 一样要进 requirementsHash，
+  // 静默默认值会让"承诺了什么"取决于代码版本
+  const missingEssential = c.requirements.filter((r) => typeof r.essential !== "boolean");
+  if (missingEssential.length > 0) {
+    at(
+      "P0",
+      "ESSENTIAL_MISSING",
+      `条款缺少 essential 标注：${missingEssential.map((r) => r.id).join(", ")} —— 无法判断给付是否可分`,
+    );
+  }
+
   const hasUndecided = c.ruleResults.some((r) => r.verdict === "undecidable");
   const s = c.settlementProposal;
+
+  // 核心条款判不了却仍按权重付了钱 —— 等于替人做了"附属条款值多少"的判断，
+  // 与"判不了就不判"的立场直接冲突
+  const essentialUndecided = c.requirements.filter(
+    (r) => r.essential && c.ruleResults.find((x) => x.id === r.id)?.verdict === "undecidable",
+  );
+  if (essentialUndecided.length > 0 && s && Number(s.toAgent) > 0) {
+    at(
+      "P0",
+      "ESSENTIAL_UNDECIDED_BUT_PAID",
+      `核心条款 ${essentialUndecided.map((r) => r.id).join(", ")} 不可裁决，却仍向 Agent 支付了 ${s.toAgent} —— 核心条款判不了时必须全额冻结`,
+    );
+  }
 
   if (s) {
     const frozen = Number(s.frozen);
