@@ -45,6 +45,27 @@ export interface PreparedTask {
   evidenceHash: string | null;
   /** Raw receipt data for E3 canonical serialization. */
   receipt: unknown;
+  /**
+   * **实际传给 `registry.action()` 的参数原样快照。**
+   *
+   * ⚠️ 不接受调用方另行提供。原先 `buildE3` 从 `E3Provenance.capabilityParams`
+   * 拿这份数据，于是归档的可以是任何东西——实际发给 Moss 的
+   * `requirementsHash` 是十进制，归档的却是十六进制。
+   *
+   * 那样的哈希只能证明"内容后来没被改过"，不能证明"内容是真的"。
+   * 证据要成立，归档的必须**就是**发出去的那一份。
+   */
+  capabilityParams: Record<string, unknown>;
+  /**
+   * **实际使用的 RPC 端点的去敏指纹。**
+   *
+   * 由创建 Runtime 的那一处生成，不由调用方提供——否则 E3 里写的端点
+   * 可以和真正用的不是同一个。
+   *
+   * 去敏是硬性要求：`docs/05` 明确不得保存私密 RPC Key，
+   * 而很多付费节点把 key 放在 URL 路径或 query 里。见 `sanitizeRpcUrl`。
+   */
+  rpcFingerprint: string;
 }
 
 export interface MossBridgeOptions {
@@ -55,14 +76,52 @@ export interface MossBridgeOptions {
 // Implementation
 // ────────────────────────────────────────────────────────────
 
+/**
+ * 把 RPC URL 变成可安全归档的指纹。
+ *
+ * 很多节点服务把密钥放在 URL 里：
+ *
+ * ```
+ * https://user:pass@rpc.example.com/v1/KEY?apikey=SECRET
+ *   → https://rpc.example.com/v1/***
+ * ```
+ *
+ * 规则：丢掉 userinfo、丢掉整个 query、路径里长度 ≥ 16 的段替换成 `***`
+ * （那种长度基本只可能是密钥）。保留 host 和路径结构，
+ * 因为"用的是哪个服务商"本身是有验证价值的信息。
+ */
+export function sanitizeRpcUrl(rpcUrl: string): string {
+  let u: URL;
+  try {
+    u = new URL(rpcUrl);
+  } catch {
+    return "(invalid-rpc-url)";
+  }
+  const path = u.pathname
+    .split("/")
+    .map((seg) => (seg.length >= 16 ? "***" : seg))
+    .join("/");
+  return `${u.protocol}//${u.host}${path === "/" ? "" : path}`;
+}
+
+const DEFAULT_RPC_URL = "https://testnet-rpc.monad.xyz";
+
+/** 实际用于创建 Runtime 的 RPC —— 与 E3 里归档的指纹同源 */
+let _rpcUrl: string | null = null;
 let _runtime: MossRuntime | null = null;
 let _registry: Registry | null = null;
 
 async function getRuntime(opts: MossBridgeOptions = {}): Promise<MossRuntime> {
   if (!_runtime) {
-    _runtime = await monadTestnetRuntime({
-      rpcUrl: opts.rpcUrl ?? "https://testnet-rpc.monad.xyz",
-    });
+    _rpcUrl = opts.rpcUrl ?? DEFAULT_RPC_URL;
+    _runtime = await monadTestnetRuntime({ rpcUrl: _rpcUrl });
+  } else if (opts.rpcUrl && opts.rpcUrl !== _rpcUrl) {
+    // Runtime 是全局缓存的，后来的 rpcUrl 不会生效。静默忽略会让
+    // E3 归档的端点与实际使用的不一致，所以直接报错。
+    throw new Error(
+      `MossBridge Runtime 已用 ${sanitizeRpcUrl(_rpcUrl ?? "")} 初始化，` +
+        `不能改用 ${sanitizeRpcUrl(opts.rpcUrl)}。请调用 resetMossBridge() 后重建。`,
+    );
   }
   return _runtime;
 }
@@ -106,6 +165,16 @@ export async function prepareCreateTask(
   }
   const requirementsHashInt = BigInt(requirementsHash).toString();
 
+  // 这一份就是发给 Moss 的原样参数，后面 buildE3 直接归档它
+  const capabilityParams = {
+    protocol: "silicon-arbitration",
+    method: "createTask",
+    account,
+    amount: amountMon,
+    requirementsHash: requirementsHashInt,
+    deadline,
+  } as const;
+
   const capability = await registry.action(
     "silicon-arbitration",
     "createTask",
@@ -141,6 +210,8 @@ export async function prepareCreateTask(
     warnings,
     evidenceHash: null,
     receipt: sim.receipt ?? null,
+    capabilityParams,
+    rpcFingerprint: sanitizeRpcUrl(_rpcUrl ?? DEFAULT_RPC_URL),
   };
 }
 
@@ -264,10 +335,6 @@ export interface E3Provenance {
   mossCommit: string;
   /** 实际使用的协议包版本。**从 package.json 读，不要抄。** */
   protocolVersion: string;
-  /** 真正传给 Capability 的参数原样记录 */
-  capabilityParams: Record<string, unknown>;
-  /** 实际使用的 RPC 端点 */
-  rpcFingerprint: string;
 }
 
 /**
@@ -299,13 +366,15 @@ export async function buildE3(
   const e3: Omit<E3Evidence, "canonicalPayloadHash"> = {
     explanation,
     chainId: MONAD_TESTNET_CHAIN_ID,
-    rpcFingerprint: provenance.rpcFingerprint,
+    // ⚠️ 下面两项都来自 task 而非 provenance：它们必须是**实际发生的**，
+    // 不能由调用方另行提供。见 PreparedTask 上的说明。
+    rpcFingerprint: task.rpcFingerprint,
     mossCommit: provenance.mossCommit,
     protocolVersion: provenance.protocolVersion,
     contractAddress: task.unsignedTransaction.to,
     abiHash:
       "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
-    capabilityParams: provenance.capabilityParams,
+    capabilityParams: task.capabilityParams,
     // domain 的 UnsignedTx 带 chainId，PreparedTask 的不带——在这里补齐，
     // 而不是让每个调用方各自拼一遍
     unsignedTx: {

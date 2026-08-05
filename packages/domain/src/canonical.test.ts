@@ -184,6 +184,29 @@ describe("校验器兜住这些边界", () => {
     assert.ok(validateCase(t).some((i) => i.code === "REQUIREMENTS_HASH_MISMATCH"));
   });
 
+  it("E3 含 Date 等不可规范化的值 → 返回 P0，而不是抛异常", () => {
+    // 回归：validateCase 直接调 verifyE3PayloadHash 而不捕获异常时，
+    // 反序列化回来的案件只要深层含 Date，校验器自己就崩了，
+    // 调用方一条 issue 都拿不到。
+    const t = structuredClone(POTATO_CASE);
+    const e3 = t.evidence.find((e) => e.mossPreSign)?.mossPreSign;
+    assert.ok(e3);
+    (e3.simulation as { receipt: unknown }).receipt = { at: new Date() };
+    const issues = validateCase(t);
+    assert.ok(
+      issues.some((i) => i.code === "E3_HASH_UNCOMPUTABLE"),
+      issues.map((i) => i.code).join(","),
+    );
+  });
+
+  it("E3 的 canonicalPayloadHash 不是字符串 → 也走 P0 而非抛错", () => {
+    const t = structuredClone(POTATO_CASE);
+    const e3 = t.evidence.find((e) => e.mossPreSign)?.mossPreSign;
+    assert.ok(e3);
+    (e3 as { canonicalPayloadHash: unknown }).canonicalPayloadHash = 42;
+    assert.ok(validateCase(t).some((i) => i.code === "E3_HASH_UNCOMPUTABLE"));
+  });
+
   it("E1 挂占位哈希 → REQUIREMENT_EVIDENCE_HASH_MISMATCH", () => {
     const t = structuredClone(POTATO_CASE);
     const e1 = t.evidence.find((e) => e.kind === "requirement_hash");

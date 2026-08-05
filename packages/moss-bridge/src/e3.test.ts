@@ -16,6 +16,7 @@ import type { Case } from "@sla/domain";
 import {
   buildE3,
   computeTransactionFingerprint,
+  sanitizeRpcUrl,
   toArchivedWalletConsistency,
   type E3Provenance,
   type PreparedTask,
@@ -32,6 +33,16 @@ const TASK: PreparedTask = {
   simulationFailed: false,
   warnings: [],
   evidenceHash: null,
+  // 实际发给 Moss 的参数原样快照 —— 注意 requirementsHash 是**十进制**
+  capabilityParams: {
+    protocol: "silicon-arbitration",
+    method: "createTask",
+    account: "0x1111111111111111111111111111111111111111",
+    amount: "0.2",
+    requirementsHash: "21627158241659389656912472248746045077030315013403535262810590894243813371931",
+    deadline: "1785928734",
+  },
+  rpcFingerprint: "https://testnet-rpc.monad.xyz",
   // 嵌套结构 —— 这正是旧写法会清空的部分
   receipt: {
     kind: "receipt",
@@ -43,8 +54,6 @@ const TASK: PreparedTask = {
 const PROV: E3Provenance = {
   mossCommit: "b00ed2db0454219e468e8a0e4928c364a869fb79",
   protocolVersion: "silicon-arbitration@0.0.1",
-  capabilityParams: { amount: "0.2", requirementsHash: "0xabc", deadline: "1785928734" },
-  rpcFingerprint: "https://testnet-rpc.monad.xyz",
 };
 
 const EXPLANATION = "你将把 0.2 MON 锁入托管合约。";
@@ -77,7 +86,7 @@ describe("buildE3 —— 产出的就是最终存档形状", () => {
 
   it("带齐 domain 要求而旧类型缺失的字段", async () => {
     const e3 = await buildE3(TASK, EXPLANATION, PROV);
-    assert.equal(e3.rpcFingerprint, PROV.rpcFingerprint);
+    assert.equal(e3.rpcFingerprint, TASK.rpcFingerprint);
     assert.deepEqual(e3.semantics.mossCoordinate, {
       protocol: "silicon-arbitration",
       method: "createTask",
@@ -103,6 +112,56 @@ describe("buildE3 —— 产出的就是最终存档形状", () => {
       mismatches: ["data mismatch"],
     });
     assert.deepEqual(bad.walletConsistency, { matched: false, mismatchFields: ["data mismatch"] });
+  });
+});
+
+describe("归档的必须是真实发生的，不是调用方说了算的", () => {
+  it("capabilityParams 逐字段等于实际传给 Moss 的入参", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    assert.deepEqual(e3.capabilityParams, TASK.capabilityParams);
+  });
+
+  it("归档的 requirementsHash 是十进制 —— 与发给 Moss 的一致，不是十六进制", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    const archived = (e3.capabilityParams as Record<string, unknown>)["requirementsHash"];
+    assert.match(String(archived), /^\d+$/, "必须是十进制整数串");
+    assert.equal(archived, TASK.capabilityParams["requirementsHash"]);
+  });
+
+  it("rpcFingerprint 来自 task，调用方无法另行指定", async () => {
+    const e3 = await buildE3(TASK, EXPLANATION, PROV);
+    assert.equal(e3.rpcFingerprint, TASK.rpcFingerprint);
+    // E3Provenance 上已经没有这两个字段了 —— 编译期就堵死
+    assert.equal("rpcFingerprint" in PROV, false);
+    assert.equal("capabilityParams" in PROV, false);
+  });
+});
+
+describe("sanitizeRpcUrl —— 不得归档私密 RPC Key", () => {
+  it("丢掉 query（key 常放这里）", () => {
+    assert.equal(
+      sanitizeRpcUrl("https://rpc.example.com/v1?apikey=SECRET123456"),
+      "https://rpc.example.com/v1",
+    );
+  });
+
+  it("丢掉 userinfo", () => {
+    assert.equal(sanitizeRpcUrl("https://user:pass@rpc.example.com/v1"), "https://rpc.example.com/v1");
+  });
+
+  it("路径里的长段替换成 ***（那种长度基本只可能是密钥）", () => {
+    assert.equal(
+      sanitizeRpcUrl("https://rpc.example.com/v2/abcdef0123456789abcdef"),
+      "https://rpc.example.com/v2/***",
+    );
+  });
+
+  it("公共端点原样保留（服务商本身有验证价值）", () => {
+    assert.equal(sanitizeRpcUrl("https://testnet-rpc.monad.xyz"), "https://testnet-rpc.monad.xyz");
+  });
+
+  it("非法 URL 不抛错", () => {
+    assert.equal(sanitizeRpcUrl("не-url"), "(invalid-rpc-url)");
   });
 });
 

@@ -140,12 +140,27 @@ export function validateCase(c: Case): ValidationIssue[] {
   for (const e of c.evidence) {
     const m = e.mossPreSign;
     if (!m || isPending(m.canonicalPayloadHash)) continue;
-    const { ok, expected } = verifyE3PayloadHash(m);
-    if (!ok) {
+    // ⚠️ 必须包 try/catch。反序列化回来的案件只要在 E3 深层含有 Date、
+    // undefined 或其他不可规范化的值，canonical 会抛错——校验器的职责是
+    // **报告问题**，不是自己崩掉。崩掉会让调用方拿不到任何一条 issue。
+    try {
+      if (typeof m.canonicalPayloadHash !== "string") {
+        at("P0", "E3_HASH_UNCOMPUTABLE", `${e.id} 的 canonicalPayloadHash 不是字符串`);
+        continue;
+      }
+      const { ok, expected } = verifyE3PayloadHash(m);
+      if (!ok) {
+        at(
+          "P0",
+          "E3_HASH_MISMATCH",
+          `${e.id} 的 canonicalPayloadHash 与内容不符：存的 ${m.canonicalPayloadHash}，实算 ${expected} —— 签前解释被改过或哈希是编的`,
+        );
+      }
+    } catch (err) {
       at(
         "P0",
-        "E3_HASH_MISMATCH",
-        `${e.id} 的 canonicalPayloadHash 与内容不符：存的 ${m.canonicalPayloadHash}，实算 ${expected} —— 签前解释被改过或哈希是编的`,
+        "E3_HASH_UNCOMPUTABLE",
+        `${e.id} 的 E3 无法规范化，哈希无从校验：${(err as Error).message}`,
       );
     }
   }

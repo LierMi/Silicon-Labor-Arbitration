@@ -230,9 +230,13 @@ export function computeRequirementsHash(requirements: readonly Requirement[]): `
  * 所以入参是 `MossPreSignEvidence` 去掉 `canonicalPayloadHash` 本身
  * （自己不能包含自己的哈希），其余字段**原样**参与计算。
  */
+export const E3_CANONICAL_VERSION = "e3-canon-v1";
+
 export function computeE3PayloadHash(e3: object): `0x${string}` {
   const { canonicalPayloadHash: _drop, ...rest } = e3 as Record<string, unknown>;
-  return keccak256(toHex(canonicalJson(rest)));
+  // 带上格式版本：将来 serializer 升级后，历史证据仍能被认出该用哪套规则复算，
+  // 而不是算出一个对不上的值却查不出原因。
+  return keccak256(toHex(canonicalJson({ version: E3_CANONICAL_VERSION, payload: rest })));
 }
 
 /**

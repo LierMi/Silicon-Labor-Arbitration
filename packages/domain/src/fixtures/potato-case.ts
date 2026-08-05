@@ -21,8 +21,8 @@ export const POTATO_REQUIREMENTS: Requirement[] = [
       id: "C1",
       type: "objective",
       check: "delivered_before_deadline",
-      expect: "2026-08-01T12:00:00Z",
-      label: "在 8 月 1 日 12:00 前交付",
+      expect: "2026-08-05T16:10:29Z",
+      label: "在 2026-08-05T16:10:29Z 前交付",
       weightBps: 2500,
       essential: false,
     },
@@ -71,7 +71,7 @@ export const POTATO_CASE: Case = {
   status: "RulingProposed",
   client: "0x1111111111111111111111111111111111111111",
   agent: "agent://illustrator-01",
-  createdAt: "2026-08-01T09:00:00Z",
+  createdAt: "2026-08-05T15:10:29Z",
   isMock: true,
 
   // ── 验收条件 ────────────────────────────────────────────
@@ -84,7 +84,7 @@ export const POTATO_CASE: Case = {
       kind: "requirement_hash",
       source: "offchain",
       label: "原始需求与验收条件",
-      ts: "2026-08-01T09:00:00Z",
+      ts: "2026-08-05T15:10:29Z",
       // E1 就是"条款原文"这份证据，它的 hash 必须**等于**上链承诺的
       // requirementsHash——否则档案里的条款和链上承诺的不是同一份东西。
       hash: POTATO_REQUIREMENTS_HASH,
@@ -95,7 +95,7 @@ export const POTATO_CASE: Case = {
       kind: "delivery",
       source: "offchain",
       label: "Agent 交付物与说明",
-      ts: "2026-08-01T11:42:00Z",
+      ts: "2026-08-05T15:52:29Z",
       hash: "0xdel0000000000000000000000000000000000000000000000000000000000002",
       text: "potato.png（PNG，含 alpha 通道）。Agent 附言：这是对猫这一概念的后现代重构。",
       // 规则引擎只读这里，不读上面的 text
@@ -104,7 +104,7 @@ export const POTATO_CASE: Case = {
         mimeType: "image/png", // 由字节解析得出，不是看扩展名
         hasAlpha: true,
         byteSize: 184_320,
-        submittedAt: "2026-08-01T11:42:00Z", // 应来自链上 DeliverySubmitted 的 block timestamp
+        submittedAt: "2026-08-05T15:52:29Z", // 应来自链上 DeliverySubmitted 的 block timestamp
         parsedBy: "png-parser-v1",
       },
     },
@@ -113,27 +113,21 @@ export const POTATO_CASE: Case = {
       kind: "moss_pre_sign_explanation",
       source: "moss",
       label: "Moss 签前证据（创建任务）",
-      ts: "2026-08-01T09:00:00Z",
-      // ⚠️ 这不是手写的样例，是 @sla/moss-bridge 真实调用 Moss、
-      //    对 Monad Testnet 跑完 simulate 之后固化下来的。
-      //
-      //    生成时间   2026-08-05T10:23:02Z
-      //    mossCommit b00ed2db（读自 moss.lock.json，不是抄的）
-      //    模拟结果   成功，gas 218304，0 warnings
-      //    deadline   运行时计算，所以每次重跑 data 与哈希都会变——
-      //               这一份是那一次模拟的快照，不是可复现常量。
-      //
-      //    要重新生成：packages/moss-bridge 里跑一次，把结果替换到这里。
+      ts: "2026-08-05T15:10:29Z",
       // ⚠️ 不是手写的样例，是 @sla/moss-bridge 的 buildE3() 真实调用 Moss、
       //    对 Monad Testnet 跑完 simulate 之后固化下来的。
       //
-      //    生成时间   2026-08-05T11:10:29Z
-      //    mossCommit b00ed2db（读自 moss.lock.json，不是抄的）
+      //    生成时间   2026-08-05T15:10:58Z
+      //    mossCommit b00ed2db（读自 moss.lock.json）
       //    模拟结果   成功，gas 218304，0 warnings
-      //    deadline   运行时计算，所以每次重跑 data 与哈希都会变——
-      //               这一份是那一次模拟的快照，不是可复现常量。
       //
-      //    要重新生成：packages/moss-bridge 里跑一次 buildE3，替换到这里。
+      //    ⚠️ **整份 fixture 的时间线由这次模拟锚定**：案件 createdAt 就是
+      //    模拟发生的那一刻，onchain.deadline 与 C1 的 expect 就是本次
+      //    createTask 真正传出去的 deadline，capabilityParams 是原样入参。
+      //    E3 因此确实是**本案**的签前证据，而不是另一笔任务的模拟。
+      //
+      //    重跑会得到新的时间线与哈希（deadline 必须在未来）。
+      //    要重新生成：packages/moss-bridge 里跑一次 buildE3 生成脚本。
       mossPreSign: {
         explanation: "你将创建一个 Agent 委托任务，并把 0.2 MON 锁入托管合约。资金在验收通过或仲裁结算前不会释放。若对方未按约定交付，可发起争议。",
         chainId: 10143,
@@ -143,14 +137,17 @@ export const POTATO_CASE: Case = {
         contractAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
         abiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
         capabilityParams: {
+          "protocol": "silicon-arbitration",
+          "method": "createTask",
+          "account": "0x1111111111111111111111111111111111111111",
           "amount": "0.2",
-          "requirementsHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
-          "deadline": "1785931812"
+          "requirementsHash": "85764853928933623864581999677338724522605936106248784809169733011667550454054",
+          "deadline": "1785946229"
         },
         unsignedTx: {
           "from": "0x1111111111111111111111111111111111111111",
           "to": "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
-          "data": "0x6fbb5f622fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a732824",
+          "data": "0x6fbb5f62bd9d2fe50f61f6a2a6e116c252a783e26f3ca6d6173a01104d507d3cb533c126000000000000000000000000000000000000000000000000000000006a736075",
           "value": "0x2c68af0bb140000",
           "chainId": 10143
         },
@@ -158,13 +155,13 @@ export const POTATO_CASE: Case = {
           "receipt": {
             "kind": "receipt",
             "outcome": {
-              "taskId": "0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2",
+              "taskId": "0xeb65d11fb5ac5448b9f248745f16fd0723527123ae1022f628f73a8e556ba30e",
               "client": "0x1111111111111111111111111111111111111111",
               "amount": "200000000000000000",
-              "reqHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
-              "deadline": "1785931812"
+              "reqHash": "0xbd9d2fe50f61f6a2a6e116c252a783e26f3ca6d6173a01104d507d3cb533c126",
+              "deadline": "1785946229"
             },
-            "text": "Task 0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2 created by 0x1111111111111111111111111111111111111111: 200000000000000000 MON escrowed",
+            "text": "Task 0xeb65d11fb5ac5448b9f248745f16fd0723527123ae1022f628f73a8e556ba30e created by 0x1111111111111111111111111111111111111111: 200000000000000000 MON escrowed",
             "changes": [
               {
                 "kind": "change",
@@ -189,19 +186,19 @@ export const POTATO_CASE: Case = {
                   "address": "0x67040374b8a9756586de0885f01d1291ce8ffccf",
                   "topics": [
                     "0x5bb958daa8dc2a1dff1f3a035228e85cc808e19978835e55d3dfa08e5ba5651f",
-                    "0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2",
+                    "0xeb65d11fb5ac5448b9f248745f16fd0723527123ae1022f628f73a8e556ba30e",
                     "0x0000000000000000000000001111111111111111111111111111111111111111"
                   ],
-                  "data": "0x00000000000000000000000000000000000000000000000002c68af0bb1400002fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a732824"
+                  "data": "0x00000000000000000000000000000000000000000000000002c68af0bb140000bd9d2fe50f61f6a2a6e116c252a783e26f3ca6d6173a01104d507d3cb533c126000000000000000000000000000000000000000000000000000000006a736075"
                 },
                 "data": {
-                  "taskId": "0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2",
+                  "taskId": "0xeb65d11fb5ac5448b9f248745f16fd0723527123ae1022f628f73a8e556ba30e",
                   "client": "0x1111111111111111111111111111111111111111",
                   "amount": "200000000000000000",
-                  "reqHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
-                  "deadline": "1785931812"
+                  "reqHash": "0xbd9d2fe50f61f6a2a6e116c252a783e26f3ca6d6173a01104d507d3cb533c126",
+                  "deadline": "1785946229"
                 },
-                "text": "Task 0x79663a454767bcdc3ebe34e9317b514910c083d3cb5fbd69b95197020b82f3a2 created: 200000000000000000 MON escrowed, deadline 1785931812"
+                "text": "Task 0xeb65d11fb5ac5448b9f248745f16fd0723527123ae1022f628f73a8e556ba30e created: 200000000000000000 MON escrowed, deadline 1785946229"
               }
             ],
             "protocol": "silicon-arbitration"
@@ -224,7 +221,7 @@ export const POTATO_CASE: Case = {
             "arbitration"
           ]
         },
-        canonicalPayloadHash: "0xdf22f0cd37e01111f8aaad01873764a5daf7a09c9372fd7045008f95fb1941f8",
+        canonicalPayloadHash: "0x3e00453c53fae4098fc47ebcc0a1009546e99d5ef1c645880028663d37abe4ab",
       },
     },
   ],
@@ -287,7 +284,7 @@ export const POTATO_CASE: Case = {
       authority: "自有资金 0.2 MON",
       sawWarning: null,
       action: "提出需求：适合儿童产品的橙色猫，透明背景，PNG，12:00 前",
-      ts: "2026-08-01T09:00:00Z",
+      ts: "2026-08-05T15:10:29Z",
       evidenceRefs: ["E1", "E3"],
     },
     {
@@ -297,7 +294,7 @@ export const POTATO_CASE: Case = {
       authority: "预算 0.2 MON，截止 12:00",
       sawWarning: null,
       action: "将需求转译为「橙色猫科动物主题插画，儿童向配色」并派发",
-      ts: "2026-08-01T09:04:00Z",
+      ts: "2026-08-05T15:14:29Z",
       evidenceRefs: ["E1"],
       intentDrift: "「适合儿童产品」被压缩为「儿童向配色」，产品用途约束丢失",
     },
@@ -308,7 +305,7 @@ export const POTATO_CASE: Case = {
       authority: "仅生成图像，无资金权限",
       sawWarning: "生成结果与提示词主体相似度偏低",
       action: "忽略相似度警告，继续生成并交付 potato.png",
-      ts: "2026-08-01T11:40:00Z",
+      ts: "2026-08-05T15:50:29Z",
       evidenceRefs: ["E2"],
       intentDrift: "主体从「猫」漂移为「土豆」，且以风格解释合理化",
     },
@@ -319,7 +316,7 @@ export const POTATO_CASE: Case = {
       authority: "按收到的参数执行",
       sawWarning: null,
       action: "输出 PNG，含 alpha 通道，符合格式参数",
-      ts: "2026-08-01T11:41:00Z",
+      ts: "2026-08-05T15:51:29Z",
       evidenceRefs: ["E2"],
     },
     {
@@ -329,7 +326,7 @@ export const POTATO_CASE: Case = {
       authority: "用户签名授权",
       sawWarning: null,
       action: "签署并广播创建任务交易，资金进入托管",
-      ts: "2026-08-01T09:01:00Z",
+      ts: "2026-08-05T15:11:29Z",
       evidenceRefs: ["E3"],
     },
   ],
@@ -356,7 +353,7 @@ export const POTATO_CASE: Case = {
     taskEscrowAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
     createTaskAbiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
     // ⚠️ 展示与规则比较用。**不要传给 createTask** —— 用 deadlineFromNow()。
-    deadline: "2026-08-01T12:00:00Z",
+    deadline: "2026-08-05T16:10:29Z",
     amount: "0.2",
     confirmed: false,
     deploymentTxHash: "0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34",
