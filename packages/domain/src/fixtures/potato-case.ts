@@ -112,41 +112,107 @@ export const POTATO_CASE: Case = {
       source: "moss",
       label: "Moss 签前证据（创建任务）",
       ts: "2026-08-01T09:00:00Z",
+      // ⚠️ 这不是手写的样例，是 @sla/moss-bridge 真实调用 Moss、
+      //    对 Monad Testnet 跑完 simulate 之后固化下来的。
+      //
+      //    生成时间   2026-08-05T10:23:02Z
+      //    mossCommit b00ed2db（读自 moss.lock.json，不是抄的）
+      //    模拟结果   成功，gas 218304，0 warnings
+      //    deadline   运行时计算，所以每次重跑 data 与哈希都会变——
+      //               这一份是那一次模拟的快照，不是可复现常量。
+      //
+      //    要重新生成：packages/moss-bridge 里跑一次，把结果替换到这里。
       mossPreSign: {
-        explanation:
-          "你将创建一个 Agent 委托任务，并把 0.2 MON 锁入托管合约。资金在验收通过或仲裁结算前不会释放。若对方未按约定交付，可发起争议。",
+        explanation: "你将创建一个 Agent 委托任务，并把 0.2 MON 锁入托管合约。资金在验收通过或仲裁结算前不会释放。若对方未按约定交付，可发起争议。",
         chainId: 10143,
         rpcFingerprint: "https://testnet-rpc.monad.xyz",
-        mossCommit: "PENDING", // 待 Neo 填入团队 Moss 基线 commit
-        protocolVersion: "silicon-arbitration@0.1.0",
-        contractAddress: "PENDING", // 待 Gate 4 部署后填入
+        mossCommit: "b00ed2db0454219e468e8a0e4928c364a869fb79",
+        protocolVersion: "silicon-arbitration@0.0.1",
+        contractAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
         abiHash: "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
         capabilityParams: {
-          requirementsHash: POTATO_REQUIREMENTS_HASH,
-          deadline: "2026-08-01T12:00:00Z",
-          amount: "0.2",
+          "amount": "0.2",
+          "requirementsHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
+          "deadline": "1785928965"
         },
         unsignedTx: {
-          from: "0x1111111111111111111111111111111111111111",
-          to: "PENDING",
-          data: "PENDING",
-          value: "200000000000000000",
-          chainId: 10143,
+          "from": "0x1111111111111111111111111111111111111111",
+          "to": "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
+          "data": "0x6fbb5f622fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a731d05",
+          "value": "0x2c68af0bb140000",
+          "chainId": 10143
         },
         simulation: {
-          receipt: { status: "PENDING" },
-          warnings: [],
+          "receipt": {
+            "kind": "receipt",
+            "outcome": {
+              "taskId": "0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7",
+              "client": "0x1111111111111111111111111111111111111111",
+              "amount": "200000000000000000",
+              "reqHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
+              "deadline": "1785928965"
+            },
+            "text": "Task 0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7 created by 0x1111111111111111111111111111111111111111: 200000000000000000 MON escrowed",
+            "changes": [
+              {
+                "kind": "change",
+                "change": {
+                  "kind": "nativeTransfer",
+                  "from": "0x1111111111111111111111111111111111111111",
+                  "to": "0x67040374b8a9756586de0885f01d1291ce8ffccf",
+                  "value": "200000000000000000"
+                },
+                "data": {
+                  "operation": "nativeTransfer",
+                  "value": "200000000000000000",
+                  "from": "0x1111111111111111111111111111111111111111",
+                  "to": "0x67040374b8a9756586de0885f01d1291ce8ffccf"
+                },
+                "text": "Escrow deposit: 200000000000000000 MON from 0x1111111111111111111111111111111111111111"
+              },
+              {
+                "kind": "change",
+                "change": {
+                  "kind": "event",
+                  "address": "0x67040374b8a9756586de0885f01d1291ce8ffccf",
+                  "topics": [
+                    "0x5bb958daa8dc2a1dff1f3a035228e85cc808e19978835e55d3dfa08e5ba5651f",
+                    "0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7",
+                    "0x0000000000000000000000001111111111111111111111111111111111111111"
+                  ],
+                  "data": "0x00000000000000000000000000000000000000000000000002c68af0bb1400002fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b000000000000000000000000000000000000000000000000000000006a731d05"
+                },
+                "data": {
+                  "taskId": "0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7",
+                  "client": "0x1111111111111111111111111111111111111111",
+                  "amount": "200000000000000000",
+                  "reqHash": "0x2fd089abb7f1b0c37089cf572ac5a73001b32a57fc47c6d52d236f308779b01b",
+                  "deadline": "1785928965"
+                },
+                "text": "Task 0x51953b369c73878e05087bc339f46b50aeaef34ab6c32f2be07aad206c5c7da7 created: 200000000000000000 MON escrowed, deadline 1785928965"
+              }
+            ],
+            "protocol": "silicon-arbitration"
+          },
+          "warnings": []
         },
-        // 语义损失显式记录，不伪装成等价（docs/08 §5.3）
         semantics: {
-          domainAction: "commission",
-          mossCoordinate: { protocol: "silicon-arbitration", method: "createTask" },
-          mossVerb: "transfer",
-          semanticMappingVersion: "create-task-v1",
-          semanticFidelity: "coarse-verb",
-          tags: ["task-creation", "escrow", "agent-work", "arbitration"],
+          "domainAction": "commission",
+          "mossCoordinate": {
+            "protocol": "silicon-arbitration",
+            "method": "createTask"
+          },
+          "mossVerb": "transfer",
+          "semanticMappingVersion": "create-task-v1",
+          "semanticFidelity": "coarse-verb",
+          "tags": [
+            "task-creation",
+            "escrow",
+            "agent-work",
+            "arbitration"
+          ]
         },
-        canonicalPayloadHash: "PENDING",
+        canonicalPayloadHash: "0x97fc9e42ecf0382bd98c90ecac4b3c13955b782b47daad4d35548b1184daf3f6",
       },
     },
   ],

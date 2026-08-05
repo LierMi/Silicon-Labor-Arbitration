@@ -183,3 +183,32 @@ export function canonicalizeRequirements(requirements: readonly Requirement[]): 
 export function computeRequirementsHash(requirements: readonly Requirement[]): `0x${string}` {
   return keccak256(toHex(canonicalizeRequirements(requirements)));
 }
+
+// ────────────────────────────────────────────────────────────
+// E3（Moss 签前证据）的规范化哈希
+// ────────────────────────────────────────────────────────────
+
+/**
+ * 计算 E3 的 `canonicalPayloadHash`。
+ *
+ * ⚠️ **哈希必须覆盖「案件里真正存着的那份 E3」**，而不是生成它的中间对象。
+ * 否则第三方拿到案件档案后复算不出同一个值——那这个字段就只是装饰。
+ *
+ * 所以入参是 `MossPreSignEvidence` 去掉 `canonicalPayloadHash` 本身
+ * （自己不能包含自己的哈希），其余字段**原样**参与计算。
+ */
+export function computeE3PayloadHash(
+  e3: Record<string, unknown> & { canonicalPayloadHash?: unknown },
+): `0x${string}` {
+  const { canonicalPayloadHash: _drop, ...rest } = e3;
+  return keccak256(toHex(canonicalJson(rest)));
+}
+
+/** 校验一份 E3 的 `canonicalPayloadHash` 是否与内容相符 */
+export function verifyE3PayloadHash(e3: {
+  canonicalPayloadHash: string;
+  [k: string]: unknown;
+}): { ok: boolean; expected: string } {
+  const expected = computeE3PayloadHash(e3);
+  return { ok: e3.canonicalPayloadHash.toLowerCase() === expected.toLowerCase(), expected };
+}

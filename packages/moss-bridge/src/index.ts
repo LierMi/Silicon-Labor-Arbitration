@@ -75,8 +75,12 @@ function getRegistry(runtime: MossRuntime): Registry {
  *
  * @param account The client's wallet address.
  * @param amountMon Human-readable MON amount to escrow (e.g. "0.2").
- * @param requirementsHash Integer string representation of the canonical
- *   requirements keccak-256 hash (semanticFidelity=coarse-verb).
+ * @param requirementsHash 规范化条款的 keccak-256 哈希，**十六进制 `0x…` 形式**
+ *   （即 `computeRequirementsHash()` 的输出，也是合约 bytes32 的形式）。
+ *
+ *   ⚠️ Moss 的参数校验要的是**十进制非负整数字符串**，传十六进制会报
+ *   `Expected a non-negative integer string`。转换在本函数内部完成——
+ *   全项目只用一种表示（十六进制），到 Moss 边界才转，调用方不可能传错。
  * @param deadline Unix timestamp after which the task can be refunded.
  */
 export async function prepareCreateTask(
@@ -89,11 +93,20 @@ export async function prepareCreateTask(
   const runtime = await getRuntime(opts);
   const registry = getRegistry(runtime);
 
+  // 十六进制 → 十进制，只在这一处发生
+  if (!/^0x[0-9a-fA-F]+$/.test(requirementsHash)) {
+    throw new Error(
+      `requirementsHash 必须是十六进制 0x… 形式，收到 ${requirementsHash}。` +
+        `请传 computeRequirementsHash() 的输出。`,
+    );
+  }
+  const requirementsHashInt = BigInt(requirementsHash).toString();
+
   const capability = await registry.action(
     "silicon-arbitration",
     "createTask",
     account,
-    { amount: amountMon, requirementsHash, deadline },
+    { amount: amountMon, requirementsHash: requirementsHashInt, deadline },
   );
 
   if (capability.kind !== "capability") {
@@ -249,9 +262,26 @@ export interface E3Evidence {
  * simulated before signing. The canonicalPayloadHash allows third parties
  * to verify that the explanation has not been edited after the fact.
  */
+export interface E3Provenance {
+  /** 实际使用的 Moss commit。**从 moss.lock.json 读，不要抄。** */
+  mossCommit: string;
+  /** 实际使用的协议包版本。**从 package.json 读，不要抄。** */
+  protocolVersion: string;
+  /** 真正传给 Capability 的参数原样记录 */
+  capabilityParams: Record<string, unknown>;
+}
+
+/**
+ * ⚠️ **provenance 必须由调用方从真实来源读取后传入，不再有默认值。**
+ *
+ * 这里原先把 mossCommit 写死成 `5d70524e…`、protocolVersion 写死成 `0.1.0`，
+ * 而实际用的是 `b00ed2db…` 和 `0.0.1`——证据声称的版本不是真正用的那个。
+ * 一份声称可供第三方复算的证据，如果溯源字段是抄进来的，它就只是好看。
+ */
 export async function buildE3(
   task: PreparedTask,
   explanation: string,
+  provenance: E3Provenance,
   walletConsistency?: WalletConsistencyResult,
 ): Promise<E3Evidence> {
   const { keccak256, toHex } = await import("viem");
@@ -259,15 +289,12 @@ export async function buildE3(
   const e3: Omit<E3Evidence, "canonicalPayloadHash"> = {
     explanation,
     chainId: 10143,
-    mossCommit: "5d70524e83a6c5338a8db3b933e9726396365786",
-    protocolVersion: "0.1.0",
+    mossCommit: provenance.mossCommit,
+    protocolVersion: provenance.protocolVersion,
     contractAddress: "0x67040374b8A9756586De0885f01d1291cE8FFCcF",
     abiHash:
       "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
-    capabilityParams: {
-      protocol: "silicon-arbitration",
-      method: "createTask",
-    },
+    capabilityParams: provenance.capabilityParams,
     unsignedTx: task.unsignedTransaction,
     simulation: {
       receipt: task.receipt,
@@ -287,7 +314,10 @@ export async function buildE3(
         "arbitration",
       ],
     },
-    walletConsistency,
+    // 未做钱包一致性校验时**整个键省略**，而不是留 undefined。
+    // 留 undefined 会让 canonical 无从判断"没做"和"做了但结果为空"，
+    // 而这两者对证据的含义完全不同。
+    ...(walletConsistency ? { walletConsistency } : {}),
   };
 
   // Deterministic canonical hash.
