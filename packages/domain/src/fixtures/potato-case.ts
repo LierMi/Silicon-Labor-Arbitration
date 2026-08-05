@@ -85,7 +85,9 @@ export const POTATO_CASE: Case = {
       source: "offchain",
       label: "原始需求与验收条件",
       ts: "2026-08-01T09:00:00Z",
-      hash: "0xreq0000000000000000000000000000000000000000000000000000000000001",
+      // E1 就是"条款原文"这份证据，它的 hash 必须**等于**上链承诺的
+      // requirementsHash——否则档案里的条款和链上承诺的不是同一份东西。
+      hash: POTATO_REQUIREMENTS_HASH,
       text: "画一只适合儿童产品的橙色猫，背景透明，PNG 格式，今天中午 12 点前交付。",
     },
     {

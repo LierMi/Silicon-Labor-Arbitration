@@ -111,6 +111,27 @@ export function validateCase(c: Case): ValidationIssue[] {
     }
   }
 
+  // kind 为 requirement_hash 的证据，它的 hash 就必须**是**那个上链承诺的哈希。
+  //
+  // 这类证据的全部意义就是"档案里这份条款，正是链上承诺的那一份"。
+  // 挂一个占位值或对不上的值，等于档案和链上是两份东西，
+  // 而这恰恰是我们号称能防住的事。
+  for (const e of c.evidence) {
+    if (e.kind !== "requirement_hash" || e.hash === undefined || isPending(e.hash)) continue;
+    try {
+      const expected = computeRequirementsHash(c.requirements);
+      if (e.hash.toLowerCase() !== expected.toLowerCase()) {
+        at(
+          "P0",
+          "REQUIREMENT_EVIDENCE_HASH_MISMATCH",
+          `${e.id} 是条款哈希证据，但它的 hash 是 ${e.hash}，与条款实算的 ${expected} 不符`,
+        );
+      }
+    } catch {
+      // 条款本身无法规范化的情况已由 REQUIREMENTS_HASH_UNCOMPUTABLE 报告
+    }
+  }
+
   const hasUndecided = c.ruleResults.some((r) => r.verdict === "undecidable");
   const s = c.settlementProposal;
 

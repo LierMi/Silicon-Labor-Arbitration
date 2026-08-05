@@ -80,10 +80,34 @@ function assertNoUnknownKeys(r: Requirement): void {
 }
 
 /**
+ * 判断是否为**朴素对象**（字面量或 `JSON.parse` 出来的）。
+ *
+ * ⚠️ 这道检查是补上的一个真实碰撞路径。原先只判 `typeof === "object"`，
+ * 于是 `Date` / `Map` / `Set` / 类实例走进对象分支，而它们的
+ * `Object.keys()` 都是空数组，于是全部序列化成 `{}`：
+ *
+ * ```
+ * canonicalJson(new Date())  →  "{}"
+ * canonicalJson(new Map())   →  "{}"
+ * canonicalJson(new Set())   →  "{}"
+ * canonicalJson({})          →  "{}"     ← 四者哈希相同
+ * ```
+ *
+ * 对一个"承诺"用的哈希来说，这等于给了一条无声的伪造通道。
+ */
+function isPlainObject(v: object): boolean {
+  const proto = Object.getPrototypeOf(v);
+  return proto === Object.prototype || proto === null;
+}
+
+/**
  * 递归规范化任意值。
  *
- * 只接受可确定性序列化的类型。遇到 undefined / 函数 / Date / BigInt / NaN
- * 一律报错，而不是silently 转成别的东西——**承诺环节不容许猜测**。
+ * 只接受可确定性序列化的类型：null / boolean / 整数 / 字符串 / 数组 /
+ * 朴素对象。其余（undefined、函数、symbol、BigInt、Date、Map、Set、
+ * RegExp、类实例、浮点数、NaN、Infinity）**一律抛错**。
+ *
+ * 宁可报错也不猜——**承诺环节里，静默的转换就是静默的伪造**。
  */
 export function canonicalJson(value: unknown, path = "$"): string {
   if (value === null) return "null";
@@ -113,6 +137,15 @@ export function canonicalJson(value: unknown, path = "$"): string {
         // ⚠️ 数组**保持原顺序**——数组的顺序通常是有语义的。
         // 需要顺序无关的地方（如条款列表），由调用方先排好再传进来。
         return `[${value.map((v, i) => canonicalJson(v, `${path}[${i}]`)).join(",")}]`;
+      }
+      if (!isPlainObject(value)) {
+        const name = value.constructor?.name ?? "未知类型";
+        throw new Error(
+          `${path} 是 ${name} 实例，不是朴素对象。canonical 拒绝它——` +
+            `Date / Map / Set / 类实例的 Object.keys() 都是空的，` +
+            `会被静默序列化成 {} 而与空对象碰撞。请先显式转成朴素结构` +
+            `（如 Date 转 ISO 字符串、Map 转对象、Set 转数组）。`,
+        );
       }
       const obj = value as Record<string, unknown>;
       const keys = Object.keys(obj).sort();

@@ -287,7 +287,15 @@ export async function buildE3(
         "arbitration",
       ],
     },
-    walletConsistency,
+    // ⚠️ 未做钱包一致性校验时**整个键省略**，而不是留 undefined。
+    //
+    // `{ walletConsistency }` 简写在参数省略时会造出一个值为 undefined 的
+    // 自有属性。旧的 JSON.stringify 会静默丢掉它，canonicalJson 则会抛错——
+    // 于是 `buildE3(task, explanation)` 两参数调用直接失败。
+    //
+    // 省略而非填 null，是因为"没做校验"和"做了但结果为空"对证据的含义
+    // 完全不同，不该被压成同一个值。
+    ...(walletConsistency ? { walletConsistency } : {}),
   };
 
   // Deterministic canonical hash.
