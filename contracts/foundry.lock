@@ -1,0 +1,11 @@
+{
+  "../vendor/moss": {
+    "rev": "b00ed2db0454219e468e8a0e4928c364a869fb79"
+  },
+  "lib/forge-std": {
+    "tag": {
+      "name": "v1.16.2",
+      "rev": "bf647bd6046f2f7da30d0c2bf435e5c76a780c1b"
+    }
+  }
+}

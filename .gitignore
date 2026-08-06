@@ -19,7 +19,11 @@ build/
 contracts/out/
 contracts/cache/
 contracts/broadcast/
-contracts/lib/
+# Foundry 依赖。forge-std 是 git submodule（见 .gitmodules），必须入库——
+# 否则干净 clone 下 script/DeployTaskEscrow.s.sol 编译不了。
+# 其余手动装的库仍然忽略。
+contracts/lib/*
+!contracts/lib/forge-std
 cache/
 
 # ---- 日志 ----

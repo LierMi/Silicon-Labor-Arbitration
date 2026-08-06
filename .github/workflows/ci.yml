@@ -1,0 +1,113 @@
+# 持续集成：把「我说测试通过了」变成「GitHub 自己跑过，绿的」
+#
+# 三个 job 并行跑，互不阻塞：
+#   verify    TypeScript 层：构建 Moss + typecheck + 单元测试
+#   contracts Foundry 层：33 个合约测试（含 fuzz 与不变量）
+#   hygiene   卫生检查：行尾空白、冲突标记、占位符残留
+#
+# ⚠️ `submodules: recursive` 是**必需的**，不是保险。
+#    pnpm-workspace.yaml 引用 vendor/moss/packages/*，而 pnpm 在任何
+#    生命周期脚本（含 preinstall）之前就要解析 workspace。子模块没拉下来
+#    会直接 ENOENT，postinstall 根本轮不到。详见 README。
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# 同一分支上新的推送会取消还在跑的旧任务，省时间也省额度
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: TypeScript（构建 Moss + typecheck + 测试）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # --frozen-lockfile：lockfile 与 package.json 对不上就失败，
+      # 而不是悄悄改 lockfile。依赖变更必须是显式提交的。
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      # 与本地 `pnpm verify` 完全同一条命令 —— CI 和本地不能是两套流程，
+      # 否则「本地能过 CI 不过」会变成日常。
+      - name: 构建 Moss + typecheck + 单元测试
+        run: pnpm verify
+
+  contracts:
+    name: 合约（Foundry）
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: forge build
+        working-directory: contracts
+        run: forge build --sizes
+
+      # -vvv：失败时打印调用栈，否则 CI 上只看到一行红字，还得本地复现
+      - name: forge test
+        working-directory: contracts
+        run: forge test -vvv
+
+  hygiene:
+    name: 卫生检查
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      # 只查冲突标记，不查行尾空白 ——
+      # Markdown 的行尾双空格是**换行语法**，SVG 也天然带空白，
+      # 全仓库 `git diff --check` 会误伤它们。
+      #
+      # 冲突标记则是真危险：今天 rebase 时就差点带着它提交。
+      - name: 检查合并冲突标记残留
+        run: |
+          if git grep -nE '^(<{7}|={7}|>{7})( |$)' -- \
+               ':!*.md' ':!pnpm-lock.yaml'; then
+            echo "::error::有未解决的合并冲突标记"
+            exit 1
+          fi
+          echo "✅ 无冲突标记"
+
+      # 占位符不许混进已完成的数据层。
+      # 曾经真的发生过：E3 全是 PENDING，而前端会把它显示在屏幕上。
+      - name: 检查 PENDING 占位残留
+        run: |
+          if grep -rn '"PENDING"' packages/*/src --include='*.ts' \
+             | grep -v 'validate.ts'; then
+            echo "::error::packages/*/src 出现 PENDING 占位符。"
+            echo "占位符只允许存在于 validate.ts 的 PENDING 常量定义中。"
+            exit 1
+          fi
+          echo "✅ 无 PENDING 残留"
+
+      # 曾经真的提交过 node_modules 符号链接：
+      # .gitignore 写的是 `node_modules/`，带斜杠只匹配目录，不匹配符号链接。
+      - name: 检查误提交的 node_modules
+        run: |
+          if git ls-files | grep -E '(^|/)node_modules(/|$)'; then
+            echo "::error::node_modules 被提交进了仓库"
+            exit 1
+          fi
+          echo "✅ 无 node_modules 入库"
