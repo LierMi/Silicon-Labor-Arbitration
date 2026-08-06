@@ -39,12 +39,14 @@ const sourceShort: Record<Evidence["source"], string> = {
   offchain: "OFFCHAIN",
 };
 
+/* 碎片散落：角度克制（±3°以内），围绕中心的空位分布。
+   中心必须是空的 —— 那块什么都没有的地方才是这一屏的主角。 */
 const fragmentLayouts = [
-  { x: "9%", y: "18%", rotate: -5, depth: 18, wide: true },
-  { x: "63%", y: "15%", rotate: 6, depth: -14, wide: false },
-  { x: "51%", y: "63%", rotate: -2, depth: 10, wide: true },
-  { x: "14%", y: "64%", rotate: 7, depth: -9, wide: false },
-  { x: "73%", y: "52%", rotate: -8, depth: 12, wide: false },
+  { x: "6%", y: "16%", rotate: -2.4, depth: 16, wide: true },
+  { x: "62%", y: "10%", rotate: 2.1, depth: -13, wide: false },
+  { x: "50%", y: "58%", rotate: -1.6, depth: 9, wide: true },
+  { x: "10%", y: "62%", rotate: 2.8, depth: -8, wide: false },
+  { x: "72%", y: "46%", rotate: -3, depth: 11, wide: false },
 ] as const;
 
 const fragmentCopy: Record<string, { title: string; note: string }> = {
@@ -53,9 +55,49 @@ const fragmentCopy: Record<string, { title: string; note: string }> = {
   E3: { title: "E3 Moss", note: "签前解释、模拟结果、unsigned tx" },
 };
 
+/**
+ * 程序性的不完美（docs/03 §十一③）
+ *
+ * > 完美的重复是软件，微小的不完美是手工。
+ *
+ * 每一枚章的角度、落点、油墨浓淡都不同。用 seed 派生而非
+ * Math.random()，是因为服务端预渲染和客户端 hydration 必须得到
+ * 同一个值——真随机会让两边对不上，React 直接报 hydration 错误。
+ */
+function imperfection(seed: string) {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const r = (n: number) => (((h >>> (n * 6)) & 63) / 63) * 2 - 1; // -1 ~ 1
+  return {
+    rot: -4 + r(0) * 3.2,        // 角度：每次盖歪一点点
+    dx: r(1) * 2.4,              // 落点微偏
+    dy: r(2) * 2.4,
+    ink: 0.82 + r(3) * 0.09,     // 油墨浓淡
+  };
+}
+
+/** 证物纸片的自然歪斜，同样由 id 派生 */
+function paperTilt(seed: string, amplitude = 2.2) {
+  return imperfection(seed).rot / 3.2 * amplitude;
+}
+
 function shortHash(value?: string) {
   if (!value || value === "PENDING") return "PENDING";
   return `${value.slice(0, 8)}...${value.slice(-6)}`;
+}
+
+/** 条款里的 expect 可能是 ISO 时间串，直接显示会露出 2026-08-05T16:10:29Z */
+function humanizeExpect(value: unknown): string {
+  if (typeof value !== "string") return String(value);
+  const t = Date.parse(value);
+  if (Number.isNaN(t)) return value;
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
+    hour12: false, timeZone: "Asia/Shanghai",
+  }).format(new Date(t));
 }
 
 function formatTime(value: string) {
@@ -344,35 +386,66 @@ function RuleRow({
 }) {
   const verdict = result?.verdict ?? "undecidable";
   const isUndecidable = verdict === "undecidable";
-  const stampLabel = verdict === "satisfied" ? "满足" : verdict === "violated" ? "驳回" : "待复核";
+  const stampLabel = verdict === "satisfied" ? "准" : verdict === "violated" ? "驳" : "待";
+  const mark = imperfection(requirement.id);
 
   return (
-    <article className={`rule-sheet-row verdict-${verdict}`} style={{ "--delay": `${index * 0.34}s` } as CSSProperties}>
+    <article
+      className={`rule-sheet-row verdict-${verdict}`}
+      style={{ "--delay": `${index * 0.34}s` } as CSSProperties}
+    >
       <div className="clause-number">{requirement.id}</div>
+
       <div className="clause-copy">
-        <h3>{requirement.label}</h3>
+        {/* 不解释（docs/03 §十一④）——只放条款本身，不写"客观条款，
+            确定性规则层可复算"这类描述界面自己的话。判定结果由章说，
+            不需要文字再说一遍。 */}
+        <h3>
+          {requirement.check === "delivered_before_deadline"
+            ? `在 ${humanizeExpect(requirement.expect)} 前交付`
+            : requirement.label}
+        </h3>
         <p>
-          {requirement.type === "objective" ? "客观条款，确定性规则层可复算。" : "主观条款，确定性规则层无法判定。"}
-          <span>{requirement.weightBps / 100}% 权重</span>
+          {requirement.weightBps / 100}%
+          {requirement.essential ? " · 核心条款" : null}
         </p>
-        {result?.reason ? <small>{result.reason}</small> : null}
+        {isUndecidable && result?.reason ? <small>{result.reason}</small> : null}
         {result?.basis.length ? (
           <div className="cite-row">
             {result.basis.map((basis) => (
-              <button key={basis} onClick={() => onEvidence(basis)} type="button">[{basis}]</button>
+              <button key={basis} onClick={() => onEvidence(basis)} type="button">
+                {basis}
+              </button>
             ))}
           </div>
         ) : null}
       </div>
+
       <div className="stamp-bay">
         {isUndecidable ? (
           <>
+            {/* 空章位 + 悬在上方的章 + 呼吸的影子。
+                这三件事说的都是同一句话：章落不下去。 */}
             <div className="empty-stamp-slot" />
-            <div className="suspended-stamp"><span>{stampLabel}</span></div>
-            <p>C4 空章位 · 资金冻结</p>
+            <div className="suspended-stamp">
+              <span>{stampLabel}</span>
+            </div>
+            <p>待人工复核</p>
           </>
         ) : (
-          <div className="printed-stamp"><span>{stampLabel}</span></div>
+          <div
+            className="printed-stamp"
+            style={
+              {
+                "--stamp-rot": `${mark.rot}deg`,
+                "--stamp-dx": `${mark.dx}px`,
+                "--stamp-dy": `${mark.dy}px`,
+                "--stamp-ink": mark.ink,
+              } as CSSProperties
+            }
+          >
+            <span>{stampLabel}</span>
+          </div>
         )}
       </div>
     </article>
@@ -440,8 +513,12 @@ function ArgumentsScene({ c, onEvidence }: { c: Case; onEvidence: (id: string) =
   return (
     <div className="argument-desk">
       {c.aiArguments.map((argument) => (
-        <article className="argument-paper" key={argument.role}>
-          <p className="eyebrow">{AI_ROLE_LABEL[argument.role]}</p>
+        <article
+          className="argument-paper"
+          key={argument.role}
+          style={{ "--rot": `${paperTilt(argument.role)}deg` } as CSSProperties}
+        >
+          <p className="role">{AI_ROLE_LABEL[argument.role]}</p>
           <CitationText argument={argument} onEvidence={onEvidence} />
           <div className="argument-footer">
             <span>引用：{argument.cites.map((cite) => `[${cite}]`).join(" ")}</span>
@@ -586,7 +663,14 @@ export default function DemoPage() {
           <div className="rule-sheet">
             <div className="rule-sheet-head">
               <span>规则判定</span>
-              <small>每条验收条件权重 25%</small>
+              <small>
+                {(() => {
+                  const w = new Set(caseData.requirements.map((r) => r.weightBps));
+                  return w.size === 1
+                    ? `每条 ${[...w][0]! / 100}%`
+                    : caseData.requirements.map((r) => `${r.id} ${r.weightBps / 100}%`).join(" · ");
+                })()}
+              </small>
             </div>
             {caseData.requirements.map((requirement, index) => (
               <RuleRow
