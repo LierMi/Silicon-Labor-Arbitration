@@ -1,48 +1,33 @@
 /* ============================================================
    硅基劳动仲裁院 · 视觉系统
-   方向 ⑥「夜间档案室」（见 docs/03-视觉灵感与3D方案.md §六）
+   方向 ⑥「夜间档案室」（docs/03-视觉灵感与3D方案.md §六）
 
-   一句话定调：
-     一份归档完好、编号齐全、却始终没有署名的责任。
+   参考：Cornelia Parker《Cold Dark Matter》——
+   一个完整的东西被炸开，碎片被细线悬吊重组，中心一盏灯，
+   投出巨大的影子。**这就是我们的委托链。**
 
    三条不可违背：
      1. 一个贯穿全场的物件 —— 印章。其余全是它的配角
      2. 最大的一块面积必须是「空」，不是内容
      3. 完美的重复是软件，微小的不完美是手工
-
-   为什么选暗色：全项目最重要的一帧是「悬停的印章」，
-   而悬停只有在单点光 + 深背景下才有分量。纸仍是暖白的 ——
-   我们不是把纸变黑，是把桌子和房间变黑。
    ============================================================ */
 
 :root {
-  /* 房间 —— 深棕黑，不是纯黑。纯黑没有空气 */
-  --room: #14110d;
-  --room-lift: #1e1a14;
+  --room: #0b0906;
+  --room-2: #12100b;
 
-  /* 纸 —— 单点暖光下的档案纸 */
-  --paper: #e8e0cf;
-  --paper-lit: #f2ece0;
-  --paper-shade: #cdc3ae;
-  --paper-edge: #b6ab93;
+  --paper-lit: #f4efe4;
 
-  /* 墨 */
-  --ink: #16130e;
-  --ink-soft: #4a4338;
-  --ink-faint: #7d7462;
+  /* 朱 —— 印泥。唯一的强色 */
+  --cinnabar: #c0392b;
+  --cinnabar-deep: #8d2118;
 
-  /* 朱 —— 印泥。唯一的彩色，只给印章和「判不了」 */
-  --cinnabar: #b83227;
-  --cinnabar-deep: #8e2119;
-  --cinnabar-wash: rgba(184, 50, 39, 0.14);
+  /* 灯 —— 唯一的暖 */
+  --lamp: #ffca7a;
 
-  /* 房间里的文字 */
-  --on-room: #cfc6b2;
-  --on-room-faint: #6b6455;
-
-  /* 单点暖光 */
-  --lamp: rgba(255, 226, 168, 0.15);
-  --grid: rgba(207, 198, 178, 0.045);
+  --on-room: #d6cdb9;
+  --on-room-soft: #948b78;
+  --on-room-faint: #5f5949;
 
   --serif: "Songti SC", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
   --sans: "PingFang SC", "Noto Sans SC", Inter, system-ui, sans-serif;
@@ -53,1065 +38,1465 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 html,
 body {
-  min-height: 100%;
   margin: 0;
+  height: 100%;
+  overflow: hidden; /* 剧场：不滚动 */
 }
 
 body {
-  background:
-    /* 单点暖光：从左上斜下来的一盏灯 */
-    radial-gradient(120% 78% at 20% -12%, var(--lamp), transparent 60%),
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
-    var(--room);
-  background-size: auto, 88px 88px, 88px 88px, auto;
-  background-attachment: fixed;
+  background: var(--room);
   color: var(--on-room);
   font-family: var(--sans);
-  font-feature-settings: "tnum" 1;
   -webkit-font-smoothing: antialiased;
-  min-width: 1180px;
+  font-feature-settings: "tnum" 1;
 }
 
-button,
-a {
-  font: inherit;
-}
 button {
+  font: inherit;
   color: inherit;
+  background: none;
+  border: none;
   cursor: pointer;
 }
-a {
-  color: inherit;
-  text-decoration: none;
-}
+
 h1,
 h2,
 h3,
-h4,
 p,
-dl {
-  margin-top: 0;
-}
-
-/* 序列即作品（On Kawara）：统一字号、统一间距、绝不装饰 */
-.eyebrow {
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  color: var(--on-room-faint);
-  margin: 0 0 1.1rem;
-}
-
-/* ============================================================
-   场次骨架
-   ============================================================ */
-
-.archive-page {
-  position: relative;
-  padding-left: 8rem;
-  min-width: 1180px;
-}
-
-.archive-scene {
-  min-height: 100vh;
-  padding: 11vh 5.5rem 12vh 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  position: relative;
-}
-
-/* ⚠️ 第一版这里两行标题叠在一起：line-height 被压到 1 以下，
-   而中文字符高度撑满 em box，必然重叠。
-   中文标题的 line-height 永远不要低于 1.15。 */
-.scene-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 3rem;
-  margin-bottom: 3.2rem;
-  padding-right: 1rem;
-}
-
-.scene-heading h2 {
-  max-width: 34ch;
-}
-
-.scene-heading h2 {
-  font-family: var(--serif);
-  font-size: clamp(2rem, 3.1vw, 3rem);
-  line-height: 1.32;
-  letter-spacing: 0.01em;
-  font-weight: 500;
-  color: var(--paper-lit);
+dl,
+dd,
+ol,
+ul,
+blockquote {
   margin: 0;
-  text-wrap: balance;
+  padding: 0;
 }
 
-.scene-rubric {
-  display: flex;
-  align-items: baseline;
-  gap: 1.1rem;
-  margin-bottom: 1.3rem;
+ol,
+ul {
+  list-style: none;
 }
 
-.scene-rubric span {
-  font-family: var(--mono);
-  font-size: 1.4rem;
-  color: var(--cinnabar);
-  letter-spacing: 0.04em;
-}
-
-.scene-rubric p {
+.label {
   font-family: var(--mono);
   font-size: 0.62rem;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--on-room-faint);
-  margin: 0;
 }
 
-/* ============================================================
-   左侧装订边 —— 一条贯穿全站的结构线，而不是导航条
-   ============================================================ */
+/* ══════════════════════════════════════════════════════════
+   顶栏 / 底栏
+   ══════════════════════════════════════════════════════════ */
 
-.dossier-pager {
+.top-bar {
   position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 8rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2.4rem;
-  padding-left: 2.4rem;
-  border-right: 1px solid rgba(207, 198, 178, 0.09);
-  z-index: 40;
-}
-
-/* 骑缝孔 */
-.dossier-pager::before {
-  content: "";
-  position: absolute;
-  left: 1.15rem;
-  top: 8%;
-  bottom: 8%;
-  width: 1px;
-  background: repeating-linear-gradient(
-    180deg,
-    rgba(207, 198, 178, 0.2) 0 3px,
-    transparent 3px 13px
-  );
-}
-
-.dossier-pager a {
-  position: relative;
+  inset: 0 0 auto 0;
+  height: 4.6rem;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  color: var(--on-room-faint);
-  transition: color 0.45s ease;
+  gap: 1.6rem;
+  padding: 0 2.4rem;
+  z-index: 60;
 }
 
-.dossier-pager b {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  font-weight: 400;
-  width: 1.5rem;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
 }
 
-.dossier-pager span {
-  position: absolute;
-  left: 2.4rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateX(-5px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  pointer-events: none;
-}
-
-.dossier-pager a:hover span,
-.dossier-pager a.is-active span {
-  opacity: 1;
-  transform: none;
-}
-
-.dossier-pager a.is-active {
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1.5px solid var(--cinnabar);
   color: var(--cinnabar);
-}
-
-/* ============================================================
-   纸 —— 内容躺在纸上，纸躺在暗桌上
-   ============================================================ */
-
-.case-sheet,
-.rule-sheet,
-.settlement-book,
-.report-folder,
-.argument-paper,
-.evidence-fragment,
-.chain-timeline article,
-.evidence-drawer,
-.pinned-evidence {
-  background:
-    repeating-linear-gradient(0deg, rgba(120, 105, 78, 0.02) 0 1px, transparent 1px 3px),
-    linear-gradient(168deg, var(--paper-lit), var(--paper) 46%, var(--paper-shade));
-  color: var(--ink);
-  border: 1px solid var(--paper-edge);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.38) inset,
-    0 24px 46px -20px rgba(0, 0, 0, 0.75),
-    0 2px 6px rgba(0, 0, 0, 0.38);
-}
-
-/* ============================================================
-   01 责任碎片
-   ============================================================ */
-
-.fragment-field {
-  position: relative;
-  height: 58vh;
-  min-height: 420px;
-  margin-top: 0.5rem;
-  border-top: 1px solid rgba(207, 198, 178, 0.09);
-  border-bottom: 1px solid rgba(207, 198, 178, 0.09);
-}
-
-.evidence-fragment {
-  position: absolute;
-  width: 17.5rem;
-  padding: 1.2rem 1.35rem 1.4rem;
-  text-align: left;
-  transform: rotate(var(--rot, 0deg));
-  transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1);
-}
-
-.evidence-fragment:hover {
-  transform: rotate(var(--rot, 0deg)) translateY(-5px);
-}
-
-.evidence-fragment strong {
-  display: block;
   font-family: var(--serif);
-  font-size: 1rem;
+  font-size: 0.86rem;
   font-weight: 600;
-  margin: 0.7rem 0 0.3rem;
 }
 
-.evidence-fragment small {
-  color: var(--ink-soft);
-  font-size: 0.76rem;
-  line-height: 1.6;
+.brand b {
+  font-family: var(--serif);
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--paper-lit);
 }
 
-/* 法医证物编号牌 */
-.evidence-pin-grid {
+.brand i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.56rem;
+  letter-spacing: 0.24em;
+  color: var(--on-room-faint);
+  padding-left: 0.7rem;
+  border-left: 1px solid rgba(214, 205, 185, 0.16);
+}
+
+.case-no {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  color: var(--on-room-soft);
+}
+
+.enter-link {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-}
-
-.fragment-pin {
+  gap: 0.7rem;
   font-family: var(--mono);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
   color: var(--paper-lit);
-  background: var(--cinnabar);
-  padding: 0.14rem 0.48rem;
-  box-shadow: 1px 1px 0 var(--cinnabar-deep);
+  border: 1px solid rgba(214, 205, 185, 0.28);
+  padding: 0.58rem 1.05rem;
+  transition: border-color 0.3s ease, background 0.3s ease;
 }
 
-.source-badge {
+.enter-link em {
+  font-style: normal;
+}
+
+.enter-link:hover {
+  border-color: var(--cinnabar);
+  background: rgba(192, 57, 43, 0.1);
+}
+
+.bottom-bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 3.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+  padding: 0 2.4rem;
   font-family: var(--mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.18em;
-  color: var(--ink-faint);
-  border: 1px solid var(--paper-edge);
-  padding: 0.12rem 0.4rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--on-room-soft);
+  z-index: 60;
 }
 
-/* 责任链里的意图漂移批注（红笔），随文流，不定位 */
-.drift {
-  font-family: var(--sans);
-  font-size: 0.76rem;
-  line-height: 1.6;
-  color: var(--cinnabar-deep);
-  margin: 0.5rem 0 0;
-  padding-left: 0.7rem;
-  border-left: 2px solid rgba(184, 50, 39, 0.4);
-}
-
-/* 碎片场里飘着的无主纸屑：有编号、无归属 */
-.paper-shard {
-  position: absolute;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
+.bottom-bar .dim {
   color: var(--on-room-faint);
-  padding: 0.4rem 0.7rem;
-  border: 1px dashed rgba(207, 198, 178, 0.16);
-  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════
+   开屏页 —— 暗房 · 吊灯 · 悬挂的证物 · 中心的空
+   ══════════════════════════════════════════════════════════ */
+
+.landing {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(80% 60% at 50% 8%, rgba(255, 202, 122, 0.09), transparent 62%),
+    radial-gradient(120% 90% at 50% 120%, rgba(255, 202, 122, 0.035), transparent 60%),
+    var(--room);
+  animation: fade-in 1.2s ease both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 进入时：整个房间往前推，像走进去 */
+.landing.is-leaving {
+  animation: walk-in 0.62s cubic-bezier(0.6, 0, 0.4, 1) forwards;
+}
+
+@keyframes walk-in {
+  to {
+    opacity: 0;
+    transform: scale(1.16);
+    filter: brightness(1.7);
+  }
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+}
+
+/* 灯光锥 */
+.beam {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 74vw;
+  height: 88vh;
+  transform: translateX(-50%);
+  background: conic-gradient(
+    from 180deg at 50% 4%,
+    transparent 42%,
+    rgba(255, 202, 122, 0.075) 50%,
+    transparent 58%
+  );
+  filter: blur(14px);
   pointer-events: none;
 }
 
-.shard-a {
-  left: 6%;
-  top: 76%;
-}
-.shard-b {
-  left: 78%;
-  top: 78%;
-}
-.shard-c {
-  left: 33%;
-  top: 4%;
+.bulb-wire {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 15vh;
+  background: linear-gradient(180deg, rgba(214, 205, 185, 0.05), rgba(214, 205, 185, 0.4));
+  transform: translateX(-50%);
 }
 
-/* 宽卡片 */
-.evidence-fragment.is-wide {
-  width: 19.5rem;
+.bulb {
+  position: absolute;
+  left: 50%;
+  top: 15vh;
+  width: 12px;
+  height: 18px;
+  margin-left: -6px;
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 40% 34%, #fff6e0, var(--lamp) 46%, #c98a2e);
+  box-shadow:
+    0 0 18px 4px rgba(255, 202, 122, 0.9),
+    0 0 80px 26px rgba(255, 202, 122, 0.32),
+    0 0 220px 90px rgba(255, 202, 122, 0.15);
+  transform-origin: 50% -15vh;
+  animation: sway 9s ease-in-out infinite;
 }
 
-/* 缺席的中心：一块什么都没有的地方，不是虚线圈 */
-.missing-center {
+/* 灯在极缓慢地晃 —— 房间是活的 */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-0.5deg);
+  }
+  50% {
+    transform: rotate(0.5deg);
+  }
+}
+
+.bulb-glow {
   position: absolute;
   left: 50%;
   top: 50%;
+  width: 46vw;
+  height: 46vw;
   transform: translate(-50%, -50%);
-  text-align: center;
+  background: radial-gradient(circle, rgba(255, 202, 122, 0.11), transparent 62%);
   pointer-events: none;
 }
 
-.missing-center span {
+/* ── 悬挂的证物板 ── */
+
+.hang {
+  position: absolute;
+  width: var(--w);
+  transform: translate3d(
+      calc(var(--mx, 0) * var(--d) * -26px),
+      calc(var(--my, 0) * var(--d) * -18px),
+      0
+    )
+    rotate(var(--tilt));
+  transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+/* 悬线：从天花板垂下来 */
+.hang-wire {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 1px;
+  height: var(--wire);
+  background: linear-gradient(180deg, transparent, rgba(214, 205, 185, 0.26));
+}
+
+.exhibit-panel {
+  position: relative;
+  padding: 1rem 1.1rem 1.15rem;
+  /* 玻璃展板：半透、有边、微微反光 */
+  background: linear-gradient(
+    155deg,
+    rgba(233, 226, 209, 0.2),
+    rgba(233, 226, 209, 0.075) 46%,
+    rgba(233, 226, 209, 0.15)
+  );
+  border: 1px solid rgba(233, 226, 209, 0.4);
+  backdrop-filter: blur(2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 30px 60px -24px rgba(0, 0, 0, 0.9);
+  animation: hang-drift 11s ease-in-out infinite;
+}
+
+@keyframes hang-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0.45deg);
+  }
+}
+
+.exhibit-panel b {
   display: block;
   font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.36em;
-  color: var(--on-room-faint);
-  margin-bottom: 0.5rem;
-}
-
-.missing-center b {
-  font-family: var(--serif);
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--cinnabar);
-  letter-spacing: 0.1em;
-}
-
-/* ============================================================
-   动作按钮 —— 朱红，像盖上去的
-   ============================================================ */
-
-.archive-action {
-  flex: none;
-  align-self: flex-end;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
   color: var(--paper-lit);
-  background: var(--cinnabar);
-  border: none;
-  padding: 0.72rem 1.45rem;
-  box-shadow: 2px 2px 0 var(--cinnabar-deep);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  line-height: 1;
 }
 
-.archive-action:hover {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 var(--cinnabar-deep);
-}
-
-.static-action,
-.static-action:hover {
-  cursor: default;
-  transform: none;
-  box-shadow: 2px 2px 0 var(--cinnabar-deep);
-}
-
-/* ============================================================
-   02 案件开卷
-   ============================================================ */
-
-.case-sheet {
-  padding: 3rem 3.2rem;
-  max-width: 76rem;
-  position: relative;
-}
-
-.case-sheet h3 {
-  font-family: var(--serif);
-  font-size: 1.9rem;
-  font-weight: 600;
-  margin: 0.3rem 0 0.55rem;
-}
-
-.case-sheet > p {
-  font-family: var(--mono);
-  font-size: 0.76rem;
-  color: var(--ink-faint);
-  letter-spacing: 0.05em;
-  margin: 0;
-}
-
-/* 待复核骑缝章 */
-.case-stamp {
-  position: absolute;
-  top: 2rem;
-  right: 2.6rem;
-  width: 6rem;
-  height: 6rem;
-  display: grid;
-  place-items: center;
-  border: 2.5px solid var(--cinnabar);
-  color: var(--cinnabar);
+.exhibit-panel strong {
+  display: block;
   font-family: var(--serif);
   font-size: 0.92rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  transform: rotate(-11deg);
-  opacity: 0.85;
-  mix-blend-mode: multiply;
+  color: var(--paper-lit);
+  margin: 0.45rem 0 0.5rem;
 }
 
-.case-tags {
-  display: flex;
-  gap: 0.55rem;
-  margin: 1.5rem 0 1.9rem;
-  flex-wrap: wrap;
-}
-
-.case-tags span {
+.exhibit-panel p {
   font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
-  border: 1px solid var(--paper-edge);
-  padding: 0.3rem 0.68rem;
+  font-size: 0.58rem;
+  line-height: 1.75;
+  color: var(--on-room);
+  white-space: pre-line;
 }
 
-.pinned-evidence {
-  padding: 1.1rem 1.25rem;
-  box-shadow: none;
-  background: rgba(255, 255, 255, 0.2);
-}
+/* ── 悬挂的小吊牌 ── */
 
-.pinned-evidence span {
-  display: block;
-  font-family: var(--serif);
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin: 0.5rem 0 0.45rem;
-}
-
-.pinned-evidence p {
-  font-size: 0.83rem;
-  line-height: 1.78;
-  color: var(--ink-soft);
-  margin: 0;
-}
-
-.pinned-evidence code {
-  display: inline-block;
-  margin-top: 0.6rem;
+.hang-tag {
+  position: absolute;
   font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--cinnabar-deep);
+  font-size: 0.56rem;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  color: var(--on-room-soft);
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgba(214, 205, 185, 0.18);
+  background: rgba(233, 226, 209, 0.045);
+  white-space: pre-line;
+  transform: translate3d(
+      calc(var(--mx, 0) * var(--d) * -26px),
+      calc(var(--my, 0) * var(--d) * -18px),
+      0
+    )
+    rotate(var(--tilt));
+  transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.25, 1);
+  pointer-events: none;
 }
 
-.source-card-moss {
-  border-left: 3px solid var(--cinnabar);
-}
-.source-card-offchain,
-.source-card-direct {
-  border-left: 3px solid var(--paper-edge);
+.hang-tag.is-warn {
+  color: var(--cinnabar);
+  border-color: rgba(192, 57, 43, 0.5);
+  background: rgba(192, 57, 43, 0.07);
 }
 
-.wallet-gate {
-  margin-top: 1.7rem;
-  padding-top: 1.3rem;
-  border-top: 1px solid var(--paper-edge);
+/* ── 碎屑 ── */
+
+.debris {
+  position: absolute;
+  border-radius: 1px;
+  width: var(--s);
+  height: var(--s);
+  background: linear-gradient(140deg, rgba(233, 226, 209, 0.5), rgba(140, 120, 90, 0.14));
+  transform: translate3d(
+      calc(var(--mx, 0) * var(--d) * -30px),
+      calc(var(--my, 0) * var(--d) * -22px),
+      0
+    )
+    rotate(var(--tilt));
+  transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.25, 1);
+  animation: float 9s ease-in-out infinite;
+  animation-delay: var(--delay);
+  pointer-events: none;
+  opacity: 0.62;
 }
 
-.wallet-gate b {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  margin-bottom: 0.3rem;
+@keyframes float {
+  0%,
+  100% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: -8px;
+  }
 }
 
-.wallet-gate small {
-  font-size: 0.72rem;
-  color: var(--ink-faint);
+/* ── 中心的空 —— 这才是主角 ── */
+
+.void {
+  position: absolute;
+  left: 62%;
+  top: 50%;
+  width: 17rem;
+  height: 17rem;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 }
 
-.status-ledger {
-  margin-top: 2.2rem;
+.void-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed rgba(214, 205, 185, 0.22);
+  border-radius: 50%;
+  animation: ring-breathe 7s ease-in-out infinite;
 }
 
-.status-track {
-  display: flex;
-  border: 1px solid rgba(207, 198, 178, 0.15);
+@keyframes ring-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.035);
+    opacity: 0.35;
+  }
 }
 
-.status-track span {
-  flex: 1;
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.05em;
-  color: var(--on-room-faint);
-  padding: 0.58rem 0.6rem;
-  border-right: 1px solid rgba(207, 198, 178, 0.11);
+.void-copy {
   text-align: center;
-  white-space: nowrap;
 }
 
-.status-track span:last-child {
-  border-right: none;
+.void-copy span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.34em;
+  color: var(--on-room-faint);
+  margin-bottom: 0.6rem;
 }
 
-.status-track span.is-current {
+.void-copy b {
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--paper-lit);
+}
+
+/* 地面：光落下来的那一圈 */
+.floor {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 34vh;
+  background:
+    radial-gradient(60% 100% at 50% 100%, rgba(255, 202, 122, 0.07), transparent 70%),
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+}
+
+/* ── 左侧文案 ── */
+
+.pitch {
+  position: absolute;
+  left: 4.5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(29rem, 36vw);
+  z-index: 20;
+  animation: pitch-in 1.3s 0.24s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+@keyframes pitch-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-50% + 22px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+}
+
+.pitch h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.9rem, 3vw, 2.9rem);
+  line-height: 1.36;
+  font-weight: 500;
+  color: var(--paper-lit);
+  margin-bottom: 1.5rem;
+}
+
+.pitch h1 em {
+  font-style: normal;
+  color: var(--cinnabar);
+}
+
+.pitch-lead {
+  font-size: 0.88rem;
+  line-height: 2;
+  color: var(--on-room);
+  margin-bottom: 1.1rem;
+}
+
+.pitch-lead b {
+  color: var(--paper-lit);
+  font-weight: 600;
+}
+
+.pitch-stance {
+  font-size: 0.84rem;
+  line-height: 1.95;
+  color: var(--on-room-soft);
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--cinnabar);
+  margin-bottom: 2.1rem;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   color: var(--paper-lit);
   background: var(--cinnabar);
+  padding: 0.9rem 1.6rem;
+  box-shadow: 3px 3px 0 var(--cinnabar-deep);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
-.ledger-note {
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  color: var(--on-room-faint);
-  margin: 0.8rem 0 0;
-  letter-spacing: 0.04em;
+.cta em {
+  font-style: normal;
+  transition: transform 0.24s ease;
 }
 
-/* ============================================================
-   03 责任断层 —— 爆炸视图 / X 光叠层
-   越往后越淡：错位就是责任流失的量
-   ============================================================ */
-
-/* ⚠️ 列宽顺序必须跟着 DOM：layer-stack 在前，chain-timeline 在后。
-   写反的话时间线会被挤进窄列，左边留一大片空白。 */
-.chain-composition {
-  display: grid;
-  grid-template-columns: 19rem 1fr;
-  gap: 3.2rem;
-  align-items: start;
+.cta:hover {
+  transform: translate(1.5px, 1.5px);
+  box-shadow: 1.5px 1.5px 0 var(--cinnabar-deep);
 }
 
-.chain-timeline {
-  position: relative;
-  padding-left: 2.5rem;
-}
-
-.chain-timeline::before {
-  content: "";
-  position: absolute;
-  left: 0.6rem;
-  top: 0.6rem;
-  bottom: 0.6rem;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(207, 198, 178, 0.28) 8%,
-    rgba(207, 198, 178, 0.28) 92%,
-    transparent
-  );
-}
-
-.chain-timeline article {
-  position: relative;
-  /* 中文长行超过 ~40 字就难读，收一下宽度 */
-  max-width: 46rem;
-  padding: 1.1rem 1.35rem;
-  margin-bottom: 0.85rem;
-  opacity: calc(1 - var(--i, 0) * 0.12);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.chain-timeline article::before {
-  content: "";
-  position: absolute;
-  left: -2.28rem;
-  top: 1.45rem;
-  width: 0.46rem;
-  height: 0.46rem;
-  background: var(--cinnabar);
-  transform: rotate(45deg);
-}
-
-.chain-timeline article.is-active {
-  opacity: 1;
+.cta:hover em {
   transform: translateX(4px);
 }
 
-.chain-timeline time {
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  color: var(--ink-faint);
-  letter-spacing: 0.05em;
+/* ══════════════════════════════════════════════════════════
+   剧场 —— 六幕，不滚动
+   ══════════════════════════════════════════════════════════ */
+
+.theatre {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(90% 60% at 22% -8%, rgba(255, 202, 122, 0.055), transparent 60%),
+    var(--room);
+  animation: theatre-in 0.85s cubic-bezier(0.2, 0.9, 0.25, 1) both;
 }
 
-.chain-timeline h4 {
-  font-family: var(--serif);
-  font-size: 0.98rem;
-  font-weight: 600;
-  margin: 0.28rem 0 0.45rem;
+@keyframes theatre-in {
+  from {
+    opacity: 0;
+    transform: scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.chain-timeline b {
+.theatre-bar .brand {
+  cursor: pointer;
+}
+
+/* 幕次轨：右侧 */
+.act-rail {
+  position: fixed;
+  right: 2.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 60;
+}
+
+.rail-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  color: var(--on-room-faint);
+  transition: color 0.35s ease;
+}
+
+.rail-item b {
   font-family: var(--mono);
-  font-size: 0.68rem;
-  color: var(--cinnabar-deep);
+  font-size: 0.64rem;
   font-weight: 400;
 }
 
-.chain-timeline p {
-  font-size: 0.83rem;
-  line-height: 1.7;
-  color: var(--ink-soft);
-  margin: 0.35rem 0 0;
+.rail-item span {
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-.role {
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-/* ⚠️ layer-slice 是 <button>，默认 inline-block —— 不显式 block
-   会横着排开，整个层堆叠散架。 */
-.layer-slice {
-  display: block;
-  width: 100%;
-  text-align: left;
-  border: 1px solid rgba(207, 198, 178, 0.18);
-  padding: 0.9rem 1rem;
-  margin-bottom: 0.5rem;
-  background: rgba(232, 224, 207, 0.045);
-  /* 越往后的层越远、越淡：错位就是责任流失的量 */
-  transform: translateZ(calc(var(--i, 0) * -26px));
-  opacity: calc(1 - var(--i, 0) * 0.13);
-  transition: transform 0.45s ease, opacity 0.45s ease, border-color 0.3s ease;
-}
-
-.layer-slice:hover,
-.layer-slice.is-active {
+.rail-item:hover span,
+.rail-item.is-active span {
   opacity: 1;
-  transform: translateZ(0);
-  border-color: var(--cinnabar);
+  transform: none;
 }
 
-.layer-slice strong {
-  display: block;
-  font-family: var(--serif);
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--paper-lit);
-  margin: 0.2rem 0 0.15rem;
+.rail-item.is-done {
+  color: var(--on-room-soft);
 }
 
-.layer-stack {
-  perspective: 900px;
-  perspective-origin: 50% 40%;
-  padding-top: 1.2rem;
-}
-
-.delivery-layer strong {
+.rail-item.is-active {
   color: var(--cinnabar);
 }
 
-.layer-slice span {
-  display: block;
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.09em;
-  color: var(--on-room);
+/* 幕：叠在一起交叉淡入 */
+.stage-area {
+  position: absolute;
+  inset: 4.6rem 9rem 4.4rem 4.5vw;
 }
 
-.layer-slice small {
-  display: block;
-  font-size: 0.68rem;
-  color: var(--on-room-faint);
-  margin-top: 0.3rem;
-  line-height: 1.6;
+.act {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transition:
+    opacity 0.62s cubic-bezier(0.3, 0.9, 0.3, 1),
+    transform 0.62s cubic-bezier(0.3, 0.9, 0.3, 1),
+    filter 0.62s ease;
+  pointer-events: none;
 }
 
-/* ============================================================
-   04 规则盖章 —— 全项目最重要的一屏
-   这里最大的一块面积必须是「空」
-   ============================================================ */
-
-.rules-layout {
-  display: grid;
-  grid-template-columns: 1fr 18.5rem;
-  gap: 3rem;
-  align-items: start;
+.act.is-current {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  pointer-events: auto;
 }
 
-.rule-sheet {
-  padding: 2.5rem 3rem 2.8rem;
+/* 走过的幕往左退；未到的幕在右侧候场 */
+.act.is-past {
+  transform: translateX(-3.5rem) scale(0.985);
+  filter: blur(3px);
 }
 
-.rule-sheet-head {
+.act.is-future {
+  transform: translateX(3.5rem) scale(0.985);
+  filter: blur(3px);
+}
+
+.act-head {
+  margin-bottom: 2.4rem;
+}
+
+.act-rubric {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  padding-bottom: 1.3rem;
-  border-bottom: 1px solid var(--paper-edge);
+  gap: 1rem;
+  margin-bottom: 0.85rem;
 }
 
-.rule-sheet-head span {
-  font-family: var(--serif);
-  font-size: 1.04rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-}
-
-.rule-sheet-head small {
+.act-rubric b {
   font-family: var(--mono);
-  font-size: 0.66rem;
-  color: var(--ink-faint);
-  letter-spacing: 0.05em;
-}
-
-.rule-sheet-row {
-  display: grid;
-  grid-template-columns: 3rem 1fr 9.5rem;
-  gap: 1.5rem;
-  align-items: center;
-  padding: 1.7rem 0;
-  border-bottom: 1px solid rgba(182, 171, 147, 0.4);
-}
-
-/* 判不了的那一条要有呼吸空间 —— 留白就是内容 */
-.rule-sheet-row:last-child {
-  border-bottom: none;
-  padding-top: 2.6rem;
-  padding-bottom: 3.2rem;
-}
-
-.clause-number {
-  font-family: var(--mono);
-  font-size: 1.5rem;
-  color: var(--ink-faint);
-}
-
-.rule-sheet-row.verdict-undecidable .clause-number {
+  font-size: 1.25rem;
+  font-weight: 400;
   color: var(--cinnabar);
 }
 
-.clause-copy h3 {
-  font-family: var(--serif);
-  font-size: 1.08rem;
-  font-weight: 600;
-  margin: 0 0 0.3rem;
-}
-
-.clause-copy p {
+.act-rubric i {
   font-family: var(--mono);
-  font-size: 0.68rem;
-  color: var(--ink-faint);
-  letter-spacing: 0.06em;
-  margin: 0;
+  font-style: normal;
+  font-size: 0.58rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--on-room-faint);
 }
 
-.clause-copy small {
+.act-head h2 {
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 2.5vw, 2.35rem);
+  line-height: 1.36;
+  font-weight: 500;
+  color: var(--paper-lit);
+  max-width: 28ch;
+}
+
+/* 幕内元素依次浮现 —— 一次只动一个东西 */
+.act.is-current .panel,
+.act.is-current .clause,
+.act.is-current .testimony,
+.act.is-current .hop,
+.act.is-current .verdict-card {
+  animation: rise 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 160ms);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── 通用面板 ── */
+
+.panel {
+  padding: 1.5rem 1.6rem 1.65rem;
+  border: 1px solid rgba(214, 205, 185, 0.14);
+  background: linear-gradient(160deg, rgba(233, 226, 209, 0.055), rgba(233, 226, 209, 0.02));
+}
+
+.panel .label {
   display: block;
-  font-size: 0.78rem;
-  color: var(--cinnabar-deep);
-  margin-top: 0.45rem;
-  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.aside {
+  font-size: 0.76rem;
+  line-height: 1.85;
+  color: var(--on-room-soft);
+  margin-top: 1rem;
+}
+
+.aside b {
+  color: var(--paper-lit);
+  font-weight: 600;
+}
+
+.act-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 0.78fr;
+  gap: 1.3rem;
+  align-items: stretch;
+}
+
+.act-grid > *:nth-child(1) {
+  --i: 0;
+}
+.act-grid > *:nth-child(2) {
+  --i: 1;
+}
+.act-grid > *:nth-child(3) {
+  --i: 2;
+}
+
+blockquote {
+  font-family: var(--serif);
+  font-size: 0.98rem;
+  line-height: 2;
+  color: var(--paper-lit);
+  padding-left: 1rem;
+  border-left: 2px solid var(--cinnabar);
+}
+
+.big-quote {
+  font-size: 1.22rem;
+  line-height: 1.85;
+}
+
+.cite {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  color: var(--cinnabar);
+  border: 1px solid rgba(192, 57, 43, 0.42);
+  padding: 0.2rem 0.55rem;
+  transition: background 0.2s ease;
+}
+
+.cite:hover {
+  background: rgba(192, 57, 43, 0.14);
 }
 
 .cite-row {
   display: flex;
-  gap: 0.35rem;
-  margin-top: 0.5rem;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
 }
 
-.cite-row button {
+.cite-row .cite {
+  margin-top: 0;
+}
+
+.hashline {
+  display: block;
+  margin-top: 0.7rem;
   font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--cinnabar);
+}
+
+/* 幕 01：条款表 */
+.terms li {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: baseline;
+  gap: 0.8rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(214, 205, 185, 0.1);
+}
+
+.terms li:last-child {
+  border-bottom: none;
+}
+
+.terms b {
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--cinnabar);
+}
+
+.terms span {
+  font-size: 0.82rem;
+  color: var(--on-room);
+}
+
+.terms i {
+  font-family: var(--mono);
+  font-style: normal;
   font-size: 0.68rem;
+  color: var(--on-room-faint);
+}
+
+.panel-figure {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.big-figure {
+  font-family: var(--mono);
+  font-size: 4.2rem;
+  line-height: 1;
+  color: var(--paper-lit);
+  letter-spacing: -0.02em;
+}
+
+.figure-unit {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.24em;
   color: var(--cinnabar);
-  background: none;
-  border: 1px solid rgba(184, 50, 39, 0.38);
-  padding: 0.08rem 0.38rem;
-  transition: background 0.18s ease;
+  margin-top: 0.4rem;
 }
 
-.cite-row button:hover {
-  background: var(--cinnabar-wash);
+/* 幕 02：交付物 */
+.panel-artifact {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-/* ---- 印章本体 ----------------------------------------------
-   方形朱红篆刻章。圆圈是签字笔，方章才是「机构盖下去的」。
-   ------------------------------------------------------------ */
-
-.stamp-bay {
-  position: relative;
+.artifact {
+  width: 100%;
+  aspect-ratio: 4 / 3;
   display: grid;
   place-items: center;
-  min-height: 6.4rem;
+  gap: 0.8rem;
+  align-content: center;
+  border: 1px dashed rgba(214, 205, 185, 0.22);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 202, 122, 0.07), transparent 62%),
+    repeating-conic-gradient(rgba(233, 226, 209, 0.035) 0 25%, transparent 0 50%) 0 0 / 18px 18px;
 }
 
-.printed-stamp {
-  position: relative;
-  width: 5.2rem;
-  height: 5.2rem;
-  display: grid;
-  place-items: center;
-  border: 3px solid var(--cinnabar);
-  color: var(--cinnabar);
+.artifact-mark {
   font-family: var(--serif);
-  font-size: 1.12rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  /* 程序性的不完美：角度、浓淡、落点每次都不同（由内联变量注入）*/
-  transform: rotate(var(--stamp-rot, -4deg))
-    translate(var(--stamp-dx, 0px), var(--stamp-dy, 0px));
-  opacity: var(--stamp-ink, 0.84);
-  mix-blend-mode: multiply;
-}
-
-/* 油墨在纤维上渗透：边缘不均匀 */
-.printed-stamp::after {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  background: radial-gradient(
-    circle at 34% 26%,
-    transparent 54%,
-    rgba(232, 224, 207, 0.46) 80%
-  );
-  pointer-events: none;
-}
-
-/* ---- 空章位：全项目最重要的一处 ---------------------------- */
-
-.empty-stamp-slot {
-  position: absolute;
-  width: 5.2rem;
-  height: 5.2rem;
-  border: 1px dashed rgba(184, 50, 39, 0.4);
-  /* 悬停的章投下的影子。章还在动，所以影子在呼吸 */
-  animation: slot-breathe 4.6s ease-in-out infinite;
-}
-
-@keyframes slot-breathe {
-  0%,
-  100% {
-    background: radial-gradient(circle at 50% 44%, rgba(20, 17, 13, 0.17), transparent 66%);
-  }
-  50% {
-    background: radial-gradient(circle at 50% 44%, rgba(20, 17, 13, 0.09), transparent 74%);
-  }
-}
-
-/* 悬在空中的章：没有落下，所以它在章位「上方」，而且在颤 */
-.suspended-stamp {
-  position: absolute;
-  width: 5.2rem;
-  height: 5.2rem;
-  display: grid;
-  place-items: center;
-  border: 3px solid var(--cinnabar);
+  font-size: 3.2rem;
   color: var(--cinnabar);
-  background: linear-gradient(168deg, var(--paper-lit), var(--paper));
-  font-family: var(--serif);
-  font-size: 1rem;
-  font-weight: 600;
+  line-height: 1;
+}
+
+.artifact-name {
+  font-family: var(--mono);
+  font-size: 0.7rem;
   letter-spacing: 0.1em;
-  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.55);
-  animation: stamp-hover 4.6s ease-in-out infinite;
+  color: var(--on-room-soft);
+}
+
+.facts li {
+  display: grid;
+  grid-template-columns: 5rem 1fr auto;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.62rem 0;
+  border-bottom: 1px solid rgba(214, 205, 185, 0.1);
+}
+
+.facts li:last-child {
+  border-bottom: none;
+}
+
+.facts b {
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--on-room-faint);
+}
+
+.facts span {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--paper-lit);
+}
+
+.facts em {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.64rem;
+}
+
+.facts .ok {
+  color: var(--on-room-soft);
+}
+
+.facts .no {
+  color: var(--cinnabar);
+}
+
+.facts .miss {
+  border-top: 1px solid rgba(192, 57, 43, 0.34);
+  margin-top: 0.4rem;
+  padding-top: 0.8rem;
+}
+
+/* ══════════════════════════════════════════════════════════
+   幕 03 断链
+   ══════════════════════════════════════════════════════════ */
+
+.act-chain {
+  display: grid;
+  grid-template-columns: 1fr 23rem;
+  gap: 2.2rem;
+  align-items: start;
+}
+
+.hops {
+  display: flex;
+  gap: 0.65rem;
+}
+
+/* 每一跳比上一跳更淡：责任在传递中变薄 */
+.hop {
+  flex: 1;
+  text-align: left;
+  padding: 1rem 0.95rem 1.1rem;
+  border: 1px solid rgba(214, 205, 185, 0.14);
+  background: linear-gradient(160deg, rgba(233, 226, 209, 0.06), rgba(233, 226, 209, 0.015));
+  opacity: calc(1 - var(--i, 0) * 0.13);
+  transition: opacity 0.35s ease, border-color 0.35s ease, transform 0.35s ease;
+}
+
+.hop:hover,
+.hop.is-active {
+  opacity: 1;
+  border-color: var(--cinnabar);
+  transform: translateY(-4px);
+}
+
+.hop b {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 400;
+  color: var(--cinnabar);
+}
+
+.hop strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--paper-lit);
+  margin: 0.35rem 0 0.25rem;
+}
+
+.hop span {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-room-faint);
+}
+
+.hop i {
+  display: block;
+  margin-top: 0.55rem;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  color: var(--cinnabar);
+}
+
+.hop-detail dl {
+  margin-top: 0.4rem;
+}
+
+.hop-detail dt {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--on-room-faint);
+  margin-top: 0.9rem;
+}
+
+.hop-detail dd {
+  margin: 0.28rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--on-room);
+}
+
+.hop-detail dd.warn {
+  color: var(--cinnabar);
+}
+
+.drift {
+  margin-top: 1rem;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--cinnabar);
+  font-size: 0.78rem;
+  line-height: 1.75;
+  color: var(--paper-lit);
+}
+
+.chain-aside {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(214, 205, 185, 0.12);
+}
+
+/* ══════════════════════════════════════════════════════════
+   幕 04 判定 —— 最重要的一屏。留白就是内容
+   ══════════════════════════════════════════════════════════ */
+
+.act-ruling {
+  display: grid;
+  grid-template-columns: 1fr 19rem;
+  gap: 2.8rem;
+  align-items: start;
+}
+
+.clause {
+  display: grid;
+  grid-template-columns: 2.6rem 1fr 8rem;
+  align-items: center;
+  gap: 1.3rem;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid rgba(214, 205, 185, 0.1);
+}
+
+.clause:nth-child(1) {
+  --i: 0;
+}
+.clause:nth-child(2) {
+  --i: 1;
+}
+.clause:nth-child(3) {
+  --i: 2;
+}
+
+/* C4 慢一拍：前三个章落完，停一下，才轮到它 */
+.clause:nth-child(4) {
+  --i: 5;
+  border-bottom: none;
+  padding-top: 2.2rem;
+}
+
+.clause-no {
+  font-family: var(--mono);
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: var(--on-room-faint);
+}
+
+.verdict-undecidable .clause-no {
+  color: var(--cinnabar);
+}
+
+.clause-body strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--paper-lit);
+}
+
+.clause-meta {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--on-room-faint);
+  margin-top: 0.28rem;
+}
+
+.clause-body em {
+  display: block;
+  font-style: normal;
+  font-size: 0.76rem;
+  line-height: 1.65;
+  color: var(--cinnabar);
+  margin-top: 0.45rem;
+}
+
+/* ── 印章：方形朱红，不是手绘圈 ── */
+
+.stamp-slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 5.4rem;
+}
+
+.stamp {
+  width: 4.4rem;
+  height: 4.4rem;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--cinnabar);
+  color: var(--cinnabar);
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+/* 落下的章：角度、落点、浓淡每次都不同 */
+.stamp.is-printed {
+  opacity: var(--ink);
+  animation: stamp-drop 0.44s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 460ms);
+}
+
+@keyframes stamp-drop {
+  from {
+    transform: rotate(var(--rot)) translate(var(--dx), calc(var(--dy) - 28px)) scale(1.3);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(var(--rot)) translate(var(--dx), var(--dy)) scale(1);
+    opacity: var(--ink);
+  }
+}
+
+/* 悬在空中的章：没落下，所以在章位上方，而且在颤 */
+.stamp.is-hovering {
+  position: absolute;
+  background: linear-gradient(160deg, rgba(233, 226, 209, 0.1), rgba(233, 226, 209, 0.03));
+  box-shadow: 0 22px 34px -12px rgba(0, 0, 0, 0.85);
+  animation: stamp-hover 4.4s ease-in-out infinite;
 }
 
 @keyframes stamp-hover {
   0%,
   100% {
-    transform: translateY(-2.1rem) rotate(-5deg);
+    transform: translateY(-1.85rem) rotate(-5deg);
   }
   50% {
-    transform: translateY(-1.8rem) rotate(-4.2deg);
+    transform: translateY(-1.55rem) rotate(-4.1deg);
   }
 }
 
-.stamp-bay p {
+/* 章位：空的，只有一个呼吸的影子 */
+.slot-shadow {
   position: absolute;
-  bottom: -0.5rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  border: 1px dashed rgba(192, 57, 43, 0.4);
+  animation: slot-breathe 4.4s ease-in-out infinite;
+}
+
+@keyframes slot-breathe {
+  0%,
+  100% {
+    background: radial-gradient(circle at 50% 44%, rgba(0, 0, 0, 0.62), transparent 68%);
+  }
+  50% {
+    background: radial-gradient(circle at 50% 44%, rgba(0, 0, 0, 0.32), transparent 76%);
+  }
+}
+
+.stamp-slot i {
+  position: absolute;
+  bottom: -0.35rem;
   font-family: var(--mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
+  font-style: normal;
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
   color: var(--cinnabar);
-  margin: 0;
   white-space: nowrap;
 }
 
-/* ============================================================
-   资金账本
-   ============================================================ */
+/* ── 账本 ── */
 
-.settlement-book {
-  padding: 1.9rem 2rem 2.1rem;
-  position: sticky;
-  top: 5rem;
+.verdict-side {
+  padding: 1.6rem 1.5rem 1.7rem;
+  border: 1px solid rgba(214, 205, 185, 0.14);
+  background: linear-gradient(160deg, rgba(233, 226, 209, 0.05), rgba(233, 226, 209, 0.015));
 }
 
-.settlement-book h3 {
-  font-family: var(--serif);
-  font-size: 1.18rem;
-  font-weight: 600;
-  margin: 0 0 1.3rem;
-  letter-spacing: 0.04em;
+.verdict-side .label {
+  display: block;
+  margin-bottom: 0.8rem;
 }
 
-.settlement-book dl {
-  margin: 0;
-}
-
-.settlement-book div {
+.money div {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid rgba(182, 171, 147, 0.45);
+  padding: 0.68rem 0;
+  border-bottom: 1px solid rgba(214, 205, 185, 0.1);
 }
 
-.settlement-book dt {
-  font-size: 0.8rem;
-  color: var(--ink-soft);
+.money dt {
+  font-size: 0.78rem;
+  color: var(--on-room-soft);
 }
 
-.settlement-book dd {
-  margin: 0;
+.money dd {
   font-family: var(--mono);
-  font-size: 1.02rem;
+  font-size: 0.98rem;
+  color: var(--on-room);
 }
 
-/* 冻结那一行：唯一的朱红，因为它是内容不是装饰 */
-.settlement-book .frozen-line {
+.money .frozen {
   border-bottom: none;
-  margin-top: 0.3rem;
-  padding-top: 0.95rem;
   border-top: 2px solid var(--cinnabar);
+  margin-top: 0.3rem;
+  padding-top: 0.85rem;
 }
 
-.settlement-book .frozen-line dt,
-.settlement-book .frozen-line dd {
+.money .frozen dt,
+.money .frozen dd {
   color: var(--cinnabar);
   font-weight: 600;
 }
 
-.settlement-book > p {
-  font-family: var(--mono);
-  font-size: 0.64rem;
-  line-height: 1.7;
-  color: var(--ink-faint);
-  letter-spacing: 0.02em;
-  margin: 1rem 0 0;
-}
+/* ══════════════════════════════════════════════════════════
+   幕 05 质询 —— 罗生门
+   ══════════════════════════════════════════════════════════ */
 
-.settlement-book .frozen-note {
-  margin-top: 0.5rem;
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  line-height: 1.68;
-  color: var(--ink-soft);
-  letter-spacing: 0;
-}
-
-/* ============================================================
-   05 交叉质询 —— 罗生门：三份并置的证词
-   ============================================================ */
-
-.argument-desk {
+.testimony-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 1.3rem;
   align-items: start;
 }
 
-.argument-paper {
-  padding: 1.7rem 1.6rem 1.8rem;
-  /* 三份证词各自歪一点点，像真的摞在桌上 */
-  transform: rotate(var(--rot, 0deg));
+.testimony {
+  padding: 1.4rem 1.4rem 1.5rem;
+  border: 1px solid rgba(214, 205, 185, 0.14);
+  background: linear-gradient(160deg, rgba(233, 226, 209, 0.06), rgba(233, 226, 209, 0.02));
 }
 
-.argument-paper .role {
-  display: block;
-  margin-bottom: 0.85rem;
-  color: var(--cinnabar);
-}
-
-.argument-paper p {
-  font-size: 0.86rem;
-  line-height: 1.95;
-  color: var(--ink);
-  margin: 0;
-}
-
-.argument-footer {
-  margin-top: 1.2rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid var(--paper-edge);
+.role {
   font-family: var(--mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cinnabar);
+  margin-bottom: 0.85rem;
+}
+
+.testimony-text {
+  font-size: 0.83rem;
+  line-height: 2.05;
+  color: var(--on-room);
+}
+
+.testimony footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(214, 205, 185, 0.12);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  color: var(--on-room-faint);
 }
 
 .inline-cite {
   font-family: var(--mono);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   color: var(--cinnabar);
-  background: none;
-  border: none;
-  padding: 0 0.08rem;
-  border-bottom: 1px solid rgba(184, 50, 39, 0.42);
-  transition: background 0.16s ease;
+  padding: 0 0.12rem;
+  border-bottom: 1px solid rgba(192, 57, 43, 0.45);
+  transition: background 0.18s ease;
 }
 
 .inline-cite:hover {
-  background: var(--cinnabar-wash);
+  background: rgba(192, 57, 43, 0.16);
 }
 
-/* ============================================================
-   证据抽屉 —— 从右侧弹入，轻微过冲（§十二「甩证据」）
-   ============================================================ */
+.arguments-aside {
+  margin-top: 1.5rem;
+  max-width: 66ch;
+}
 
-/* ⚠️ 抽屉始终在 DOM 里（aria-live 需要它常驻），靠 .is-open 推入。
-   漏掉 .is-open 的话它会一直占着右边三分之一屏幕。 */
-.evidence-drawer {
+/* ══════════════════════════════════════════════════════════
+   幕 06 归档
+   ══════════════════════════════════════════════════════════ */
+
+.act-archive {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.verdict-card {
+  max-width: 45rem;
+  padding: 2rem 2.2rem 2.2rem;
+  border: 1px solid rgba(214, 205, 185, 0.16);
+  background: linear-gradient(160deg, rgba(233, 226, 209, 0.06), rgba(233, 226, 209, 0.02));
+}
+
+.verdict-card .label {
+  display: block;
+}
+
+.verdict-card h3 {
+  font-family: var(--mono);
+  font-size: 2.3rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--paper-lit);
+  margin: 0.5rem 0 1rem;
+}
+
+.archive-line {
+  font-size: 0.9rem;
+  line-height: 1.95;
+  color: var(--on-room);
+  max-width: 48ch;
+}
+
+.archive-line b {
+  color: var(--paper-lit);
+}
+
+.archive-stats {
+  display: flex;
+  margin: 1.7rem 0;
+  border: 1px solid rgba(214, 205, 185, 0.14);
+}
+
+.archive-stats span {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.8rem 0.95rem;
+  border-right: 1px solid rgba(214, 205, 185, 0.12);
+  font-size: 0.7rem;
+  color: var(--on-room-soft);
+}
+
+.archive-stats span:last-child {
+  border-right: none;
+}
+
+.archive-stats b {
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--paper-lit);
+}
+
+.closing {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  color: var(--on-room-soft);
+}
+
+/* ══════════════════════════════════════════════════════════
+   底部导航
+   ══════════════════════════════════════════════════════════ */
+
+.theatre-foot {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 4.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  padding: 0 9rem 0 4.5vw;
+  z-index: 60;
+}
+
+.step {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: var(--on-room-soft);
+  border: 1px solid rgba(214, 205, 185, 0.2);
+  padding: 0.52rem 0.95rem;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.step:hover:not(:disabled) {
+  color: var(--paper-lit);
+  border-color: var(--cinnabar);
+}
+
+.step:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.step-hint {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: var(--on-room-faint);
+}
+
+/* ══════════════════════════════════════════════════════════
+   证据抽屉 —— 甩证据（docs/03 §十二）
+   ══════════════════════════════════════════════════════════ */
+
+.drawer {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 29rem;
-  padding: 3rem 2.5rem;
+  width: 27rem;
+  padding: 3rem 2.3rem;
   overflow-y: auto;
-  z-index: 60;
+  z-index: 80;
   border-left: 3px solid var(--cinnabar);
+  background: linear-gradient(170deg, var(--room-2), #0d0b08);
   transform: translateX(101%);
   visibility: hidden;
   transition: transform 0.42s cubic-bezier(0.16, 1.06, 0.3, 1), visibility 0.42s;
 }
 
-/* 甩证据：弹入时轻微过冲，纸震一下（docs/03 §十二） */
-.evidence-drawer.is-open {
+.drawer.is-open {
   visibility: visible;
   animation: drawer-slam 0.42s cubic-bezier(0.16, 1.06, 0.3, 1) forwards;
 }
@@ -1120,49 +1505,57 @@ dl {
   0% {
     transform: translateX(101%);
   }
-  74% {
-    transform: translateX(-1.4%);
+  76% {
+    transform: translateX(-1.6%);
   }
   100% {
     transform: translateX(0);
   }
 }
 
-.evidence-drawer h3 {
+.drawer h3 {
   font-family: var(--serif);
-  font-size: 1.32rem;
+  font-size: 1.26rem;
   font-weight: 600;
-  margin: 0.7rem 0 0.5rem;
+  color: var(--paper-lit);
+  margin: 0.8rem 0;
 }
 
-.evidence-drawer p {
-  font-size: 0.86rem;
-  line-height: 1.85;
-  color: var(--ink-soft);
+.drawer p {
+  font-size: 0.84rem;
+  line-height: 1.9;
+  color: var(--on-room);
 }
 
-.evidence-drawer dl {
-  margin: 1.5rem 0 0;
+.quote-in-drawer {
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--cinnabar);
+  color: var(--paper-lit) !important;
 }
 
-.evidence-drawer dt {
+.drawer dl {
+  margin-top: 1.5rem;
+}
+
+.drawer dt {
   font-family: var(--mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.18em;
+  font-size: 0.54rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--on-room-faint);
   margin-top: 0.95rem;
 }
 
-.evidence-drawer dd {
-  margin: 0.22rem 0 0;
-  font-size: 0.82rem;
+.drawer dd {
+  margin-top: 0.26rem;
+  font-size: 0.8rem;
+  color: var(--on-room);
 }
 
-.evidence-drawer code {
+.drawer code {
   font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--cinnabar-deep);
+  font-size: 0.68rem;
+  color: var(--cinnabar);
   word-break: break-all;
 }
 
@@ -1170,63 +1563,17 @@ dl {
   position: absolute;
   top: 1.4rem;
   right: 1.7rem;
-  background: none;
-  border: none;
   font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.2em;
-  color: var(--ink-faint);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--on-room-faint);
 }
 
 .drawer-close:hover {
   color: var(--cinnabar);
 }
 
-/* ============================================================
-   06 归档报告
-   ============================================================ */
-
-.report-folder {
-  padding: 2.9rem 3.2rem 3rem;
-  max-width: 60rem;
-}
-
-.report-folder h3 {
-  font-family: var(--mono);
-  font-size: 2.4rem;
-  letter-spacing: 0.06em;
-  font-weight: 400;
-  margin: 0.4rem 0 1rem;
-}
-
-.report-folder p {
-  font-size: 0.9rem;
-  line-height: 1.9;
-  color: var(--ink-soft);
-  max-width: 54ch;
-}
-
-.report-grid {
-  display: flex;
-  margin: 2.1rem 0;
-  border: 1px solid var(--paper-edge);
-}
-
-.report-grid span {
-  flex: 1;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  padding: 0.88rem 1rem;
-  border-right: 1px solid var(--paper-edge);
-  color: var(--ink-soft);
-}
-
-.report-grid span:last-child {
-  border-right: none;
-}
-
-/* ============================================================ */
+/* ══════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1235,6 +1582,5 @@ dl {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
