@@ -12,6 +12,7 @@
 
 import type { Case } from "./case.js";
 import { TOTAL_WEIGHT_BPS } from "./case.js";
+import { computeRequirementsHash, verifyE3PayloadHash } from "./canonical.js";
 import { CASE_STATUSES } from "./status.js";
 
 export type Severity = "P0" | "P1" | "P2";
@@ -79,8 +80,106 @@ export function validateCase(c: Case): ValidationIssue[] {
     }
   }
 
+  // essential 必须显式声明 —— 它和 weightBps 一样要进 requirementsHash，
+  // 静默默认值会让"承诺了什么"取决于代码版本
+  const missingEssential = c.requirements.filter((r) => typeof r.essential !== "boolean");
+  if (missingEssential.length > 0) {
+    at(
+      "P0",
+      "ESSENTIAL_MISSING",
+      `条款缺少 essential 标注：${missingEssential.map((r) => r.id).join(", ")} —— 无法判断给付是否可分`,
+    );
+  }
+
+  // requirementsHash 必须与条款本身对得上。
+  //
+  // 这是"0.05 可复算"这一主张的技术支点：条款在争议之前被承诺上链，
+  // 事后改不动。如果链上那个哈希跟手里的条款算不出同一个值，
+  // 要么条款被改过，要么哈希是编的——两种都让整套叙事失效。
+  if (c.onchain.requirementsHash !== undefined && !isPending(c.onchain.requirementsHash)) {
+    try {
+      const expected = computeRequirementsHash(c.requirements);
+      if (c.onchain.requirementsHash.toLowerCase() !== expected.toLowerCase()) {
+        at(
+          "P0",
+          "REQUIREMENTS_HASH_MISMATCH",
+          `链上 requirementsHash 与条款算出的不一致：链上 ${c.onchain.requirementsHash}，实算 ${expected}`,
+        );
+      }
+    } catch (e) {
+      at("P0", "REQUIREMENTS_HASH_UNCOMPUTABLE", `条款无法规范化：${(e as Error).message}`);
+    }
+  }
+
+  // kind 为 requirement_hash 的证据，它的 hash 就必须**是**那个上链承诺的哈希。
+  //
+  // 这类证据的全部意义就是"档案里这份条款，正是链上承诺的那一份"。
+  // 挂一个占位值或对不上的值，等于档案和链上是两份东西，
+  // 而这恰恰是我们号称能防住的事。
+  for (const e of c.evidence) {
+    if (e.kind !== "requirement_hash" || e.hash === undefined || isPending(e.hash)) continue;
+    try {
+      const expected = computeRequirementsHash(c.requirements);
+      if (e.hash.toLowerCase() !== expected.toLowerCase()) {
+        at(
+          "P0",
+          "REQUIREMENT_EVIDENCE_HASH_MISMATCH",
+          `${e.id} 是条款哈希证据，但它的 hash 是 ${e.hash}，与条款实算的 ${expected} 不符`,
+        );
+      }
+    } catch {
+      // 条款本身无法规范化的情况已由 REQUIREMENTS_HASH_UNCOMPUTABLE 报告
+    }
+  }
+
+  // E3 的 canonicalPayloadHash 必须与它自己的内容相符。
+  //
+  // E3 是"Moss 事前解释 → 仲裁院事后追责"这条叙事的落点：
+  // 当事情没按签名前那句话发生时，那句话就是证据。
+  // 而一份能被事后编辑的解释不叫证据，所以哈希必须对得上。
+  for (const e of c.evidence) {
+    const m = e.mossPreSign;
+    if (!m || isPending(m.canonicalPayloadHash)) continue;
+    // ⚠️ 必须包 try/catch。反序列化回来的案件只要在 E3 深层含有 Date、
+    // undefined 或其他不可规范化的值，canonical 会抛错——校验器的职责是
+    // **报告问题**，不是自己崩掉。崩掉会让调用方拿不到任何一条 issue。
+    try {
+      if (typeof m.canonicalPayloadHash !== "string") {
+        at("P0", "E3_HASH_UNCOMPUTABLE", `${e.id} 的 canonicalPayloadHash 不是字符串`);
+        continue;
+      }
+      const { ok, expected } = verifyE3PayloadHash(m);
+      if (!ok) {
+        at(
+          "P0",
+          "E3_HASH_MISMATCH",
+          `${e.id} 的 canonicalPayloadHash 与内容不符：存的 ${m.canonicalPayloadHash}，实算 ${expected} —— 签前解释被改过或哈希是编的`,
+        );
+      }
+    } catch (err) {
+      at(
+        "P0",
+        "E3_HASH_UNCOMPUTABLE",
+        `${e.id} 的 E3 无法规范化，哈希无从校验：${(err as Error).message}`,
+      );
+    }
+  }
+
   const hasUndecided = c.ruleResults.some((r) => r.verdict === "undecidable");
   const s = c.settlementProposal;
+
+  // 核心条款判不了却仍按权重付了钱 —— 等于替人做了"附属条款值多少"的判断，
+  // 与"判不了就不判"的立场直接冲突
+  const essentialUndecided = c.requirements.filter(
+    (r) => r.essential && c.ruleResults.find((x) => x.id === r.id)?.verdict === "undecidable",
+  );
+  if (essentialUndecided.length > 0 && s && Number(s.toAgent) > 0) {
+    at(
+      "P0",
+      "ESSENTIAL_UNDECIDED_BUT_PAID",
+      `核心条款 ${essentialUndecided.map((r) => r.id).join(", ")} 不可裁决，却仍向 Agent 支付了 ${s.toAgent} —— 核心条款判不了时必须全额冻结`,
+    );
+  }
 
   if (s) {
     const frozen = Number(s.frozen);
