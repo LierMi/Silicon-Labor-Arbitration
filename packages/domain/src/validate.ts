@@ -65,6 +65,14 @@ export function validateCase(c: Case): ValidationIssue[] {
     }
   }
 
+  // 展示出来的 hash 必须至少真的是一个 bytes32。`0xreq...` / `0xdel...`
+  // 这类视觉占位符会让任何懂链的评委当场发现证据是编的。
+  for (const e of c.evidence) {
+    if (e.hash !== undefined && !isPending(e.hash) && !/^0x[0-9a-fA-F]{64}$/.test(e.hash)) {
+      at("P0", "EVIDENCE_HASH_INVALID", `${e.id} 的 hash 不是合法 bytes32：${e.hash}`);
+    }
+  }
+
   // 权重必须齐全且总和为 10000 —— 否则"金额可复算"这一主张不成立
   const missingWeight = c.requirements.filter((r) => typeof r.weightBps !== "number");
   if (missingWeight.length > 0) {

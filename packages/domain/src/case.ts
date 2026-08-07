@@ -77,6 +77,8 @@ export type EvidenceKind =
   | "requirement_hash" // 原始需求哈希
   | "delivery" // 交付物
   | "moss_pre_sign_explanation" // E3：Moss 签前证据
+  | "agent_translation_log" // 主 Agent 的转译与派发记录
+  | "tool_execution_log" // 工具参数、返回与警告记录
   | "onchain_receipt" // 链上回执
   | "direct_tx"; // Direct 路径的普通交易证据
 
@@ -99,10 +101,20 @@ export interface Evidence {
   hash?: string;
   text?: string;
   txHash?: string;
+  /** UI 可展示并可由字节哈希复核的原始文件；不等同于链上事件。 */
+  asset?: EvidenceAsset;
   /** kind === "moss_pre_sign_explanation" 时必填 */
   mossPreSign?: MossPreSignEvidence;
   /** kind === "delivery" 时必填：交付物的机器可读事实 */
   delivery?: DeliveryFacts;
+}
+
+export interface EvidenceAsset {
+  fileName: string;
+  mimeType: string;
+  /** 原始文件字节的 sha256，使用 bytes32 十六进制格式。 */
+  sha256: string;
+  byteSize: number;
 }
 
 /**

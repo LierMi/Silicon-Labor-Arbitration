@@ -168,6 +168,21 @@ describe("requirementsHash", () => {
     assert.ok(e1, "找不到 requirement_hash 证据");
     assert.equal(e1.hash, POTATO_REQUIREMENTS_HASH);
   });
+
+  it("土豆案：用户提供的猫参考图与土豆交付物都有真实文件指纹", () => {
+    const e1 = POTATO_CASE.evidence.find((e) => e.id === "E1");
+    const e2 = POTATO_CASE.evidence.find((e) => e.id === "E2");
+    assert.ok(e1 && e2?.delivery);
+
+    assert.deepEqual(e1.asset, {
+      fileName: "orange-cat-reference.png",
+      mimeType: "image/png",
+      sha256: "0xaad8adb7087b20935882300667a5697f9c9620ffc5903ad2aed9d013857ab60a",
+      byteSize: 2_905_073,
+    });
+    assert.equal(e2.hash, "0x5f99d6682fb827aa0ea1d002fcbb0cd37b535c7c1a113248f66ef222abaace79");
+    assert.equal(e2.delivery.byteSize, 1_704_811);
+  });
 });
 
 // ────────────────────────────────────────────────────────────
@@ -214,5 +229,14 @@ describe("校验器兜住这些边界", () => {
     e1.hash = "0xreq0000000000000000000000000000000000000000000000000000000000001";
     const codes = validateCase(t).map((i) => i.code);
     assert.ok(codes.includes("REQUIREMENT_EVIDENCE_HASH_MISMATCH"), codes.join(","));
+  });
+
+  it("证据 hash 不是 bytes32 → EVIDENCE_HASH_INVALID", () => {
+    const t = structuredClone(POTATO_CASE);
+    const e2 = t.evidence.find((e) => e.id === "E2");
+    assert.ok(e2);
+    e2.hash = "0xdel-not-a-real-hash";
+    const codes = validateCase(t).map((i) => i.code);
+    assert.ok(codes.includes("EVIDENCE_HASH_INVALID"), codes.join(","));
   });
 });

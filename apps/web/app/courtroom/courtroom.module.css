@@ -1,0 +1,1052 @@
+.courtroom {
+  --ink: #e8e1d2;
+  --ink-soft: rgba(232, 225, 210, 0.64);
+  --blue: #a8c7d8;
+  --blue-hot: #bde8fb;
+  --yellow: #f2c14e;
+  --red: #b83c2f;
+  --radius-panel: 10px;
+  --radius-control: 7px;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  color: var(--ink);
+  background: #050706;
+  font-family: ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
+  isolation: isolate;
+}
+
+.courtroom button,
+.courtroom a {
+  font: inherit;
+}
+
+.backdrop,
+.paperNoise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.backdrop {
+  z-index: -4;
+  overflow: hidden;
+  background: #050807;
+}
+
+.backdrop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 45%;
+  filter: grayscale(0.05) sepia(0.08) saturate(1.38) brightness(0.72) contrast(1.14);
+  transform: scale(1.02);
+}
+
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(3, 6, 6, 0.28), transparent 20%, rgba(3, 6, 6, 0.04) 54%, rgba(3, 6, 6, 0.58)),
+    radial-gradient(circle at 50% 24%, rgba(239, 201, 139, 0.14), transparent 28%),
+    linear-gradient(90deg, rgba(3, 5, 5, 0.42), transparent 19% 80%, rgba(3, 5, 5, 0.4));
+}
+
+.paperNoise {
+  z-index: 40;
+  opacity: 0.16;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(224, 236, 236, 0.035) 3px 4px),
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.06) 0 1px, transparent 1.4px);
+  background-size: auto, 8px 11px;
+  mix-blend-mode: soft-light;
+}
+
+.institutionBar {
+  position: relative;
+  z-index: 30;
+  height: 4.35rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.1rem;
+  border-bottom: 1px solid rgba(168, 199, 216, 0.18);
+  background: linear-gradient(180deg, rgba(3, 6, 7, 0.95), rgba(3, 6, 7, 0.68));
+  backdrop-filter: blur(12px);
+}
+
+.wordmark {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.wordmark > b {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.72rem;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  font-weight: 900;
+}
+
+.wordmark > b::before,
+.wordmark > b::after {
+  content: "";
+  position: absolute;
+  left: -0.16rem;
+  width: 0.34rem;
+  height: 2px;
+  background: var(--ink);
+  transform: rotate(-38deg);
+}
+
+.wordmark > b::before { top: 0.3rem; }
+.wordmark > b::after { bottom: 0.23rem; }
+
+.wordmark > span {
+  display: grid;
+  gap: 0.18rem;
+  padding-left: 0.72rem;
+  border-left: 1px solid rgba(168, 199, 216, 0.28);
+}
+
+.wordmark strong {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.wordmark i {
+  color: rgba(168, 199, 216, 0.56);
+  font-size: 0.43rem;
+  font-style: normal;
+  letter-spacing: 0.2em;
+}
+
+.courtTitle {
+  display: grid;
+  place-items: center;
+  gap: 0.22rem;
+  text-align: center;
+}
+
+.courtTitle span {
+  color: rgba(168, 199, 216, 0.58);
+  font-size: 0.54rem;
+  letter-spacing: 0.2em;
+}
+
+.courtTitle b {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+}
+
+.chainState {
+  justify-self: end;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 0.18rem 0.42rem;
+  color: rgba(232, 225, 210, 0.7);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+}
+
+.chainState code {
+  grid-column: 2;
+  color: rgba(168, 199, 216, 0.52);
+}
+
+.liveDot {
+  grid-row: 1 / 3;
+  width: 0.43rem;
+  height: 0.43rem;
+  border-radius: 50%;
+  background: #77c98b;
+  box-shadow: 0 0 0.8rem rgba(119, 201, 139, 0.6);
+}
+
+.fixtureDot {
+  background: var(--gold);
+  box-shadow: none;
+}
+
+.courtGrid {
+  position: absolute;
+  z-index: 5;
+  inset: 4.35rem 0 1.8rem;
+  display: grid;
+  grid-template-columns: clamp(13rem, 18vw, 16rem) minmax(0, 1fr) clamp(14rem, 19vw, 17rem);
+  gap: 0.72rem;
+  padding: 0.72rem 1rem;
+  transform-origin: 50% 50%;
+}
+
+.sidePanel,
+.argumentCard,
+.chainPanel,
+.evidenceCard {
+  border: 1px solid rgba(181, 222, 239, 0.46);
+  background:
+    linear-gradient(145deg, rgba(120, 177, 201, 0.16), transparent 30%),
+    rgba(4, 12, 16, 0.92);
+  box-shadow:
+    inset 0 1px rgba(229, 244, 248, 0.08),
+    0 1.5rem 3rem rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px) saturate(112%);
+  border-radius: var(--radius-panel);
+}
+
+.sidePanel {
+  position: relative;
+  min-height: 0;
+  padding: 0.9rem;
+  overflow: hidden;
+}
+
+.sidePanel::before {
+  content: "";
+  position: absolute;
+  inset: 0.32rem;
+  pointer-events: none;
+  border: 1px solid rgba(172, 215, 230, 0.08);
+  border-radius: var(--radius-control);
+}
+
+.panelHeading {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.22rem;
+  padding-bottom: 0.68rem;
+  border-bottom: 1px solid rgba(168, 199, 216, 0.18);
+}
+
+.panelHeading span {
+  color: rgba(189, 232, 249, 0.76);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+}
+
+.panelHeading b {
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  font-size: 1.08rem;
+  letter-spacing: 0.07em;
+}
+
+.caseIdentity {
+  position: relative;
+  z-index: 1;
+  padding: 0.78rem 0 0.72rem;
+  border-bottom: 1px solid rgba(168, 199, 216, 0.14);
+}
+
+.caseIdentity > code {
+  color: var(--yellow);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.caseIdentity h1 {
+  margin: 0.38rem 0 0.48rem;
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+}
+
+.caseSummary {
+  margin: 0 0 0.7rem;
+  color: rgba(232, 225, 210, 0.79);
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.caseIdentity dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.62rem 0.45rem;
+  margin: 0;
+}
+
+.caseIdentity dl div {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.caseIdentity dt {
+  color: rgba(168, 199, 216, 0.72);
+  font-size: 0.72rem;
+}
+
+.caseIdentity dd {
+  margin: 0;
+  color: rgba(232, 225, 210, 0.83);
+  font-size: 0.8rem;
+}
+
+.caseIdentity .pendingText {
+  color: var(--yellow);
+}
+
+.progressBlock {
+  position: relative;
+  z-index: 1;
+  padding-top: 0.72rem;
+}
+
+.progressBlock > p {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0.45rem;
+  font-family: "Songti SC", serif;
+  font-size: 0.82rem;
+}
+
+.progressBlock > p span {
+  color: rgba(168, 199, 216, 0.54);
+  font-family: ui-monospace, monospace;
+  font-size: 0.57rem;
+}
+
+.progressBlock ol {
+  position: relative;
+  display: grid;
+  gap: 0.12rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progressBlock ol::before {
+  content: "";
+  position: absolute;
+  left: 0.58rem;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  width: 1px;
+  background: rgba(168, 199, 216, 0.2);
+}
+
+.progressBlock li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.2rem 1fr auto;
+  align-items: center;
+  min-height: 1.75rem;
+  gap: 0.42rem;
+  color: rgba(232, 225, 210, 0.38);
+  font-size: 0.74rem;
+}
+
+.progressBlock li i {
+  z-index: 1;
+  display: grid;
+  width: 1.2rem;
+  height: 1.2rem;
+  place-items: center;
+  border: 1px solid rgba(168, 199, 216, 0.25);
+  border-radius: 50%;
+  background: #0d1417;
+  font-size: 0.53rem;
+  font-style: normal;
+}
+
+.progressBlock li em {
+  font-size: 0.58rem;
+  font-style: normal;
+}
+
+.progressBlock .doneStep { color: rgba(232, 225, 210, 0.72); }
+.progressBlock .doneStep i { border-color: rgba(107, 186, 139, 0.54); color: #8bd29b; }
+.progressBlock .currentStep { color: var(--ink); }
+.progressBlock .currentStep i { border-color: var(--yellow); color: #17130b; background: var(--yellow); box-shadow: 0 0 1rem rgba(242, 193, 78, 0.24); }
+.progressBlock .currentStep em { color: var(--yellow); }
+
+.mockNotice {
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  bottom: 0.65rem;
+  margin: 0;
+  color: rgba(168, 199, 216, 0.38);
+  font-size: 0.5rem;
+  letter-spacing: 0.09em;
+}
+
+.courtStage {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(168, 199, 216, 0.12);
+  border-bottom: 1px solid rgba(168, 199, 216, 0.12);
+  background: radial-gradient(circle at 50% 24%, rgba(238, 201, 140, 0.12), transparent 36%);
+  perspective: 1200px;
+  border-radius: var(--radius-panel);
+}
+
+.justiceSlice {
+  position: absolute;
+  right: -3.2rem;
+  top: 3.5rem;
+  width: 9rem;
+  height: 15rem;
+  opacity: 0.12;
+  overflow: hidden;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.justiceSlice img {
+  width: 18rem;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  filter: grayscale(1) contrast(1.4);
+}
+
+.confrontation {
+  position: absolute;
+  inset: 0 0 13.7rem;
+}
+
+.argumentCard {
+  position: absolute;
+  z-index: 4;
+  width: min(38%, 20rem);
+  min-height: 12.2rem;
+  padding: 0.8rem 0.86rem 0.72rem;
+  overflow: hidden;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.argumentCard::after {
+  content: "";
+  position: absolute;
+  inset: 0.35rem;
+  border: 1px solid rgba(173, 215, 230, 0.08);
+  border-radius: var(--radius-control);
+  pointer-events: none;
+}
+
+.argumentCard header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.42rem;
+  border-bottom: 1px solid rgba(168, 199, 216, 0.16);
+}
+
+.argumentCard header span {
+  color: rgba(189, 232, 249, 0.78);
+  font-size: 0.52rem;
+  letter-spacing: 0.12em;
+}
+
+.argumentCard header b {
+  font-family: "Songti SC", serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+}
+
+.argumentCard p {
+  display: -webkit-box;
+  margin: 0.52rem 0;
+  overflow: hidden;
+  color: rgba(232, 225, 210, 0.88);
+  font-family: "Songti SC", serif;
+  font-size: 0.92rem;
+  line-height: 1.58;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+}
+
+.argumentCard footer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.argumentCard footer button {
+  padding: 0;
+  color: var(--yellow);
+  border: 0;
+  background: transparent;
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+
+.argumentCard .expandArgumentButton {
+  margin-left: auto;
+  padding: 0.18rem 0.32rem;
+  color: var(--blue-hot);
+  border: 1px solid rgba(189, 232, 249, 0.28);
+}
+
+.expandedArgument {
+  z-index: 28;
+  left: 8% !important;
+  right: auto !important;
+  top: 4% !important;
+  width: 84% !important;
+  min-height: 13rem;
+  transform: none !important;
+  border-color: rgba(189, 232, 249, 0.74);
+  background: rgba(4, 12, 16, 0.98);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.72);
+}
+
+.expandedArgument p {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.argumentCard:hover { border-color: rgba(189, 232, 249, 0.58); }
+.prosecution { left: 1.5%; top: 4%; transform: rotate(-0.45deg); }
+.defense { right: 1.5%; top: 4%; transform: rotate(0.45deg); }
+.audit { left: 50%; top: 49%; width: min(38%, 20rem); transform: translateX(-50%); }
+.prosecution { border-left: 3px solid rgba(93, 165, 255, 0.92); box-shadow: -0.6rem 0 2rem rgba(54, 117, 203, 0.12), 0 1.5rem 3rem rgba(0, 0, 0, 0.36); }
+.defense { border-right: 3px solid rgba(222, 92, 78, 0.86); box-shadow: 0.6rem 0 2rem rgba(192, 75, 60, 0.12), 0 1.5rem 3rem rgba(0, 0, 0, 0.36); }
+.audit { border-bottom: 3px solid rgba(221, 224, 218, 0.75); }
+
+.vacancy {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  top: 7.2rem;
+  display: grid;
+  width: 10.4rem;
+  height: 5.1rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.28rem;
+  transform: translateX(-50%);
+  border: 1px dashed rgba(232, 225, 210, 0.32);
+  border-radius: var(--radius-panel);
+  background: rgba(3, 7, 8, 0.78);
+  box-shadow: 0 0 3rem rgba(0, 0, 0, 0.58), inset 0 0 2rem rgba(168, 199, 216, 0.04);
+  text-align: center;
+}
+
+.vacancy::before,
+.vacancy::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 3rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 225, 210, 0.3));
+}
+
+.vacancy::before { right: 100%; }
+.vacancy::after { left: 100%; transform: rotate(180deg); }
+.vacancy span { color: rgba(189, 232, 249, 0.7); font-size: 0.44rem; letter-spacing: 0.12em; }
+.vacancy b { font-family: "Songti SC", serif; font-size: 1.12rem; letter-spacing: 0.18em; font-weight: 500; }
+.vacancy i { color: rgba(242, 193, 78, 0.75); font-size: 0.43rem; font-style: normal; letter-spacing: 0.08em; }
+
+.bottomConsole {
+  position: absolute;
+  z-index: 12;
+  left: 0.55rem;
+  right: 0.55rem;
+  bottom: 0.48rem;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.chainPanel {
+  padding: 0.55rem 0.65rem 0.62rem;
+  background: rgba(4, 10, 12, 0.92);
+}
+
+.chainPanel header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.52rem;
+  margin-bottom: 0.52rem;
+}
+
+.chainPanel header span { color: rgba(189, 232, 249, 0.72); font-size: 0.49rem; letter-spacing: 0.12em; }
+.chainPanel header b { font-family: "Songti SC", serif; font-size: 0.9rem; }
+.chainPanel header em { margin-left: auto; color: rgba(232, 225, 210, 0.68); font-family: "Songti SC", serif; font-size: 0.64rem; font-style: normal; }
+
+.chainPanel ol {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.28rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chainPanel li {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.05rem 0.36rem;
+  padding: 0.38rem 0.42rem;
+  border: 1px solid rgba(168, 199, 216, 0.24);
+  background: rgba(142, 190, 208, 0.08);
+}
+
+.chainPanel li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 100%;
+  top: 50%;
+  width: 0.3rem;
+  border-top: 1px solid rgba(242, 193, 78, 0.52);
+}
+
+.chainPanel li i { grid-row: 1 / 3; color: var(--yellow); font-size: 0.58rem; font-style: normal; }
+.chainPanel li b { font-family: "Songti SC", serif; font-size: 0.78rem; font-weight: 500; }
+.chainPanel li span { color: rgba(168, 199, 216, 0.7); font-size: 0.6rem; }
+
+.evidenceShelf {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.48rem;
+}
+
+.evidenceCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.2rem minmax(0, 1fr);
+  gap: 0.66rem;
+  align-items: stretch;
+  min-width: 0;
+  min-height: 5.35rem;
+  padding: 0.5rem;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 170ms ease, border-color 170ms ease, background 170ms ease;
+}
+
+.evidenceCard:hover,
+.evidenceCard:focus-visible {
+  z-index: 2;
+  border-color: rgba(189, 232, 249, 0.68);
+  background: rgba(13, 31, 39, 0.82);
+  transform: translateY(-3px);
+  outline: 1px solid rgba(242, 193, 78, 0.55);
+  outline-offset: 2px;
+}
+
+.evidenceThumb {
+  position: relative;
+  min-height: 4.25rem;
+  overflow: hidden;
+  border: 1px solid rgba(181, 222, 239, 0.24);
+  background: rgba(1, 4, 5, 0.82);
+}
+
+.evidenceThumb img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.08) contrast(1.08) brightness(0.88); }
+
+.evidenceCard[data-evidence-id="E1"] .evidenceThumb img,
+.evidenceCard[data-evidence-id="E2"] .evidenceThumb img {
+  object-fit: contain;
+  padding: 0.22rem;
+  background: radial-gradient(circle at 50% 40%, rgba(219, 132, 54, 0.15), rgba(1, 4, 5, 0.94) 72%);
+}
+
+.missingEvidenceImage {
+  display: grid;
+  height: 100%;
+  place-content: center;
+  gap: 0.28rem;
+  padding: 0.4rem;
+  background: repeating-linear-gradient(-45deg, rgba(168, 199, 216, 0.04) 0 5px, transparent 5px 10px);
+  text-align: center;
+}
+
+.missingEvidenceImage b { color: rgba(189, 232, 249, 0.62); font-size: 0.48rem; letter-spacing: 0.12em; }
+.missingEvidenceImage i { color: var(--yellow); font-family: "Songti SC", serif; font-size: 0.58rem; font-style: normal; }
+.evidenceCardCopy { display: grid; min-width: 0; align-content: center; }
+.evidenceCardCopy header { display: flex; align-items: baseline; gap: 0.48rem; }
+.evidenceCardCopy header span { color: var(--yellow); font-size: 0.82rem; }
+.evidenceCardCopy header b { font-family: "Songti SC", serif; font-size: 0.76rem; }
+.evidenceCardCopy p { display: -webkit-box; margin: 0.38rem 0; overflow: hidden; color: rgba(232, 225, 210, 0.78); font-family: "Songti SC", serif; font-size: 0.75rem; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.evidenceCardCopy em { color: rgba(189, 232, 249, 0.72); font-size: 0.58rem; font-style: normal; }
+
+.rulesPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.ruleList {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.38rem;
+  padding: 0.72rem 0;
+}
+
+.ruleList button {
+  display: grid;
+  grid-template-columns: 1.65rem 1fr auto;
+  align-items: center;
+  gap: 0.52rem;
+  min-height: 3.35rem;
+  padding: 0.54rem;
+  color: var(--ink);
+  border: 1px solid rgba(168, 199, 216, 0.14);
+  background: rgba(129, 176, 194, 0.045);
+  text-align: left;
+}
+
+.ruleList button i {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.66rem;
+  font-style: normal;
+}
+
+.ruleList button span { display: grid; gap: 0.18rem; }
+.ruleList button b { font-family: "Songti SC", serif; font-size: 0.9rem; }
+.ruleList button small { color: rgba(232, 225, 210, 0.65); font-size: 0.66rem; line-height: 1.45; }
+.ruleList button em { padding: 0.2rem 0.32rem; border: 1px solid currentColor; font-size: 0.57rem; font-style: normal; }
+.satisfiedRule { color: #79ce8d !important; }
+.satisfiedRule span b { color: var(--ink); }
+.undecidableRule { color: var(--yellow) !important; cursor: pointer; }
+.undecidableRule span b { color: var(--ink); }
+.undecidableRule:hover { border-color: rgba(242, 193, 78, 0.62); background: rgba(123, 80, 26, 0.12); }
+
+.reviewWindow {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  min-height: 5.4rem;
+  margin-top: auto;
+  overflow: hidden;
+  border: 1px solid rgba(168, 199, 216, 0.19);
+  background: rgba(4, 9, 11, 0.68);
+}
+
+.reviewWindow img { width: 4rem; height: 100%; object-fit: cover; filter: grayscale(0.35) brightness(0.6) contrast(1.2); }
+.reviewWindow > div { display: grid; align-content: center; gap: 0.22rem; padding: 0.5rem; }
+.reviewWindow span { color: rgba(189, 232, 249, 0.7); font-size: 0.47rem; letter-spacing: 0.1em; }
+.reviewWindow b { font-family: "Songti SC", serif; font-size: 0.8rem; }
+.reviewWindow p { margin: 0; color: rgba(232, 225, 210, 0.68); font-family: "Songti SC", serif; font-size: 0.62rem; line-height: 1.45; }
+
+.pendingStamp {
+  position: absolute;
+  right: 0.28rem;
+  top: 0.22rem;
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  color: rgba(184, 60, 47, 0.9);
+  border: 2px double rgba(184, 60, 47, 0.76);
+  border-radius: 50%;
+  font-family: "Songti SC", serif;
+  font-size: 0.72rem;
+  transform: rotate(-8deg);
+  opacity: 0;
+}
+
+.enterCase {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.2rem 0.45rem;
+  margin-top: 0.58rem;
+  padding: 0.68rem 0.75rem;
+  color: var(--ink);
+  border: 1px solid rgba(242, 193, 78, 0.6);
+  background: linear-gradient(135deg, rgba(242, 193, 78, 0.14), rgba(11, 13, 11, 0.6));
+  text-decoration: none;
+  transition: transform 170ms ease, background 170ms ease;
+}
+
+.enterCase:hover,
+.enterCase:focus-visible { transform: translateY(-2px); background: rgba(242, 193, 78, 0.18); outline: 1px solid var(--yellow); outline-offset: 2px; }
+.enterCase span { font-family: "Songti SC", serif; font-size: 0.88rem; letter-spacing: 0.12em; }
+.enterCase b { grid-column: 1; color: rgba(232, 225, 210, 0.68); font-size: 0.5rem; font-weight: 400; }
+.enterCase i { grid-column: 2; grid-row: 1 / 3; align-self: center; color: var(--yellow); font-size: 1rem; font-style: normal; }
+
+.statusRail {
+  position: absolute;
+  z-index: 25;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1rem;
+  color: rgba(168, 199, 216, 0.42);
+  border-top: 1px solid rgba(168, 199, 216, 0.14);
+  background: rgba(3, 6, 7, 0.88);
+  font-size: 0.4rem;
+  letter-spacing: 0.08em;
+}
+
+.objectionMark {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  top: 45%;
+  display: grid;
+  width: 10rem;
+  height: 6rem;
+  place-items: center;
+  align-content: center;
+  gap: 0.2rem;
+  color: #b83c2f;
+  border: 0.32rem double currentColor;
+  background: rgba(16, 5, 4, 0.2);
+  box-shadow: inset 0 0 0 0.16rem rgba(184, 60, 47, 0.34), 0 0 2rem rgba(184, 60, 47, 0.18);
+  transform: translate(-50%, -50%) rotate(-6deg);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.objectionMark span { font-family: "Songti SC", serif; font-size: 2.4rem; line-height: 1; letter-spacing: 0.22em; }
+.objectionMark b { font-size: 0.54rem; letter-spacing: 0.28em; }
+
+.courtroom[data-objection-state="raised"] .objectionMark,
+.courtroom[data-objection-state="raised"] .pendingStamp {
+  opacity: 1;
+}
+
+.evidenceOverlay {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.overlayScrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(1, 3, 3, 0.82);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.evidenceOverlay article {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.8fr) minmax(18rem, 1.2fr);
+  width: min(48rem, 88vw);
+  min-height: 24rem;
+  overflow: hidden;
+  color: var(--ink);
+  border: 1px solid rgba(183, 223, 239, 0.6);
+  background: linear-gradient(145deg, rgba(31, 65, 78, 0.82), rgba(4, 11, 14, 0.96));
+  box-shadow: 0 3rem 8rem #000;
+}
+
+.closeEvidence {
+  position: absolute;
+  z-index: 4;
+  right: 0.7rem;
+  top: 0.65rem;
+  padding: 0.35rem 0.45rem;
+  color: rgba(232, 225, 210, 0.72);
+  border: 1px solid rgba(168, 199, 216, 0.3);
+  background: rgba(3, 7, 8, 0.72);
+  font-size: 0.46rem;
+  cursor: pointer;
+}
+
+.evidenceImage {
+  position: relative;
+  min-height: 24rem;
+  overflow: hidden;
+  background: #111;
+}
+
+.evidenceImage img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.72) contrast(1.08) brightness(0.78); }
+.evidenceImage[data-evidence-image-id="E1"] img,
+.evidenceImage[data-evidence-image-id="E2"] img { object-fit: contain; padding: 1.2rem; background: radial-gradient(circle at 50% 42%, rgba(216, 126, 43, 0.13), #05090a 72%); }
+.evidenceImage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 60%, rgba(4, 11, 14, 0.86)); }
+.evidenceImage span { position: absolute; z-index: 2; left: 1rem; bottom: 0.85rem; color: var(--yellow); font-size: 2.2rem; }
+
+.overlayImageMissing {
+  display: grid;
+  height: 100%;
+  min-height: 24rem;
+  place-content: center;
+  gap: 0.65rem;
+  padding: 2rem;
+  background:
+    linear-gradient(rgba(4, 11, 14, 0.32), rgba(4, 11, 14, 0.86)),
+    repeating-linear-gradient(-45deg, rgba(168, 199, 216, 0.06) 0 8px, transparent 8px 16px);
+  text-align: center;
+}
+
+.overlayImageMissing b { font-family: "Songti SC", serif; font-size: 1.45rem; letter-spacing: 0.08em; }
+.overlayImageMissing span { position: static; color: rgba(189, 232, 249, 0.64); font-size: 0.55rem; letter-spacing: 0.14em; }
+.overlayImageMissing p { max-width: 18rem; margin: 0.55rem auto 0; color: rgba(232, 225, 210, 0.68); font-family: "Songti SC", serif; font-size: 0.72rem; line-height: 1.65; }
+
+.evidenceText {
+  display: grid;
+  align-content: center;
+  gap: 0.75rem;
+  padding: 2.4rem 2rem 2rem;
+}
+
+.evidenceText > p { margin: 0; color: rgba(168, 199, 216, 0.52); font-size: 0.46rem; letter-spacing: 0.13em; }
+.evidenceText h2 { margin: 0; font-family: "Songti SC", serif; font-size: 1.75rem; font-weight: 500; letter-spacing: 0.08em; }
+.evidenceText blockquote { margin: 0.45rem 0 0; padding: 1rem 0 1rem 1.2rem; color: rgba(232, 225, 210, 0.76); border-left: 2px solid var(--yellow); font-family: "Songti SC", serif; font-size: 0.86rem; line-height: 1.8; }
+.evidenceText .evidenceDetail { margin: 0; color: rgba(232, 225, 210, 0.72); font-family: "Songti SC", serif; font-size: 0.68rem; line-height: 1.7; letter-spacing: 0; }
+.downloadOriginal { justify-self: start; padding: 0.34rem 0.46rem; color: var(--blue-hot); border: 1px solid rgba(189, 232, 249, 0.28); font-size: 0.58rem; text-decoration: none; }
+.downloadOriginal:hover { color: var(--ink); border-color: var(--blue-hot); }
+.evidenceText dl { display: grid; gap: 0.48rem; margin: 0.6rem 0 0; }
+.evidenceText dl div { display: grid; grid-template-columns: 4rem 1fr; gap: 0.7rem; padding-top: 0.45rem; border-top: 1px solid rgba(168, 199, 216, 0.14); font-size: 0.5rem; }
+.evidenceText dt { color: rgba(168, 199, 216, 0.48); }
+.evidenceText dd { margin: 0; color: rgba(232, 225, 210, 0.68); overflow: hidden; text-overflow: ellipsis; }
+
+/* 统一为柔和的法院控制台框体，保留圆形进度节点与司法印章。 */
+.chainPanel li,
+.evidenceThumb,
+.ruleList button,
+.reviewWindow,
+.enterCase,
+.evidenceOverlay article,
+.closeEvidence,
+.downloadOriginal,
+.argumentCard .expandArgumentButton,
+.argumentCard footer button,
+.ruleList button em,
+.progressBlock li {
+  border-radius: var(--radius-control);
+}
+
+.evidenceOverlay article,
+.reviewWindow,
+.evidenceThumb {
+  overflow: hidden;
+}
+
+.chainPanel li,
+.ruleList button,
+.reviewWindow,
+.enterCase {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+@media (max-width: 1180px) {
+  .courtGrid { grid-template-columns: 12.2rem minmax(0, 1fr) 13.4rem; gap: 0.5rem; padding-inline: 0.55rem; }
+  .sidePanel { padding: 0.68rem; }
+  .argumentCard { width: 38%; }
+  .audit { width: 34%; }
+  .caseIdentity h1 { font-size: 1.02rem; }
+  .progressBlock li { min-height: 1.8rem; }
+  .chainPanel header em { display: none; }
+}
+
+@media (max-width: 980px) {
+  .institutionBar { grid-template-columns: 1fr auto; }
+  .courtTitle { display: none; }
+  .courtGrid { grid-template-columns: 12rem minmax(0, 1fr); }
+  .rulesPanel { position: absolute; z-index: 25; right: 0.6rem; top: 0.6rem; width: 13rem; height: calc(100% - 1.2rem); }
+  .confrontation { right: 12.7rem; }
+  .bottomConsole { right: 12.7rem; }
+  .vacancy { left: 38%; }
+  .argumentCard { width: 46%; }
+  .audit { left: 50%; width: 41%; }
+  .chainPanel li span { display: none; }
+}
+
+@media (max-width: 767px) {
+  .courtroom { position: relative; min-height: 100svh; overflow-x: hidden; overflow-y: auto; }
+  .institutionBar { position: sticky; top: 0; height: 3.8rem; padding-inline: 0.75rem; }
+  .wordmark > b { font-size: 1.35rem; }
+  .wordmark > span { padding-left: 0.55rem; }
+  .wordmark strong { font-size: 0.64rem; }
+  .wordmark i { font-size: 0.34rem; }
+  .chainState { font-size: 0.4rem; }
+  .chainState code { display: none; }
+  .courtGrid { position: relative; inset: auto; display: flex; flex-direction: column; gap: 0.65rem; padding: 0.7rem 0.7rem 2.7rem; }
+  .sidePanel { min-height: auto; }
+  .dossier { order: 1; }
+  .courtStage { order: 2; min-height: 47rem; overflow: hidden; }
+  .rulesPanel { position: relative; right: auto; top: auto; order: 3; width: auto; height: auto; }
+  .caseIdentity dl { grid-template-columns: repeat(2, 1fr); }
+  .progressBlock ol { grid-template-columns: repeat(3, 1fr); gap: 0.25rem; }
+  .progressBlock ol::before { display: none; }
+  .progressBlock li { grid-template-columns: auto 1fr; min-height: 2.3rem; padding: 0.25rem; border: 1px solid rgba(168, 199, 216, 0.1); }
+  .progressBlock li em { grid-column: 2; }
+  .mockNotice { position: relative; left: auto; right: auto; bottom: auto; margin-top: 0.6rem; }
+  .confrontation { inset: 0 0 18.5rem; }
+  .argumentCard { width: 46%; min-height: 7.4rem; }
+  .argumentCard p { -webkit-line-clamp: 4; }
+  .audit { top: 46%; width: 48%; }
+  .vacancy { left: 50%; top: 15.3rem; }
+  .bottomConsole { left: 0.4rem; right: 0.4rem; bottom: 0.4rem; }
+  .chainPanel ol { grid-template-columns: repeat(5, minmax(4rem, 1fr)); overflow-x: auto; }
+  .evidenceShelf { grid-template-columns: 1fr; }
+  .evidenceCard { min-height: 4rem; }
+  .statusRail { position: relative; height: auto; min-height: 2rem; flex-wrap: wrap; padding: 0.5rem 0.7rem; }
+  .statusRail span:nth-child(2) { display: none; }
+  .evidenceOverlay { padding: 0.7rem; }
+  .evidenceOverlay article { grid-template-columns: 1fr; width: 100%; max-height: 88svh; overflow-y: auto; }
+  .evidenceImage { min-height: 14rem; }
+  .evidenceText { padding: 1.5rem 1.1rem; }
+  .evidenceText h2 { font-size: 1.35rem; }
+  .objectionMark { width: 8rem; height: 5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courtroom *,
+  .courtroom *::before,
+  .courtroom *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .evidenceCard,
+  .enterCase,
+  .argumentCard {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .sidePanel,
+  .argumentCard,
+  .chainPanel,
+  .evidenceCard,
+  .overlayScrim {
+    backdrop-filter: none;
+  }
+
+  .sidePanel,
+  .argumentCard,
+  .chainPanel,
+  .evidenceCard {
+    background: #091115;
+  }
+}
