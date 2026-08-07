@@ -488,7 +488,8 @@
   position: relative;
   z-index: 2;
   display: flex;
-  gap: 0.3rem;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .argumentCard footer button {
@@ -501,7 +502,7 @@
 }
 
 .argumentCard .expandArgumentButton {
-  margin-left: auto;
+  margin-left: 0;
   padding: 0.18rem 0.32rem;
   color: var(--blue-hot);
   border: 1px solid rgba(214, 176, 122, 0.3);
@@ -1277,29 +1278,30 @@
 }
 
 /* 辩方卡片里的触发按钮 */
-.objectButton {
+.argumentCard footer .objectButton {
   margin-left: auto;
   font-family: "Songti SC", "Noto Serif SC", serif;
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-indent: 0.16em;
-  color: #e0574a;
-  background: rgba(192, 57, 43, 0.16);
-  border: 2px solid #c0392b;
+  color: #fffdf8;
+  background: #c0392b;
+  border: 2px solid #df594c;
   border-radius: var(--radius-control);
-  padding: 0.24rem 0.72rem;
-  box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.28), 0 0 14px rgba(192, 57, 43, 0.3);
+  padding: 0.44rem 0.92rem;
+  box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.34), 0 0 16px rgba(192, 57, 43, 0.38);
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease;
 }
 
-.objectButton:hover {
-  background: #c0392b;
+.argumentCard footer .objectButton:hover {
+  background: #d84a3c;
+  border-color: #ef786c;
   color: #fffdf8;
 }
 
-.objectButton:active {
+.argumentCard footer .objectButton:active {
   transform: scale(0.94) rotate(-2deg);
 }
 
