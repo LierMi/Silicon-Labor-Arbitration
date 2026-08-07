@@ -1112,3 +1112,157 @@
     background: #091115;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   「异议」特效 —— 非全屏，画面中央爆开
+   ══════════════════════════════════════════════════════════
+
+   全屏会盖掉法庭和三份证词，而「异议」是对着某一方提出的，
+   盖掉对方等于抽走了语境。所以只占中央一块，
+   比审计卡（20rem）稍大一圈。
+   ══════════════════════════════════════════════════════════ */
+
+.objectionFx {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 26rem;
+  aspect-ratio: 1.42 / 1;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  z-index: 30;
+  pointer-events: none;
+  /* 硬切消失，不淡出——那一下的力量在「突然」 */
+  animation: objHold 1.15s steps(1, end) forwards;
+}
+
+@keyframes objHold {
+  0%, 80% { opacity: 1; }
+  81%, 100% { opacity: 0; }
+}
+
+/* 放射线：只在这块区域内，用圆形遮罩收边，不铺满屏 */
+.objRays {
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    #8e1b14 0deg 2.6deg,
+    #c0392b 2.6deg 4.4deg,
+    rgba(20, 8, 5, 0.92) 4.4deg 7.2deg
+  );
+  mask-image: radial-gradient(circle, #000 52%, transparent 74%);
+  animation: objRaysIn 1.15s cubic-bezier(0.15, 1.2, 0.4, 1) both;
+}
+
+@keyframes objRaysIn {
+  0% { transform: scale(0.14) rotate(-16deg); }
+  22% { transform: scale(1.07) rotate(2deg); }
+  34% { transform: scale(1) rotate(0deg); }
+  100% { transform: scale(1) rotate(6deg); }
+}
+
+/* 白色爆炸形：22 个尖角，长度刻意不均 */
+.objBurst {
+  position: absolute;
+  width: 88%;
+  aspect-ratio: 1.5 / 1;
+  background: linear-gradient(168deg, #fffdf8, #f2ece0 58%, #ded3bd);
+  clip-path: polygon(
+    50% -3%, 54.9% 15.9%, 64.1% 2%, 64.3% 18.6%, 76.2% 9.2%, 72.6% 23.9%,
+    90.1% 15.3%, 79% 31.3%, 94.1% 29.9%, 83.1% 40.3%, 99.5% 42.9%, 84.5% 50%,
+    102.5% 57.5%, 83.1% 59.7%, 95.5% 70.8%, 79% 68.7%, 86.7% 81.8%, 72.6% 76.1%,
+    78.7% 94.6%, 64.3% 81.4%, 63.7% 96.5%, 54.9% 84.1%, 50% 100%, 45.1% 84.1%,
+    35.1% 100.9%, 35.7% 81.4%, 23% 92.1%, 27.4% 76.1%, 13.3% 81.8%, 21% 68.7%,
+    1.8% 72%, 16.9% 59.7%, 2% 56.9%, 15.5% 50%, 0.5% 42.9%, 16.9% 40.3%,
+    1.8% 28%, 21% 31.3%, 12.2% 17.3%, 27.4% 23.9%, 23.8% 9.2%, 35.7% 18.6%,
+    35.1% -0.9%, 45.1% 15.9%
+  );
+  animation: objBurstIn 1.15s cubic-bezier(0.15, 1.35, 0.4, 1) both;
+}
+
+@keyframes objBurstIn {
+  0% { transform: scale(0.18) rotate(7deg); }
+  20% { transform: scale(1.08) rotate(-1.8deg); }
+  32%, 100% { transform: scale(1) rotate(-0.9deg); }
+}
+
+/* 朱红的戳：砸下去、弹一下、定住 */
+.objWord {
+  position: relative;
+  display: grid;
+  place-items: center;
+  animation: objWordIn 1.15s cubic-bezier(0.2, 1.7, 0.35, 1) both;
+}
+
+@keyframes objWordIn {
+  0% { transform: scale(2.4) rotate(-12deg); opacity: 0; }
+  12% { opacity: 1; }
+  26% { transform: scale(0.93) rotate(-2.2deg); }
+  38%, 100% { transform: scale(1) rotate(-3.4deg); }
+}
+
+.objWord em {
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-style: normal;
+  font-size: 5.4rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.08;
+  color: #c0392b;
+  -webkit-text-stroke: 2.5px #fffdf8;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 0 #fffdf8,
+    4px 5px 0 rgba(90, 14, 9, 0.5),
+    8px 10px 18px rgba(0, 0, 0, 0.4);
+}
+
+/* 副标题挂在字下方外侧 —— 参与 grid 会被大字的行高压住 */
+.objWord i {
+  position: absolute;
+  top: calc(100% + 0.2rem);
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-style: normal;
+  font-size: 0.6rem;
+  letter-spacing: 0.55em;
+  text-indent: 0.55em;
+  color: #8d2118;
+  white-space: nowrap;
+}
+
+/* 辩方卡片里的触发按钮 */
+.objectButton {
+  margin-left: auto;
+  font-family: "Songti SC", "Noto Serif SC", serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  color: #c0392b;
+  background: none;
+  border: 1.5px solid rgba(192, 57, 43, 0.7);
+  border-radius: var(--radius-control);
+  padding: 0.16rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease;
+}
+
+.objectButton:hover {
+  background: #c0392b;
+  color: #fffdf8;
+}
+
+.objectButton:active {
+  transform: scale(0.94) rotate(-2deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .objRays,
+  .objBurst,
+  .objWord {
+    animation: none !important;
+  }
+}

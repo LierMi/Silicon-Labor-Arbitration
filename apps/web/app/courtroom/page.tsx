@@ -79,6 +79,7 @@ export default function CourtroomPage() {
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
   const [objectionRaised, setObjectionRaised] = useState(false);
   const [expandedArgument, setExpandedArgument] = useState<string | null>(null);
+  const [objectionFx, setObjectionFx] = useState(false);
   const [localReview, setLocalReview] = useState<ReturnType<typeof parseStoredReview>>(null);
 
   const evidence = useMemo(
@@ -295,6 +296,11 @@ export default function CourtroomPage() {
                         [{cite}]
                       </button>
                     ))}
+                    {argument.role === "defense" ? (
+                      <button className={styles.objectButton} onClick={() => setObjectionFx(true)} type="button">
+                        异议
+                      </button>
+                    ) : null}
                     <button className={styles.expandArgumentButton} onClick={() => setExpandedArgument((current) => current === argument.role ? null : argument.role)} type="button">
                       {expandedArgument === argument.role ? "收起全文" : "展开全文"}
                     </button>
@@ -458,6 +464,44 @@ export default function CourtroomPage() {
           </article>
         </div>
       ) : null}
+
+      <ObjectionBurst show={objectionFx} onDone={() => setObjectionFx(false)} />
     </main>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   「异议」特效
+   ══════════════════════════════════════════════════════════
+
+   参考逆转裁判的「異議あり！」，只偷剪辑语法不偷画风
+   （docs/03 §十二：它的美学内核是「一定有答案」，我们是「判不了」，
+    视觉先于台词被接收，画风照搬会和主张正面打架）。
+
+     偷   硬切（无渐入）· 放射线 · 过冲回弹
+     不偷 漫画速度线 · 动漫立绘 · 对话气泡
+
+   ⚠️ 不做全屏。全屏会盖掉法庭和三份证词——而「异议」是**对着某一方**
+   提出的，盖掉对方等于抽走了语境。所以只在画面中央爆开，
+   比中间那张审计卡稍大一圈（20rem → 26rem）。
+   ══════════════════════════════════════════════════════════ */
+
+function ObjectionBurst({ show, onDone }: { show: boolean; onDone: () => void }) {
+  useEffect(() => {
+    if (!show) return;
+    const t = window.setTimeout(onDone, 1150);
+    return () => window.clearTimeout(t);
+  }, [show, onDone]);
+
+  if (!show) return null;
+  return (
+    <div className={styles.objectionFx} aria-hidden>
+      <span className={styles.objRays} />
+      <span className={styles.objBurst} />
+      <span className={styles.objWord}>
+        <em>异议</em>
+        <i>OBJECTION</i>
+      </span>
+    </div>
   );
 }
