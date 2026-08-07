@@ -1380,18 +1380,17 @@ ul {
 }
 
 .landing .void-copy span {
-  color: rgba(192, 57, 43, 0.82);
+  color: rgba(168, 135, 107, 0.9);
   font-size: var(--micro-copy);
   letter-spacing: 0.2em;
 }
 
-/* 归属未决是这一屏的结论，用深红——全场只有它和印章配得上这个颜色 */
+/* 红的是框，不是字——字保持原来的暖白，靠红框和暗底把它托出来 */
 .landing .void-copy b {
   font-family: var(--sans);
   font-size: clamp(1.12rem, 1.45vw, 1.38rem);
   letter-spacing: 0.16em;
-  font-weight: 700;
-  color: #c0392b;
+  color: #d8c2a9;
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
 }
 
@@ -1494,10 +1493,12 @@ ul {
   border-left-color: rgba(var(--gallery-frame-rgb), 0.7);
 }
 
+/* 与上方对比框同一档（0.24 边框）。0.72 的橘框在这一屏是唯一的重色，
+   把视线从「归属未决」那个红圈上抢走了——而那才是主角。 */
 .landing .cta {
   color: var(--gallery-bone);
-  border: 1px solid rgba(var(--gallery-frame-rgb), 0.72);
-  background: rgba(49, 37, 29, 0.72);
+  border: 1px solid rgba(var(--gallery-frame-rgb), 0.24);
+  background: rgba(49, 37, 29, 0.55);
   box-shadow: inset 0 0 0 1px rgba(232, 225, 210, 0.04);
   backdrop-filter: blur(8px);
 }

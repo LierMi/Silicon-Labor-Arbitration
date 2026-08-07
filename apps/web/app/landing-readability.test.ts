@@ -11,7 +11,7 @@ test("the landing page uses the warmer gallery, readable copy, and a crimson una
   assert.match(css, /--micro-copy:\s*0\.68rem/);
   // 归属未决是这一屏的结论，改用深红——全场只有它和印章配得上这个颜色
   assert.match(css, /\.landing \.void-ring\s*\{[^}]*border:\s*2px solid rgba\(160,\s*34,\s*26/s);
-  assert.match(css, /\.landing \.void-copy b\s*\{[^}]*color:\s*#c0392b/s);
+  assert.match(css, /\.landing \.void-copy b\s*\{[^}]*color:\s*#d8c2a9/s);
   assert.match(css, /\.positioning-contrast i\s*\{[^}]*font-size:\s*0\.78rem/s);
   assert.match(css, /\.landing \.positioning-contrast\s*\{[^}]*max-width:\s*33rem/s);
   assert.match(css, /\.landing \.pitch\s*\{[^}]*width:\s*min\(35rem,\s*43vw\)/s);
