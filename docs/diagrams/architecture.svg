@@ -1,49 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1010 650" width="1010" height="650">
-<style>
-
-  .c-mask       { fill: #0f172a; stroke: none; }
-  .c-frontend   { fill: rgba(8,51,68,0.4);   stroke: #22d3ee; }
-  .c-backend    { fill: rgba(6,78,59,0.4);    stroke: #34d399; }
-  .c-database   { fill: rgba(76,29,149,0.4);  stroke: #a78bfa; }
-  .c-cloud      { fill: rgba(120,53,15,0.3);  stroke: #fbbf24; }
-  .c-security   { fill: rgba(136,19,55,0.4);  stroke: #fb7185; }
-  .c-external   { fill: rgba(30,41,59,0.5);   stroke: #94a3b8; }
-  .c-messagebus { fill: rgba(251,146,60,0.3); stroke: #fb923c; }
-  .c-grid       { fill: none; stroke: #1e293b; }
-  .t-primary    { fill: #ffffff; }
-  .t-muted      { fill: #94a3b8; }
-  .t-dim        { fill: #475569; }
-  .t-frontend   { fill: #22d3ee; }
-  .t-backend    { fill: #34d399; }
-  .t-database   { fill: #a78bfa; }
-  .t-cloud      { fill: #fbbf24; }
-  .t-security   { fill: #fb7185; }
-  .t-external   { fill: #94a3b8; }
-  .t-messagebus { fill: #fb923c; }
-  .a-default    { stroke: #64748b; fill: none; }
-  .a-emphasis   { stroke: #34d399; fill: none; }
-  .a-security   { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
-  .a-dashed     { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
-  .m-default    { fill: #64748b; }
-  .m-emphasis   { fill: #34d399; }
-  .m-security   { fill: #fb7185; }
-  .m-dashed     { fill: #a78bfa; }
-  .c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
-  .c-region     { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
-  .c-lane       { fill: rgba(15,23,42,0.22); stroke: #334155; stroke-dasharray: 6,6; }
-  .sv-panel     { fill: rgba(15,23,42,0.5); stroke: #1e293b; }
-  .t-cyan    { fill: #22d3ee; }
-  .t-emerald { fill: #34d399; }
-  .t-violet  { fill: #a78bfa; }
-  .t-amber   { fill: #fbbf24; }
-  .t-rose    { fill: #fb7185; }
-  .t-orange  { fill: #fb923c; }
-  .t-slate   { fill: #94a3b8; }
-
-</style>
-<rect width="100%" height="100%" fill="#020617" />
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 650" role="img" aria-label="Silicon Labor Arbitration · System Architecture (Current) — Current monorepo runtime: Next.js demo + domain/rules/chain + Moss createTask seam + Monad Testnet (architecture diagram)"><rect width="100%" height="100%" fill="#020617"/>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -70,7 +25,7 @@
         <rect x="10" y="30" width="260" height="112" rx="12" class="c-region" stroke-width="1"/>
         <text x="18" y="48" class="t-cloud" font-size="9" font-weight="600">Verification &amp; Tooling</text>
 
-        <rect x="10" y="150" width="960" height="112" rx="12" class="c-region" stroke-width="1"/>
+        <rect x="10" y="150" width="1030" height="272" rx="12" class="c-region" stroke-width="1"/>
         <text x="18" y="168" class="t-cloud" font-size="9" font-weight="600">Silicon Packages (monorepo)</text>
 
         <rect x="250" y="310" width="590" height="112" rx="12" class="c-region" stroke-width="1"/>
@@ -90,6 +45,7 @@
         <path d="M 545 340 L 735 340" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         <path d="M 735 402 L 735 443 Q 735 451 727 451 L 653 451 Q 645 451 645 459 L 645 500" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         <path d="M 560 531 L 430 531" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 930 402 L 930 443 Q 930 451 922 451 L 363 451 Q 355 451 355 459 L 355 500" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
 
         <!-- Components -->
         <rect x="40" y="60" width="200" height="62" rx="6" class="c-mask"/>
@@ -123,8 +79,8 @@
         <rect x="790" y="180" width="150" height="62" rx="6" class="c-mask"/>
         <rect x="790" y="180" width="150" height="62" rx="6" class="c-frontend" stroke-width="1.5"/>
         <text x="865" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Next.js UI</text>
-        <text x="865" y="225" class="t-muted" font-size="9" text-anchor="middle">typed mock adapter</text>
-        <text x="865" y="234" class="t-frontend" font-size="7" text-anchor="middle">planned</text>
+        <text x="865" y="225" class="t-muted" font-size="9" text-anchor="middle">demo dossier · freshPotatoCase()</text>
+        <text x="865" y="234" class="t-frontend" font-size="7" text-anchor="middle">current mock</text>
 
         <rect x="280" y="340" width="150" height="62" rx="6" class="c-mask"/>
         <rect x="280" y="340" width="150" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
@@ -141,6 +97,12 @@
         <rect x="660" y="340" width="150" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
         <text x="735" y="369" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Trace Simulator</text>
         <text x="735" y="385" class="t-muted" font-size="9" text-anchor="middle">TraceCall + Receipt parser</text>
+
+        <rect x="850" y="340" width="160" height="62" rx="6" class="c-mask"/>
+        <rect x="850" y="340" width="160" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="930" y="369" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Chain Adapter</text>
+        <text x="930" y="385" class="t-muted" font-size="9" text-anchor="middle">viem tx builders · direct path</text>
+        <text x="930" y="394" class="t-backend" font-size="7" text-anchor="middle">post-create writes</text>
 
         <rect x="280" y="500" width="150" height="62" rx="6" class="c-mask"/>
         <rect x="280" y="500" width="150" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
@@ -174,6 +136,8 @@
         <text x="690" y="481" class="t-messagebus" font-size="8" text-anchor="middle">debug_traceCall</text>
         <rect x="470.8" y="511" width="48.4" height="14" rx="3" class="c-mask"/>
         <text x="495" y="521" class="t-muted" font-size="8" text-anchor="middle">JSON-RPC</text>
+        <rect x="606.3" y="476" width="72.4" height="14" rx="3" class="c-mask"/>
+        <text x="642.5" y="486" class="t-security" font-size="8" text-anchor="middle">direct writes</text>
 
         <!-- Legend -->
         <text x="40" y="621" class="t-primary" font-size="9" font-weight="600">Legend</text>
@@ -187,5 +151,4 @@
         <text x="349" y="634" class="t-muted" font-size="8">Frontend</text>
         <rect x="427" y="626" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
         <text x="447" y="634" class="t-muted" font-size="8">Cloud</text>
-      
-</svg>
+      </svg>
