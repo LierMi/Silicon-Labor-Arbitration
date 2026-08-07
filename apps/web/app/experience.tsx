@@ -41,6 +41,7 @@ import {
   parseStoredReview,
   reviewStorageKey,
 } from "./case-presentation";
+import { ResponsibilityChainBoard } from "./responsibility-chain-board";
 
 const c: Case = freshPotatoCase();
 const EVIDENCE_CONNECTIONS = buildEvidenceConnectionIndex(c);
@@ -496,7 +497,7 @@ function Landing({ onEnter }: { onEnter: () => void }) {
           <span><i>SLA</i><b>让证据可复算，让边界可申诉</b></span>
         </div>
         <button className="cta" onClick={enter} type="button">
-          查看案件 {c.caseNo}
+          查看案件 猫猫和土豆案
           <em>→</em>
         </button>
       </div>
@@ -653,28 +654,15 @@ function ActChain({
   }, [focusedConnection]);
 
   return (
-    <div className="act-chain">
+    <div className="act-chain is-board">
       <div className="chain-map">
-        <div className="hops">
-          {c.responsibilityChain.map((h, i) => {
-            const related = focusedConnection?.chainHopIds.includes(h.id) ?? false;
-            return (
-              <button
-                key={h.id}
-                className={`hop ${active === h.id ? "is-active" : ""} ${h.intentDrift ? "has-drift" : ""} ${related ? "is-evidence-linked" : ""} ${focusedConnection && !related ? "is-evidence-dimmed" : ""}`}
-                style={{ "--i": i } as CSSProperties}
-                onMouseEnter={() => setActive(h.id)}
-                onClick={() => setActive(h.id)}
-                type="button"
-              >
-                <b>{h.id}</b>
-                <strong>{h.actor}</strong>
-                <span>{ACTOR_ROLE_LABEL[h.actorRole]}</span>
-                {h.intentDrift ? <i>意图偏移</i> : null}
-              </button>
-            );
-          })}
-        </div>
+        <ResponsibilityChainBoard
+          activeHopId={active}
+          focusedEvidenceId={focusedEvidenceId}
+          hops={c.responsibilityChain}
+          onActiveHop={setActive}
+          onOpenEvidence={onEvidence}
+        />
 
         <section className="evidence-link-map" aria-label="证据与责任节点关联">
           <header>
@@ -898,6 +886,41 @@ function ActRuling({ onEvidence, onHumanReview, active }: { onEvidence: (id: str
    幕 05 质询
    ══════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════
+   「异议」特效
+   ══════════════════════════════════════════════════════════
+
+   参考逆转裁判的「異議あり！」，但只偷**剪辑语法**，不偷画风。
+   docs/03 §十二 给了三条理由，最要命的一条是：
+   它的美学内核是「一定有答案」，而我们的立场是「判不了」——
+   视觉先于台词被接收，用错了会和主张正面打架。
+
+     偷   硬切（无渐入）· 放射线 · 画面震动 · 过冲回弹
+     不偷 漫画速度线 · 动漫立绘 · 对话气泡
+
+   换成我们的语言：一枚朱红「异议」戳砸在纸面上，整个房间震一下。
+   ══════════════════════════════════════════════════════════ */
+
+function Objection({ show, onDone }: { show: boolean; onDone: () => void }) {
+  useEffect(() => {
+    if (!show) return;
+    const t = window.setTimeout(onDone, 1250);
+    return () => window.clearTimeout(t);
+  }, [show, onDone]);
+
+  if (!show) return null;
+  return (
+    <div className="objection" aria-hidden>
+      <span className="obj-rays" />
+      <span className="obj-burst" />
+      <span className="obj-stamp">
+        <em>异议</em>
+        <i>OBJECTION</i>
+      </span>
+    </div>
+  );
+}
+
 function Cited({ a, onEvidence }: { a: AiArgument; onEvidence: (id: string) => void }) {
   const parts = a.text.split(/(\[E\d\])/g);
   return (
@@ -920,10 +943,12 @@ function ActArguments({
   onEvidence,
   focusedEvidenceId,
   onFocusEvidence,
+  onObject,
 }: {
   onEvidence: (id: string) => void;
   focusedEvidenceId: string | null;
   onFocusEvidence: (id: string | null) => void;
+  onObject: () => void;
 }) {
   const [activeRole, setActiveRole] = useState<AiArgument["role"] | null>(null);
   const presentation = buildArgumentPresentation(c.aiArguments, activeRole, focusedEvidenceId);
@@ -980,7 +1005,12 @@ function ActArguments({
           })}
         </div>
       </section>
-      <p className="argument-instruction">点击任一方进入单独质询；点击证据编号调取原始证物。</p>
+      <div className="argument-instruction-row">
+        <p className="argument-instruction">点击任一方进入单独质询；点击证据编号调取原始证物。</p>
+        <button className="object-btn" onClick={onObject} type="button">
+          <span>提出异议</span>
+        </button>
+      </div>
       <p className="aside arguments-aside">
         三份意见由 AI 生成，<b>但它们不决定一分钱</b>。金额由事前写死的权重算出，
         AI 只负责解释，而且每一句都必须挂上证据编号。
@@ -1441,6 +1471,84 @@ function TechnicalTrace({ onClose }: { onClose: () => void }) {
           </section>
         ))}
       </div>
+
+      <TraceDiagrams />
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   技术链 · 架构图
+   ══════════════════════════════════════════════════════════
+
+   三张图来自 Neo 的 archify 产出（docs/diagrams/*.svg，PR #24），
+   原样搬过来只注入了一段配色 style —— Archify 默认是蓝灰工程图，
+   与暗房 + 朱红不搭。图形结构一个字没改，重新生成后覆盖
+   public/diagrams/ 再跑一次注入即可。
+
+   放在文字节点下方，不替换任何现有内容：
+   卡片回答「每一步发生了什么」，图回答「这些步骤怎么连起来」。
+   ══════════════════════════════════════════════════════════ */
+
+const DIAGRAMS = [
+  {
+    id: "architecture",
+    label: "系统架构",
+    en: "System architecture",
+    note: "monorepo 运行时：Next.js 演示层 + domain / rules / chain，Moss 是 createTask 唯一入口",
+    ratio: "1080 / 650",
+  },
+  {
+    id: "e2e-flow",
+    label: "createTask 全链路",
+    en: "End-to-end · Moss path",
+    note: "MossBridge 构造 → 链上模拟 → 固化 E3 → 钱包签名 → 上链确认",
+    ratio: "720 / 528",
+  },
+  {
+    id: "task-lifecycle",
+    label: "合约状态机",
+    en: "TaskEscrow lifecycle",
+    note: "八个链上状态：创建 → 交付 → 验收 ｜ 争议 → 结算 → 人工复核",
+    ratio: "980 / 660",
+  },
+] as const;
+
+function TraceDiagrams() {
+  const [active, setActive] = useState<(typeof DIAGRAMS)[number]["id"]>("architecture");
+  const current = DIAGRAMS.find((d) => d.id === active)!;
+  return (
+    <section className="trace-diagrams" aria-label="技术链架构图">
+      <header>
+        <div>
+          <b>架构与流程</b>
+          <span>卡片说清每一步发生了什么，图说清这些步骤怎么连起来。</span>
+        </div>
+        <nav>
+          {DIAGRAMS.map((d) => (
+            <button
+              key={d.id}
+              className={d.id === active ? "is-active" : ""}
+              onClick={() => setActive(d.id)}
+              type="button"
+              aria-pressed={d.id === active}
+            >
+              {d.label}
+            </button>
+          ))}
+        </nav>
+      </header>
+
+      <figure style={{ "--ratio": current.ratio } as CSSProperties}>
+        <img src={`/diagrams/${current.id}.svg`} alt={`${current.label} — ${current.note}`} />
+        <figcaption>
+          <b>{current.en}</b>
+          <span>{current.note}</span>
+          <a href={`/diagrams/${current.id}.svg`} target="_blank" rel="noreferrer">
+            原图 ↗
+          </a>
+        </figcaption>
+      </figure>
     </section>
   );
 }
@@ -1554,6 +1662,8 @@ export function ArbitrationExperience({
   const [evId, setEvId] = useState<string | null>(null);
   const [focusedEvidenceId, setFocusedEvidenceId] = useState<string | null>(null);
   const [traceOpen, setTraceOpen] = useState(false);
+  const [objecting, setObjecting] = useState(false);
+  const objectedOnce = useRef(false);
 
   const ev = useMemo(() => (evId ? findEvidence(c, evId) : undefined), [evId]);
 
@@ -1642,6 +1752,16 @@ export function ArbitrationExperience({
     return () => window.removeEventListener("wheel", onWheel);
   }, [entered, evId, shiftAct, traceOpen]);
 
+  // 首次走到质询幕时自动放一次「异议」。之后只能手动重放——
+  // 反复自动播放会把冲击力磨没（docs/03 §十二：一次只动一个东西）
+  useEffect(() => {
+    if (!entered || traceOpen) return;
+    if (ACTS[act]?.id !== "arguments" || objectedOnce.current) return;
+    objectedOnce.current = true;
+    const t = window.setTimeout(() => setObjecting(true), 460);
+    return () => window.clearTimeout(t);
+  }, [act, entered, traceOpen]);
+
   if (!entered) return <Landing onEnter={onLandingEnter ?? (() => setEntered(true))} />;
 
   const current = ACTS[act]!;
@@ -1713,7 +1833,7 @@ export function ArbitrationExperience({
               {a.id === "delivery" ? <ActDelivery onEvidence={openEvidence} /> : null}
               {a.id === "chain" ? <ActChain onEvidence={openEvidence} focusedEvidenceId={focusedEvidenceId} onFocusEvidence={setFocusedEvidenceId} /> : null}
               {a.id === "ruling" ? <ActRuling onEvidence={openEvidence} onHumanReview={() => go(5)} active={i === act && !traceOpen} /> : null}
-              {a.id === "arguments" ? <ActArguments onEvidence={openEvidence} focusedEvidenceId={focusedEvidenceId} onFocusEvidence={setFocusedEvidenceId} /> : null}
+              {a.id === "arguments" ? <ActArguments onEvidence={openEvidence} focusedEvidenceId={focusedEvidenceId} onFocusEvidence={setFocusedEvidenceId} onObject={() => setObjecting(true)} /> : null}
               {a.id === "archive" ? <ActArchive onOpenTrace={() => setTraceOpen(true)} /> : null}
             </div>
           </section>
@@ -1738,6 +1858,7 @@ export function ArbitrationExperience({
       </footer> : null}
 
       <Drawer ev={ev} onClose={() => setEvId(null)} onNavigate={navigateFromEvidence} />
+      <Objection show={objecting} onDone={() => setObjecting(false)} />
     </div>
   );
 }

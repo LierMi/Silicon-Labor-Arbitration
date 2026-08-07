@@ -385,9 +385,18 @@ export default function CourtroomPage() {
           <section className={styles.reviewWindow}>
             <img src="/courtroom/suspended-gavel.jpg" alt="悬停在槌座上方的法槌与案件文件" />
             <div>
-              <span>HUMAN REVIEW</span>
-              <b>{localReview ? "本地复核意见已归档" : objectionRaised ? "待人工复核" : "印章悬停中"}</b>
-              <p>{localReview ? `${localReview.reviewer} · ${localReview.role}；链上仍未签名、未广播。` : objectionRaised ? "C4 没有落章。责任仍被悬置。" : "等待无法自动裁决的条款。"}</p>
+              {/* ⚠️ 原文案是「印章悬停中 / 等待无法自动裁决的条款」——说反了。
+                  C4 早就判不了了，不是「等待」出现这种条款；而「印章悬停中」
+                  读起来像加载状态。改成陈述当前事实：钱已经冻住，在等人。 */}
+              <span>人类终审 · HUMAN REVIEW</span>
+              <b>{localReview ? "复核意见已归档" : objectionRaised ? "异议已提出" : "C4 悬而未决"}</b>
+              <p>
+                {localReview
+                  ? `${localReview.reviewer} · ${localReview.role}；链上仍未签名、未广播。`
+                  : objectionRaised
+                    ? "章没有落下。0.2 MON 仍被冻结，等一个人来决定。"
+                    : "系统判不了「是不是一只猫」。0.2 MON 已冻结，这一步只能由人决定。"}
+              </p>
             </div>
             <strong className={styles.pendingStamp} data-pending-stamp aria-hidden={!objectionRaised}>悬</strong>
           </section>
