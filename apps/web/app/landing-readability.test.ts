@@ -14,5 +14,21 @@ test("the landing page uses the warmer gallery, readable comparison copy, and br
   assert.match(css, /\.landing \.positioning-contrast\s*\{[^}]*max-width:\s*33rem/s);
   assert.match(css, /\.landing \.pitch\s*\{[^}]*width:\s*min\(35rem,\s*43vw\)/s);
   assert.match(css, /\.landing :where\(\.exhibit-panel p, \.hang-tag\)\s*\{[^}]*font-size:\s*0\.64rem/s);
-  assert.match(css, /\.theatre :where\(\.responsibility-card-seq,[^}]*font-size:\s*0\.62rem/s);
+  assert.match(css, /\.theatre :where\(\.responsibility-card-seq,[^}]*font-size:\s*0\.7rem/s);
+});
+
+test("the landing evidence system uses orange frames, clears the seal, and fades softly into the gallery", () => {
+  assert.match(experience, /id:\s*"E3"[^\n]*y:\s*66\.5[^\n]*wire:\s*66\.5/);
+  assert.match(css, /--gallery-frame-rgb:\s*217,\s*107,\s*43/);
+  assert.match(
+    css,
+    /\.landing \.hang\[data-frame-style="glass"\] \.exhibit-panel\s*\{[^}]*border:\s*1px solid rgba\(var\(--gallery-frame-rgb\),\s*0\.72\)/s,
+  );
+  assert.match(
+    css,
+    /\.landing \.hang-tag\[data-tag-id="params"\]\s*\{[^}]*border:\s*1px solid rgba\(var\(--gallery-frame-rgb\),\s*0\.7\)/s,
+  );
+  assert.match(css, /\.landing \.enter-link\s*\{[^}]*border-color:\s*rgba\(var\(--gallery-frame-rgb\),\s*0\.48\)/s);
+  assert.match(css, /\.landing \.positioning-contrast\s*\{[^}]*border-color:\s*rgba\(var\(--gallery-frame-rgb\),\s*0\.24\)/s);
+  assert.match(css, /radial-gradient\(ellipse 78% 125% at -10% 48%/);
 });

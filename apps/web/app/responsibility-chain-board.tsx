@@ -25,7 +25,7 @@ export function ResponsibilityChainBoard({
     <section className="responsibility-board" aria-label="责任链二维证据板">
       <header className="responsibility-board-head">
         <div><span>RESPONSIBILITY TRACE</span><b>责任在传递中变薄</b></div>
-        <em>悬停放大 · 点击节点查看</em>
+        <em>悬停预览 · 点击节点显示详情</em>
       </header>
 
       <div className="responsibility-board-track">
@@ -38,10 +38,11 @@ export function ResponsibilityChainBoard({
               key={hop.id}
               className={`responsibility-card ${active ? "is-active" : ""} ${hop.intentDrift ? "has-drift" : ""} ${evidenceLinked ? "is-evidence-linked" : ""} ${evidenceDimmed ? "is-evidence-dimmed" : ""}`}
               style={{ "--card-index": index } as CSSProperties}
-              onMouseEnter={() => onActiveHop(hop.id)}
             >
               <button
                 className="responsibility-card-main"
+                aria-controls="responsibility-hop-detail"
+                aria-pressed={active}
                 onClick={() => onActiveHop(hop.id)}
                 onFocus={() => onActiveHop(hop.id)}
                 type="button"

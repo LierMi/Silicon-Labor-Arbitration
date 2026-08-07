@@ -174,7 +174,7 @@ const EVIDENCE_MEDIA: Record<string, { src: string; originalSrc: string; alt: st
 const HANGING = [
   { id: "E1", frame: "glass", x: 40.5, y: 24, w: 14, wire: 24, tilt: -2.8, depth: 1 },
   { id: "E2", frame: "glass", x: 68.5, y: 17.5, w: 13.7, wire: 17.5, tilt: 1.8, depth: 1.4 },
-  { id: "E3", frame: "glass", x: 60.5, y: 58, w: 13.8, wire: 58, tilt: -1.4, depth: 0.7 },
+  { id: "E3", frame: "glass", x: 60.5, y: 66.5, w: 13.8, wire: 66.5, tilt: -1.4, depth: 0.7 },
 ] as const;
 
 interface Tag {
@@ -678,7 +678,9 @@ function ActChain({
                   key={evidence.id}
                   className={activeEvidence ? "is-active" : ""}
                   onMouseEnter={() => onFocusEvidence(evidence.id)}
+                  onMouseLeave={() => onFocusEvidence(null)}
                   onFocus={() => onFocusEvidence(evidence.id)}
+                  onBlur={() => onFocusEvidence(null)}
                   onClick={() => onEvidence(evidence.id)}
                   type="button"
                 >
@@ -692,7 +694,7 @@ function ActChain({
         </section>
       </div>
 
-      <div className="panel hop-detail">
+      <div className="panel hop-detail" id="responsibility-hop-detail" aria-live="polite" aria-atomic="true">
         {hop ? (
           <>
             <p className="label">
@@ -887,39 +889,8 @@ function ActRuling({ onEvidence, onHumanReview, active }: { onEvidence: (id: str
    ══════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════
-   「异议」特效
-   ══════════════════════════════════════════════════════════
-
-   参考逆转裁判的「異議あり！」，但只偷**剪辑语法**，不偷画风。
-   docs/03 §十二 给了三条理由，最要命的一条是：
-   它的美学内核是「一定有答案」，而我们的立场是「判不了」——
-   视觉先于台词被接收，用错了会和主张正面打架。
-
-     偷   硬切（无渐入）· 放射线 · 画面震动 · 过冲回弹
-     不偷 漫画速度线 · 动漫立绘 · 对话气泡
-
-   换成我们的语言：一枚朱红「异议」戳砸在纸面上，整个房间震一下。
+   幕 05 质询
    ══════════════════════════════════════════════════════════ */
-
-function Objection({ show, onDone }: { show: boolean; onDone: () => void }) {
-  useEffect(() => {
-    if (!show) return;
-    const t = window.setTimeout(onDone, 1250);
-    return () => window.clearTimeout(t);
-  }, [show, onDone]);
-
-  if (!show) return null;
-  return (
-    <div className="objection" aria-hidden>
-      <span className="obj-rays" />
-      <span className="obj-burst" />
-      <span className="obj-stamp">
-        <em>异议</em>
-        <i>OBJECTION</i>
-      </span>
-    </div>
-  );
-}
 
 function Cited({ a, onEvidence }: { a: AiArgument; onEvidence: (id: string) => void }) {
   const parts = a.text.split(/(\[E\d\])/g);
@@ -943,12 +914,10 @@ function ActArguments({
   onEvidence,
   focusedEvidenceId,
   onFocusEvidence,
-  onObject,
 }: {
   onEvidence: (id: string) => void;
   focusedEvidenceId: string | null;
   onFocusEvidence: (id: string | null) => void;
-  onObject: () => void;
 }) {
   const [activeRole, setActiveRole] = useState<AiArgument["role"] | null>(null);
   const presentation = buildArgumentPresentation(c.aiArguments, activeRole, focusedEvidenceId);
@@ -1005,12 +974,7 @@ function ActArguments({
           })}
         </div>
       </section>
-      <div className="argument-instruction-row">
-        <p className="argument-instruction">点击任一方进入单独质询；点击证据编号调取原始证物。</p>
-        <button className="object-btn" onClick={onObject} type="button">
-          <span>提出异议</span>
-        </button>
-      </div>
+      <p className="argument-instruction">点击任一方进入单独质询；点击证据编号调取原始证物。</p>
       <p className="aside arguments-aside">
         三份意见由 AI 生成，<b>但它们不决定一分钱</b>。金额由事前写死的权重算出，
         AI 只负责解释，而且每一句都必须挂上证据编号。
@@ -1662,8 +1626,6 @@ export function ArbitrationExperience({
   const [evId, setEvId] = useState<string | null>(null);
   const [focusedEvidenceId, setFocusedEvidenceId] = useState<string | null>(null);
   const [traceOpen, setTraceOpen] = useState(false);
-  const [objecting, setObjecting] = useState(false);
-  const objectedOnce = useRef(false);
 
   const ev = useMemo(() => (evId ? findEvidence(c, evId) : undefined), [evId]);
 
@@ -1752,16 +1714,6 @@ export function ArbitrationExperience({
     return () => window.removeEventListener("wheel", onWheel);
   }, [entered, evId, shiftAct, traceOpen]);
 
-  // 首次走到质询幕时自动放一次「异议」。之后只能手动重放——
-  // 反复自动播放会把冲击力磨没（docs/03 §十二：一次只动一个东西）
-  useEffect(() => {
-    if (!entered || traceOpen) return;
-    if (ACTS[act]?.id !== "arguments" || objectedOnce.current) return;
-    objectedOnce.current = true;
-    const t = window.setTimeout(() => setObjecting(true), 460);
-    return () => window.clearTimeout(t);
-  }, [act, entered, traceOpen]);
-
   if (!entered) return <Landing onEnter={onLandingEnter ?? (() => setEntered(true))} />;
 
   const current = ACTS[act]!;
@@ -1833,7 +1785,7 @@ export function ArbitrationExperience({
               {a.id === "delivery" ? <ActDelivery onEvidence={openEvidence} /> : null}
               {a.id === "chain" ? <ActChain onEvidence={openEvidence} focusedEvidenceId={focusedEvidenceId} onFocusEvidence={setFocusedEvidenceId} /> : null}
               {a.id === "ruling" ? <ActRuling onEvidence={openEvidence} onHumanReview={() => go(5)} active={i === act && !traceOpen} /> : null}
-              {a.id === "arguments" ? <ActArguments onEvidence={openEvidence} focusedEvidenceId={focusedEvidenceId} onFocusEvidence={setFocusedEvidenceId} onObject={() => setObjecting(true)} /> : null}
+              {a.id === "arguments" ? <ActArguments onEvidence={openEvidence} focusedEvidenceId={focusedEvidenceId} onFocusEvidence={setFocusedEvidenceId} /> : null}
               {a.id === "archive" ? <ActArchive onOpenTrace={() => setTraceOpen(true)} /> : null}
             </div>
           </section>
@@ -1858,7 +1810,6 @@ export function ArbitrationExperience({
       </footer> : null}
 
       <Drawer ev={ev} onClose={() => setEvId(null)} onNavigate={navigateFromEvidence} />
-      <Objection show={objecting} onDone={() => setObjecting(false)} />
     </div>
   );
 }
