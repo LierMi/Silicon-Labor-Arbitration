@@ -256,8 +256,20 @@
   letter-spacing: 0.08em;
 }
 
+/* 案件昵称——评委记不住「SLA-2026-0001」，记得住「猫猫和土豆案」 */
+.caseNickname {
+  display: block;
+  margin-top: 0.42rem;
+  font-family: "Songti SC", "Noto Serif CJK SC", serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  color: #f2c14e;
+}
+
 .caseIdentity h1 {
-  margin: 0.38rem 0 0.48rem;
+  margin: 0.1rem 0 0.48rem;
   font-family: "Songti SC", "Noto Serif CJK SC", serif;
   font-size: 1.15rem;
   line-height: 1.35;
@@ -603,14 +615,28 @@
 .chainPanel header b { font-family: "Songti SC", serif; font-size: 0.9rem; }
 /* 这句是整页的论点，不是脚注。原来 0.64rem + 68% 透明度，投屏根本看不清。 */
 .chainPanel header em {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   margin-left: auto;
   color: #f0e6d2;
   font-family: "Songti SC", "Noto Serif SC", serif;
-  font-size: 1.02rem;
+  font-size: 0.92rem;
   font-weight: 600;
   font-style: normal;
   letter-spacing: 0.04em;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+}
+
+/* 天平只作为这句话的前缀出现，不当独立图标用（docs/03 §一：
+   这些符号可以是主角，但不能是装饰）。 */
+.chainPanel header em img {
+  height: 1.7rem;
+  width: auto;
+  opacity: 1;
+  /* 原图是深色剪影，压在深棕底上等于看不见。
+     反相后再上暖金色，让它变成一枚亮的前缀符号。 */
+  filter: invert(1) sepia(0.62) saturate(2.4) hue-rotate(-8deg) brightness(1.12);
 }
 
 .chainPanel ol {
@@ -760,31 +786,33 @@
 .undecidableRule span b { color: var(--ink); }
 .undecidableRule:hover { border-color: rgba(242, 193, 78, 0.62); background: rgba(123, 80, 26, 0.12); }
 
+/* 人类终审是整个产品的落点，之前按角标排版（0.47rem 标签、0.62rem 正文），
+   投屏完全读不出来。连框一起放大。 */
 .reviewWindow {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 4rem 1fr;
-  min-height: 5.4rem;
+  grid-template-columns: 5.4rem 1fr;
+  min-height: 7.6rem;
   margin-top: auto;
   overflow: hidden;
   border: 1px solid rgba(191, 157, 111, 0.19);
   background: rgba(22, 14, 9, 0.7);
 }
 
-.reviewWindow img { width: 4rem; height: 100%; object-fit: cover; filter: grayscale(0.35) brightness(0.6) contrast(1.2); }
-.reviewWindow > div { display: grid; align-content: center; gap: 0.22rem; padding: 0.5rem; }
-.reviewWindow span { color: rgba(220, 181, 128, 0.7); font-size: 0.47rem; letter-spacing: 0.1em; }
-.reviewWindow b { font-family: "Songti SC", serif; font-size: 0.8rem; }
-.reviewWindow p { margin: 0; color: rgba(232, 225, 210, 0.68); font-family: "Songti SC", serif; font-size: 0.62rem; line-height: 1.45; }
+.reviewWindow img { width: 5.4rem; height: 100%; object-fit: cover; filter: grayscale(0.3) brightness(0.68) contrast(1.2); }
+.reviewWindow > div { display: grid; align-content: center; gap: 0.34rem; padding: 0.7rem 0.8rem; }
+.reviewWindow span { color: rgba(242, 193, 78, 0.86); font-size: 0.62rem; letter-spacing: 0.14em; }
+.reviewWindow b { font-family: "Songti SC", serif; font-size: 1.06rem; color: #f0e6d2; }
+.reviewWindow p { margin: 0; color: rgba(240, 233, 218, 0.86); font-family: "Songti SC", serif; font-size: 0.8rem; line-height: 1.6; }
 
 .pendingStamp {
   position: absolute;
-  right: 0.28rem;
-  top: 0.22rem;
+  right: 0.36rem;
+  top: 0.3rem;
   display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 2.1rem;
+  height: 2.1rem;
   place-items: center;
   color: rgba(184, 60, 47, 0.9);
   border: 2px double rgba(184, 60, 47, 0.76);
@@ -835,31 +863,46 @@
   letter-spacing: 0.08em;
 }
 
+/* 落定的异议戳。
+   ⚠️ 原先是 position: fixed 居中 —— 正好压在审计卡上（看不清双方证词），
+   而且可见性同时被 CSS 的 [data-objection-state] 和 GSAP 的 autoAlpha 控制，
+   两边抢，表现就是「时而有时而无」。
+   现在：挪到辩方意见卡正下方（异议是冲着辩方提的），
+   可见性只由 data-objection-state 一处决定。 */
 .objectionMark {
-  position: fixed;
-  z-index: 100;
-  left: 50%;
-  top: 45%;
+  position: absolute;
+  z-index: 12;
+  right: 4%;
+  top: 46%;
   display: grid;
-  width: 10rem;
-  height: 6rem;
+  width: 9rem;
+  height: 5.4rem;
   place-items: center;
   align-content: center;
   gap: 0.2rem;
-  color: #b83c2f;
-  border: 0.32rem double currentColor;
-  background: rgba(16, 5, 4, 0.2);
-  box-shadow: inset 0 0 0 0.16rem rgba(184, 60, 47, 0.34), 0 0 2rem rgba(184, 60, 47, 0.18);
-  transform: translate(-50%, -50%) rotate(-6deg);
+  color: #e0574a;
+  border: 0.3rem double currentColor;
+  background: rgba(28, 8, 6, 0.42);
+  box-shadow:
+    inset 0 0 0 0.14rem rgba(224, 87, 74, 0.4),
+    0 0 2.2rem rgba(192, 57, 43, 0.34);
+  transform: rotate(-7deg) scale(0.86);
   opacity: 0;
   pointer-events: none;
-  mix-blend-mode: screen;
+  /* 只用 opacity 一个通道控制。之前 visibility 与 opacity 双控，
+     加上 GSAP 也在写 autoAlpha，三方抢同一个属性，
+     表现就是「时而有时而无」。 */
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.2, 1.5, 0.4, 1);
 }
 
 .objectionMark span { font-family: "Songti SC", serif; font-size: 2.4rem; line-height: 1; letter-spacing: 0.22em; }
 .objectionMark b { font-size: 0.54rem; letter-spacing: 0.28em; }
 
-.courtroom[data-objection-state="raised"] .objectionMark,
+.courtroom[data-objection-state="raised"] .objectionMark {
+  opacity: 1;
+  transform: rotate(-7deg) scale(1);
+}
+
 .courtroom[data-objection-state="raised"] .pendingStamp {
   opacity: 1;
 }
@@ -1237,15 +1280,16 @@
 .objectButton {
   margin-left: auto;
   font-family: "Songti SC", "Noto Serif SC", serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-indent: 0.22em;
-  color: #c0392b;
-  background: none;
-  border: 1.5px solid rgba(192, 57, 43, 0.7);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  color: #e0574a;
+  background: rgba(192, 57, 43, 0.16);
+  border: 2px solid #c0392b;
   border-radius: var(--radius-control);
-  padding: 0.16rem 0.6rem;
+  padding: 0.24rem 0.72rem;
+  box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.28), 0 0 14px rgba(192, 57, 43, 0.3);
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease;
 }
@@ -1265,4 +1309,19 @@
   .objWord {
     animation: none !important;
   }
+}
+
+/* 证物详情入口：原来和正文同级，看不出可点。放大一档并改黄，
+   与「猫猫和土豆案」同色系——黄色在这一页只用于「可操作 / 可记忆」。 */
+.evidenceCard em {
+  font-style: normal;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #f2c14e;
+}
+
+.evidenceCard:hover em,
+.evidenceCard:focus-visible em {
+  color: #ffd97a;
 }

@@ -508,7 +508,7 @@ ul {
 .void-ring {
   position: absolute;
   inset: 0;
-  border: 1px dashed rgba(214, 205, 185, 0.22);
+  border: 2px dashed rgba(160, 34, 26, 0.75);
   border-radius: 50%;
   animation: ring-breathe 7s ease-in-out infinite;
 }
@@ -1320,14 +1320,16 @@ ul {
   will-change: transform, opacity;
 }
 
+/* 归属未决是这一屏的结论，深红 + 红框。
+   底色压暗一档，否则爆炸图会把字吃掉。 */
 .landing .void-ring {
-  border: 1px solid var(--gallery-brown);
+  border: 2px solid rgba(160, 34, 26, 0.85);
   border-style: solid;
-  background: rgba(43, 33, 26, 0.26);
+  background: rgba(16, 8, 6, 0.68);
   box-shadow:
-    inset 0 0 2.8rem rgba(69, 51, 38, 0.26),
-    0 0 0 1px rgba(118, 88, 63, 0.18),
-    0 0 2.5rem rgba(24, 18, 14, 0.46);
+    inset 0 0 2.8rem rgba(120, 24, 18, 0.24),
+    0 0 0 1px rgba(192, 57, 43, 0.35),
+    0 0 3rem rgba(0, 0, 0, 0.72);
   animation: ring-breathe 7s ease-in-out infinite;
 }
 
@@ -1335,7 +1337,7 @@ ul {
   content: "";
   position: absolute;
   inset: 0.48rem;
-  border: 1px solid rgba(118, 88, 63, 0.82);
+  border: 1px solid rgba(192, 57, 43, 0.7);
   border-radius: 50%;
 }
 
@@ -1345,7 +1347,7 @@ ul {
   inset: 0.15rem;
   border-radius: 50%;
   opacity: 0.2;
-  background: repeating-conic-gradient(from 8deg, transparent 0 14deg, rgba(118, 88, 63, 0.42) 14.3deg 14.8deg);
+  background: repeating-conic-gradient(from 8deg, transparent 0 14deg, rgba(192, 57, 43, 0.5) 14.3deg 14.8deg);
   mask: radial-gradient(circle, transparent 0 46%, #000 47% 50%, transparent 51%);
 }
 
@@ -1378,16 +1380,19 @@ ul {
 }
 
 .landing .void-copy span {
-  color: rgba(168, 135, 107, 0.9);
+  color: rgba(192, 57, 43, 0.82);
   font-size: var(--micro-copy);
   letter-spacing: 0.2em;
 }
 
+/* 归属未决是这一屏的结论，用深红——全场只有它和印章配得上这个颜色 */
 .landing .void-copy b {
   font-family: var(--sans);
   font-size: clamp(1.12rem, 1.45vw, 1.38rem);
   letter-spacing: 0.16em;
-  color: #d8c2a9;
+  font-weight: 700;
+  color: #c0392b;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
 }
 
 .landing .void-copy i {
@@ -4723,9 +4728,17 @@ blockquote {
   color: rgba(214, 205, 185, 0.76);
 }
 
-.landing :where(.exhibit-panel p, .hang-tag) {
-  font-size: 0.64rem;
-  color: rgba(232, 225, 210, 0.8);
+/* 证物板正文与标题同级——0.64rem 在投屏上根本读不出来，
+   而这三块正是要评委看清的内容。 */
+.landing .exhibit-panel p {
+  font-size: 0.83rem;
+  line-height: 1.72;
+  color: rgba(240, 233, 218, 0.92);
+}
+
+.landing .hang-tag {
+  font-size: 0.72rem;
+  color: rgba(232, 225, 210, 0.86);
 }
 
 .theatre :where(.responsibility-card-seq,
@@ -4752,3 +4765,26 @@ blockquote {
   font-size: 0.7rem;
   color: rgba(232, 225, 210, 0.78);
 }
+
+/* 吊牌：上行是留下的记录，下行是这一环的免责说辞 */
+.landing .hang-tag b {
+  display: block;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(240, 233, 218, 0.94);
+}
+
+.landing .hang-tag em {
+  display: block;
+  margin-top: 0.22rem;
+  font-family: var(--serif);
+  font-style: normal;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: rgba(214, 176, 122, 0.86);
+}
+
+.landing .hang-tag.is-warn b { color: #e0574a; }
+.landing .hang-tag.is-warn em { color: rgba(224, 87, 74, 0.82); }

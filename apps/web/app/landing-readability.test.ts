@@ -5,15 +5,19 @@ import { test } from "node:test";
 const experience = readFileSync(new URL("./experience.tsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
 
-test("the landing page uses the warmer gallery, readable comparison copy, and brown seal", () => {
+test("the landing page uses the warmer gallery, readable copy, and a crimson unassigned seal", () => {
   assert.match(experience, /查看案件\s*猫猫和土豆案/);
   assert.match(css, /--gallery-black:\s*#2a221c/);
   assert.match(css, /--micro-copy:\s*0\.68rem/);
-  assert.match(css, /\.landing \.void-ring\s*\{[^}]*border[^;}]*var\(--gallery-brown\)/s);
+  // 归属未决是这一屏的结论，改用深红——全场只有它和印章配得上这个颜色
+  assert.match(css, /\.landing \.void-ring\s*\{[^}]*border:\s*2px solid rgba\(160,\s*34,\s*26/s);
+  assert.match(css, /\.landing \.void-copy b\s*\{[^}]*color:\s*#c0392b/s);
   assert.match(css, /\.positioning-contrast i\s*\{[^}]*font-size:\s*0\.78rem/s);
   assert.match(css, /\.landing \.positioning-contrast\s*\{[^}]*max-width:\s*33rem/s);
   assert.match(css, /\.landing \.pitch\s*\{[^}]*width:\s*min\(35rem,\s*43vw\)/s);
-  assert.match(css, /\.landing :where\(\.exhibit-panel p, \.hang-tag\)\s*\{[^}]*font-size:\s*0\.64rem/s);
+  // 0.64rem 投屏读不出来，而这三块正是要评委看清的内容
+  assert.match(css, /\.landing \.exhibit-panel p\s*\{[^}]*font-size:\s*0\.83rem/s);
+  assert.match(css, /\.landing \.hang-tag\s*\{[^}]*font-size:\s*0\.72rem/s);
   assert.match(css, /\.theatre :where\(\.responsibility-card-seq,[^}]*font-size:\s*0\.7rem/s);
 });
 

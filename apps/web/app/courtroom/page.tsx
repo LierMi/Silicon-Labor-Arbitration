@@ -197,7 +197,6 @@ export default function CourtroomPage() {
         .timeline({ defaults: { ease: "power3.out" } })
         .to('[data-motion-ambient]', { animationPlayState: "paused", duration: 0 }, 0)
         .to('[data-motion="court-stage"]', { scale: 1.035, duration: 0.72, ease: "power2.inOut" }, 0.1)
-        .fromTo('[data-objection-mark]', { autoAlpha: 0, scale: 2.8, rotation: -13 }, { autoAlpha: 1, scale: 1, rotation: -6, duration: 0.24, ease: "power4.in" }, 0.54)
         .to('[data-rule-sheet]', { x: -5, duration: 0.055, yoyo: true, repeat: 5 }, 0.72)
         .fromTo('[data-pending-stamp]', { autoAlpha: 0, y: -26 }, { autoAlpha: 1, y: 0, duration: 0.62 }, 1.02);
     });
@@ -242,6 +241,7 @@ export default function CourtroomPage() {
           </div>
           <div className={styles.caseIdentity}>
             <code>{caseFile.caseNo}</code>
+            <b className={styles.caseNickname}>猫猫和土豆案</b>
             <h1>{caseFile.title}</h1>
             <p className={styles.caseSummary}>
               委托人要求一只适合儿童产品的橙色猫；Agent 按时交付了透明 PNG，但画面主体是一颗土豆。C1–C3 已满足，C4“画的是猫”进入人工复核。
@@ -298,7 +298,7 @@ export default function CourtroomPage() {
                     ))}
                     {argument.role === "defense" ? (
                       <button className={styles.objectButton} onClick={() => setObjectionFx(true)} type="button">
-                        异议
+                        提出异议
                       </button>
                     ) : null}
                     <button className={styles.expandArgumentButton} onClick={() => setExpandedArgument((current) => current === argument.role ? null : argument.role)} type="button">
@@ -321,7 +321,10 @@ export default function CourtroomPage() {
               <header>
                 <span>RESPONSIBILITY CHAIN</span>
                 <b>责任链</b>
-                <em>每一步都有理由，终点却没有责任人</em>
+                <em>
+                  <img src="/courtroom/lady-justice.png" alt="" aria-hidden="true" />
+                  每一步都有理由，终点却没有责任人
+                </em>
               </header>
               <ol>
                 {caseFile.responsibilityChain.map((hop, index) => (
@@ -421,7 +424,19 @@ export default function CourtroomPage() {
         <span>证据 {caseFile.evidence.length} 份 · 责任链 {caseFile.responsibilityChain.length} 跳 · {localReview ? "本地意见已生成 / 链上未执行" : "C4 未决"}</span>
       </footer>
 
-      <div className={styles.objectionMark} data-objection-mark aria-hidden={!objectionRaised}>
+      {/* ⚠️ 可见性直接由 React state 给内联样式。
+          之前靠 CSS 的 [data-objection-state] + GSAP 的 autoAlpha 双控，
+          两边抢同一个属性，表现就是「时而有时而无」。
+          内联样式优先级最高，来源唯一，不会再抢。 */}
+      <div
+        className={styles.objectionMark}
+        data-objection-mark
+        aria-hidden={!objectionRaised}
+        style={{
+          opacity: objectionRaised ? 1 : 0,
+          transform: `rotate(-7deg) scale(${objectionRaised ? 1 : 0.86})`,
+        }}
+      >
         <span>異議</span>
         <b>OBJECTION</b>
       </div>
@@ -465,7 +480,14 @@ export default function CourtroomPage() {
         </div>
       ) : null}
 
-      <ObjectionBurst show={objectionFx} onDone={() => setObjectionFx(false)} />
+      <ObjectionBurst
+        show={objectionFx}
+        onDone={() => {
+          setObjectionFx(false);
+          // 特效收场之后，戳才落到辩方卡下方——先爆，再定案
+          setObjectionRaised(true);
+        }}
+      />
     </main>
   );
 }

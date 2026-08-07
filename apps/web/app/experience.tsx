@@ -180,6 +180,8 @@ const HANGING = [
 interface Tag {
   id: "translation" | "params" | "signature" | "broken";
   text: string;
+  /** 这一环留下的免责说辞。四张吊牌合起来就是「每个环节都有理由」 */
+  plea?: string;
   kind: "paper" | "acrylic" | "warning";
   x: number;
   y: number;
@@ -188,11 +190,15 @@ interface Tag {
   warn?: boolean;
 }
 
+/* 悬在空中的四张吊牌 = 委托链上四个环节各自留下的记录 + 各自的免责说辞。
+   原文是 agent translation log / tool params / wallet signature 这类英文黑话，
+   评委看不出意思。换成策划案 §一 那四句话——它们合起来正好证明标题：
+   **每个环节都有理由，最后没有人负责。** */
 const TAGS: Tag[] = [
-  { id: "translation", text: "agent translation log", kind: "acrylic", x: 35, y: 70, tilt: -7, depth: 1.8 },
-  { id: "params", text: "tool params", kind: "acrylic", x: 84, y: 33, tilt: 5, depth: 2.2 },
-  { id: "signature", text: "wallet signature", kind: "acrylic", x: 81, y: 65, tilt: -6, depth: 1.5 },
-  { id: "broken", text: "chain of custody\nBROKEN HERE", kind: "acrylic", x: 46, y: 83, tilt: 3, depth: 2.6, warn: true },
+  { id: "translation", text: "主 Agent · 转译记录", plea: "「我按用户意图推理」", kind: "acrylic", x: 33, y: 70, tilt: -7, depth: 1.8 },
+  { id: "params", text: "图像工具 · 调用参数", plea: "「我只执行收到的参数」", kind: "acrylic", x: 82, y: 31, tilt: 5, depth: 2.2 },
+  { id: "signature", text: "钱包 · 签名记录", plea: "「这笔签名是合法的」", kind: "acrylic", x: 80, y: 66, tilt: -6, depth: 1.5 },
+  { id: "broken", text: "四份记录都在", plea: "没有一份指向责任人", kind: "acrylic", x: 44, y: 84, tilt: 3, depth: 2.6, warn: true },
 ];
 
 function Landing({ onEnter }: { onEnter: () => void }) {
@@ -433,7 +439,8 @@ function Landing({ onEnter }: { onEnter: () => void }) {
           >
             <i className="tag-wire" aria-hidden="true" />
             <i className="tag-fastener" aria-hidden="true" />
-            {t.text}
+            <b>{t.text}</b>
+            {t.plea ? <em>{t.plea}</em> : null}
           </span>
         ))}
 
