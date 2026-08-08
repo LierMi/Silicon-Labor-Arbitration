@@ -22,15 +22,12 @@ import { gsap } from "gsap";
 import {
   ACTOR_ROLE_LABEL,
   CASE_STATUS_LABEL,
-  freshPotatoCase,
   findEvidence,
   findRuleResult,
 } from "@sla/domain";
 import type { AiArgument, Case, Evidence, Requirement, RuleResult } from "@sla/domain";
 import {
   buildArgumentPresentation,
-  buildArchiveSummary,
-  buildEvidenceConnectionIndex,
   buildProofBundle,
   caseRuntimeLabel,
   caseStatusLabel,
@@ -41,11 +38,8 @@ import {
   parseStoredReview,
   reviewStorageKey,
 } from "./case-presentation";
+import { useCase } from "./case-source";
 import { ResponsibilityChainBoard } from "./responsibility-chain-board";
-
-const c: Case = freshPotatoCase();
-const EVIDENCE_CONNECTIONS = buildEvidenceConnectionIndex(c);
-const ARCHIVE_SUMMARY = buildArchiveSummary(c);
 
 const ARGUMENT_SHORT_LABEL: Record<AiArgument["role"], string> = {
   prosecution: "检方",
@@ -149,10 +143,10 @@ const EXHIBIT_TITLE: Record<string, string> = {
   E3: "签名前的解释",
 };
 
-const EXHIBIT_NOTE: Record<string, string> = {
-  E1: `一只适合儿童产品的橙色猫\n透明背景 · PNG · ${formatCaseTime(c.onchain.deadline ?? "")} 前`,
-  E2: `potato.png\nPNG · 含 alpha · ${deliveryTimingLabel(findEvidence(c, "E2")?.delivery?.submittedAt ?? "", c.onchain.deadline ?? "")}`,
-  E3: "Moss 说：资金将锁入托管\n验收通过前不会释放",
+const EXHIBIT_NOTE: Record<string, (caseFile: Case) => string> = {
+  E1: (caseFile) => `一只适合儿童产品的橙色猫\n透明背景 · PNG · ${formatCaseTime(caseFile.onchain.deadline ?? "")} 前`,
+  E2: (caseFile) => `potato.png\nPNG · 含 alpha · ${deliveryTimingLabel(findEvidence(caseFile, "E2")?.delivery?.submittedAt ?? "", caseFile.onchain.deadline ?? "")}`,
+  E3: () => "Moss 说：资金将锁入托管\n验收通过前不会释放",
 };
 
 const EVIDENCE_MEDIA: Record<string, { src: string; originalSrc: string; alt: string; badge: string }> = {
@@ -202,6 +196,7 @@ const TAGS: Tag[] = [
 ];
 
 function Landing({ onEnter }: { onEnter: () => void }) {
+  const { caseFile: c } = useCase();
   const rootRef = useRef<HTMLDivElement>(null);
   const [leaving, setLeaving] = useState(false);
 
@@ -354,6 +349,9 @@ function Landing({ onEnter }: { onEnter: () => void }) {
         <button className="enter-link" onClick={enter} type="button">
           进入案件 <em>→</em>
         </button>
+        <a className="enter-link" href="/workbench" style={{ textDecoration: "none" }}>
+          任务工作台 <em>→</em>
+        </a>
       </header>
 
       <div className="gallery-shell" aria-hidden="true">
@@ -412,7 +410,7 @@ function Landing({ onEnter }: { onEnter: () => void }) {
                 <span className="panel-tab" aria-hidden="true" />
                 <b>{ev.id}</b>
                 <strong>{EXHIBIT_TITLE[ev.id] ?? ev.label}</strong>
-                <p>{EXHIBIT_NOTE[ev.id]}</p>
+                <p>{EXHIBIT_NOTE[ev.id]?.(c)}</p>
               </article>
             </div>
           );
@@ -523,6 +521,7 @@ function Landing({ onEnter }: { onEnter: () => void }) {
    ══════════════════════════════════════════════════════════ */
 
 function ActCommission({ onEvidence }: { onEvidence: (id: string) => void }) {
+  const { caseFile: c } = useCase();
   const e3 = findEvidence(c, "E3");
   const moss = e3?.mossPreSign;
   return (
@@ -579,6 +578,7 @@ function ActCommission({ onEvidence }: { onEvidence: (id: string) => void }) {
    ══════════════════════════════════════════════════════════ */
 
 function ActDelivery({ onEvidence }: { onEvidence: (id: string) => void }) {
+  const { caseFile: c } = useCase();
   const e2 = findEvidence(c, "E2");
   const d = e2?.delivery;
   return (
@@ -651,6 +651,7 @@ function ActChain({
   focusedEvidenceId: string | null;
   onFocusEvidence: (id: string | null) => void;
 }) {
+  const { caseFile: c, connections: EVIDENCE_CONNECTIONS } = useCase();
   const [active, setActive] = useState(c.responsibilityChain[0]?.id ?? "");
   const hop = c.responsibilityChain.find((h) => h.id === active);
   const focusedConnection = focusedEvidenceId ? EVIDENCE_CONNECTIONS[focusedEvidenceId] : undefined;
@@ -792,6 +793,7 @@ function ClauseRow({
 }
 
 function ActRuling({ onEvidence, onHumanReview, active }: { onEvidence: (id: string) => void; onHumanReview: () => void; active: boolean }) {
+  const { caseFile: c } = useCase();
   const s = c.settlementProposal;
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -926,6 +928,7 @@ function ActArguments({
   focusedEvidenceId: string | null;
   onFocusEvidence: (id: string | null) => void;
 }) {
+  const { caseFile: c, connections: EVIDENCE_CONNECTIONS } = useCase();
   const [activeRole, setActiveRole] = useState<AiArgument["role"] | null>(null);
   const presentation = buildArgumentPresentation(c.aiArguments, activeRole, focusedEvidenceId);
   const roleNames: Record<AiArgument["role"], string> = {
@@ -1007,20 +1010,20 @@ type HumanReviewResult = {
   role: string;
 };
 
-const HUMAN_DECISIONS: Record<HumanDecision, { label: string; action: string; note: string }> = {
+const HUMAN_DECISIONS: Record<HumanDecision, { label: string; action: (caseFile: Case) => string; note: string }> = {
   breach: {
     label: "违约成立",
-    action: `拟议动作：退还委托人 ${c.settlementProposal?.frozen ?? "0"} MON`,
+    action: (caseFile) => `拟议动作：退还委托人 ${caseFile.settlementProposal?.frozen ?? "0"} MON`,
     note: "认为交付物没有满足核心条款 C4。",
   },
   "no-breach": {
     label: "不构成违约",
-    action: `拟议动作：释放给 Agent ${c.settlementProposal?.frozen ?? "0"} MON`,
+    action: (caseFile) => `拟议动作：释放给 Agent ${caseFile.settlementProposal?.frozen ?? "0"} MON`,
     note: "认为现有交付与事前约定之间仍存在可接受的解释空间。",
   },
   "keep-frozen": {
     label: "继续冻结",
-    action: `拟议动作：维持冻结 ${c.settlementProposal?.frozen ?? "0"} MON`,
+    action: (caseFile) => `拟议动作：维持冻结 ${caseFile.settlementProposal?.frozen ?? "0"} MON`,
     note: "认为证据仍不足，需要补充材料或进入外部程序。",
   },
 };
@@ -1034,6 +1037,7 @@ function HumanReviewPanel({
   onClose: () => void;
   onResolve: (result: HumanReviewResult) => void;
 }) {
+  const { caseFile: c } = useCase();
   const [decision, setDecision] = useState<HumanDecision | null>(initialResult?.decision ?? null);
   const [reason, setReason] = useState(initialResult?.reason ?? "");
   const [reviewer, setReviewer] = useState(initialResult?.reviewer ?? "");
@@ -1094,7 +1098,7 @@ function HumanReviewPanel({
           <div className="review-result" data-review-result>
             <span>人工复核意见已生成</span>
             <h4>{HUMAN_DECISIONS[decision].label}</h4>
-            <p>{HUMAN_DECISIONS[decision].action}</p>
+            <p>{HUMAN_DECISIONS[decision].action(c)}</p>
             <p className="reviewer-signature">复核人：{reviewer} · {role}</p>
             <blockquote>{reason}</blockquote>
             <div className="execution-boundary">
@@ -1182,6 +1186,7 @@ function HumanReviewPanel({
 }
 
 function ActArchive({ onOpenTrace }: { onOpenTrace: () => void }) {
+  const { caseFile: c, summary: ARCHIVE_SUMMARY } = useCase();
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewResult, setReviewResult] = useState<HumanReviewResult | null>(null);
 
@@ -1226,7 +1231,7 @@ function ActArchive({ onOpenTrace }: { onOpenTrace: () => void }) {
             {reviewResult ? "查看人工复核意见" : "交由人类复核"}
             <em>→</em>
           </button>
-          <button onClick={downloadProofBundle} type="button">下载可验证证据包</button>
+          <button onClick={() => downloadProofBundle(c)} type="button">下载可验证证据包</button>
           <button onClick={onOpenTrace} type="button">查看完整技术链</button>
         </div>
         {reviewResult ? <span className="archive-local-result">本地复核意见 · {HUMAN_DECISIONS[reviewResult.decision].label}</span> : null}
@@ -1269,12 +1274,12 @@ function CopyProof({ value }: { value?: string }) {
   );
 }
 
-function downloadProofBundle() {
-  const payload = JSON.stringify(buildProofBundle(c), null, 2);
+function downloadProofBundle(caseFile: Case) {
+  const payload = JSON.stringify(buildProofBundle(caseFile), null, 2);
   const url = URL.createObjectURL(new Blob([payload], { type: "application/json" }));
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `${c.caseNo}-proof-bundle.json`;
+  anchor.download = `${caseFile.caseNo}-proof-bundle.json`;
   anchor.click();
   URL.revokeObjectURL(url);
 }
@@ -1293,6 +1298,7 @@ type TraceNode = {
 };
 
 function TechnicalTrace({ onClose }: { onClose: () => void }) {
+  const { caseFile: c } = useCase();
   const e1 = findEvidence(c, "E1");
   const e2 = findEvidence(c, "E2");
   const e3 = findEvidence(c, "E3");
@@ -1398,7 +1404,7 @@ function TechnicalTrace({ onClose }: { onClose: () => void }) {
           <span>每个节点回答三件事：发生了什么、谁拥有权限、用什么证据验证。</span>
         </div>
         <div className="trace-actions">
-          <button onClick={downloadProofBundle} type="button">下载证据包 JSON ↓</button>
+          <button onClick={() => downloadProofBundle(c)} type="button">下载证据包 JSON ↓</button>
           <button onClick={onClose} type="button">返回案件叙事 ×</button>
         </div>
       </header>
@@ -1537,6 +1543,7 @@ function Drawer({
   onClose: () => void;
   onNavigate: (act: number) => void;
 }) {
+  const { caseFile: c, connections: EVIDENCE_CONNECTIONS } = useCase();
   const media = ev ? EVIDENCE_MEDIA[ev.id] : undefined;
   const connection = ev ? EVIDENCE_CONNECTIONS[ev.id] : undefined;
   return (
@@ -1628,6 +1635,7 @@ export function ArbitrationExperience({
   onLandingEnter?: () => void;
 }) {
   const router = useRouter();
+  const { caseFile: c } = useCase();
   const [entered, setEntered] = useState(initialEntered);
   const [act, setAct] = useState(0);
   const [evId, setEvId] = useState<string | null>(null);

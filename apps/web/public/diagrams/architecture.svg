@@ -1,89 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 650" role="img" aria-label="Silicon Labor Arbitration · System Architecture (Current) — Current monorepo runtime: Next.js demo + domain/rules/chain + Moss createTask seam + Monad Testnet (architecture diagram)"><style>
-  /* 硅基劳动仲裁院 · 夜间档案室配色
-     Archify 默认是蓝灰工程图，与我们的暗房+朱红不搭。
-     这里只重定义变量，不改任何图形结构——重新生成图时覆盖本文件即可，
-     把这段 style 再注一次就行（scripts/restyle-diagrams.py）。 */
-  :root {
-    --bg: transparent;
-    --grid: rgba(214, 205, 185, 0.05);
-    --mask: rgba(11, 9, 6, 0.72);
-
-    --text: #f4efe4;
-    --text-muted: #b8ae99;
-    --text-dim: #7d7462;
-    --arrow: #8a8272;
-    --arrow-emphasis: #c0392b;
-
-    --frontend-fill: rgba(233, 226, 209, 0.06);
-    --frontend-stroke: #d6cdb9;
-    --backend-fill: rgba(192, 57, 43, 0.09);
-    --backend-stroke: #c0392b;
-    --database-fill: rgba(233, 226, 209, 0.045);
-    --database-stroke: #948b78;
-    --cloud-fill: rgba(255, 202, 122, 0.07);
-    --cloud-stroke: #e0a253;
-    --security-fill: rgba(192, 57, 43, 0.07);
-    --security-stroke: #c0392b;
-    --messagebus-fill: rgba(233, 226, 209, 0.05);
-    --messagebus-stroke: #a99f88;
-    --external-fill: rgba(233, 226, 209, 0.035);
-    --external-stroke: #6b6455;
-    --lane-fill: rgba(233, 226, 209, 0.02);
-    --lane-stroke: rgba(214, 205, 185, 0.14);
-  }
-  text { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-  .c-grid { stroke: var(--grid); fill: none; }
-  .c-mask { fill: var(--mask); stroke: none; }
-  .c-frontend { fill: var(--frontend-fill); stroke: var(--frontend-stroke); }
-  .c-backend { fill: var(--backend-fill); stroke: var(--backend-stroke); }
-  .c-database { fill: var(--database-fill); stroke: var(--database-stroke); }
-  .c-cloud { fill: var(--cloud-fill); stroke: var(--cloud-stroke); }
-  .c-security { fill: var(--security-fill); stroke: var(--security-stroke); }
-  .c-messagebus { fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
-  .c-external { fill: var(--external-fill); stroke: var(--external-stroke); }
-  .c-security-group { fill: transparent; stroke: var(--security-stroke); stroke-dasharray: 4,4; }
-  .c-region { fill: rgba(255, 202, 122, 0.035); stroke: var(--cloud-stroke); stroke-dasharray: 8,4; }
-  .c-lane { fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6,6; }
-  .c-bg-rect { fill: var(--bg); }
-  .t-primary { fill: var(--text); }
-  .t-muted { fill: var(--text-muted); }
-  .t-dim { fill: var(--text-dim); }
-  .t-frontend { fill: var(--frontend-stroke); }
-  .t-backend { fill: var(--backend-stroke); }
-  .t-database { fill: var(--database-stroke); }
-  .t-cloud { fill: var(--cloud-stroke); }
-  .t-security { fill: var(--security-stroke); }
-  .t-messagebus { fill: var(--messagebus-stroke); }
-  .t-external { fill: var(--external-stroke); }
-  /* 连线用的是 a-* 前缀（不是 e-*）。漏定义的话 path 会按 SVG
-     默认 fill:black 填成大黑块，把整张图糊掉。
-     注意：本 style 块内绝不能出现尖括号，XML 解析器会当成标签。 */
-  .a-default { stroke: var(--arrow); fill: none; stroke-width: 1.5; }
-  .a-emphasis { stroke: var(--arrow-emphasis); fill: none; stroke-width: 1.8; }
-  .a-dashed { stroke: var(--database-stroke); fill: none; stroke-width: 1.3; stroke-dasharray: 5,4; }
-  .a-security { stroke: var(--security-stroke); fill: none; stroke-width: 1.5; }
-  /* marker 跟随线宽会被放得很大，锁成绝对尺寸 */
-
-  .e-emphasis { stroke: var(--arrow-emphasis); fill: none; }
-  .e-dashed { stroke: var(--database-stroke); fill: none; stroke-dasharray: 5,4; }
-  .e-security { stroke: var(--security-stroke); fill: none; }
-  .m-default { fill: var(--arrow); }
-  .m-emphasis { fill: var(--arrow-emphasis); }
-  .m-security { fill: var(--security-stroke); }
-  .m-dashed { fill: var(--database-stroke); }
-</style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 652" role="img" aria-label="Silicon Labor Arbitration · System Architecture — Two transaction paths, one wallet signing boundary, Monad Testnet only (architecture diagram)"><style><![CDATA[
+text { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
+.c-bg-rect { fill: #020617; }
+.c-grid { fill: none; stroke: #1e293b; }
+.c-mask { fill: #0f172a; stroke: none; }
+.c-frontend { fill: rgba(8,51,68,0.72); stroke: #22d3ee; }
+.c-backend { fill: rgba(6,78,59,0.72); stroke: #34d399; }
+.c-database { fill: rgba(76,29,149,0.72); stroke: #a78bfa; }
+.c-cloud { fill: rgba(120,53,15,0.62); stroke: #fbbf24; }
+.c-security { fill: rgba(136,19,55,0.72); stroke: #fb7185; }
+.c-messagebus { fill: rgba(30,64,175,0.52); stroke: #60a5fa; }
+.c-external { fill: rgba(30,41,59,0.82); stroke: #94a3b8; }
+.c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
+.c-region { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
+.c-lane { fill: rgba(15,23,42,0.62); stroke: #334155; stroke-dasharray: 6,6; }
+.t-primary { fill: #f8fafc; }
+.t-muted { fill: #94a3b8; }
+.t-dim { fill: #64748b; }
+.t-frontend { fill: #22d3ee; }
+.t-backend { fill: #34d399; }
+.t-database { fill: #a78bfa; }
+.t-cloud { fill: #fbbf24; }
+.t-security { fill: #fb7185; }
+.t-messagebus { fill: #60a5fa; }
+.t-external { fill: #94a3b8; }
+.a-default { stroke: #64748b; fill: none; }
+.a-emphasis { stroke: #34d399; fill: none; }
+.a-security { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
+.a-dashed { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
+.m-default { fill: #64748b; }
+.m-emphasis { fill: #34d399; }
+.m-security { fill: #fb7185; }
+.m-dashed { fill: #a78bfa; }
+]]></style><rect width="100%" height="100%" fill="#020617"/>
         <!-- Definitions -->
         <defs>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
           </marker>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -95,133 +55,135 @@
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect x="10" y="30" width="260" height="112" rx="12" class="c-region" stroke-width="1"/>
-        <text x="18" y="48" class="t-cloud" font-size="9" font-weight="600">Verification &amp; Tooling</text>
+        <rect x="10" y="110" width="620" height="474" rx="12" class="c-region" stroke-width="1"/>
+        <text x="18" y="128" class="t-cloud" font-size="9" font-weight="600">First-party product packages</text>
 
-        <rect x="10" y="150" width="1030" height="272" rx="12" class="c-region" stroke-width="1"/>
-        <text x="18" y="168" class="t-cloud" font-size="9" font-weight="600">Silicon Packages (monorepo)</text>
+        <rect x="620" y="110" width="640" height="114" rx="12" class="c-region" stroke-width="1"/>
+        <text x="628" y="128" class="t-cloud" font-size="9" font-weight="600">Pinned Moss fork · vendor/moss</text>
 
-        <rect x="250" y="310" width="590" height="112" rx="12" class="c-region" stroke-width="1"/>
-        <text x="258" y="328" class="t-cloud" font-size="9" font-weight="600">Moss Fork (vendor/moss submodule)</text>
-
-        <rect x="250" y="470" width="510" height="112" rx="8" class="c-security-group" stroke-width="1"/>
-        <text x="258" y="488" class="t-security" font-size="9" font-weight="600">Monad Testnet</text>
+        <rect x="1030" y="290" width="230" height="294" rx="8" class="c-security-group" stroke-width="1"/>
+        <text x="1038" y="308" class="t-security" font-size="9" font-weight="600">Monad Testnet · chain 10143</text>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path d="M 140 122 L 140 303 Q 140 311 148 311 L 347 311 Q 355 311 355 319 L 355 500" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
-        <path d="M 170 211 L 210 211" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path d="M 170 211 L 380 211" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path d="M 170 211 L 580 211" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path d="M 340 211 L 380 211" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path d="M 650 242 L 650 283 Q 650 291 642 291 L 363 291 Q 355 291 355 299 L 355 340" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path d="M 430 371 L 470 371" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path d="M 545 340 L 735 340" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path d="M 735 402 L 735 443 Q 735 451 727 451 L 653 451 Q 645 451 645 459 L 645 500" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path d="M 560 531 L 430 531" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path d="M 930 402 L 930 443 Q 930 451 922 451 L 363 451 Q 355 451 355 459 L 355 500" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path d="M 190 172 L 230 172" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 400 172 L 440 172" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 600 172 L 650 172" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 810 172 L 850 172" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 1020 172 L 1060 172" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 1145 204 L 1145 262 L 1145 262 L 1145 320" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 115 204 L 115 270 Q 115 278 123 278 L 222 278 Q 230 278 230 286 L 230 352" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 115 204 L 115 252 Q 115 260 123 260 L 927 260 Q 935 260 935 268 L 935 320" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path d="M 400 352 L 850 352" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path d="M 1020 352 L 1060 352" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 1145 384 L 1145 442 L 1145 442 L 1145 500" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 190 532 L 230 532" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 400 532 L 440 532" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 115 500 L 115 352 L 115 352 L 115 204" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
 
         <!-- Components -->
-        <rect x="40" y="60" width="200" height="62" rx="6" class="c-mask"/>
-        <rect x="40" y="60" width="200" height="62" rx="6" class="c-external" stroke-width="1.5"/>
-        <text x="140" y="89" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Verification Scripts</text>
-        <text x="140" y="105" class="t-muted" font-size="9" text-anchor="middle">e2e-verify · concurrency-demo · forge test</text>
+        <rect x="40" y="140" width="150" height="64" rx="6" class="c-mask"/>
+        <rect x="40" y="140" width="150" height="64" rx="6" class="c-frontend" stroke-width="1.5"/>
+        <text x="115" y="170" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Next.js Workbench</text>
+        <text x="115" y="186" class="t-muted" font-size="9" text-anchor="middle">task form · evidence · lifecycle</text>
 
-        <rect x="40" y="180" width="130" height="62" rx="6" class="c-mask"/>
-        <rect x="40" y="180" width="130" height="62" rx="6" class="c-database" stroke-width="1.5"/>
-        <text x="105" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Domain Types</text>
-        <text x="105" y="225" class="t-muted" font-size="9" text-anchor="middle">Case · Evidence · E3</text>
-        <text x="105" y="234" class="t-database" font-size="7" text-anchor="middle">shared schemas</text>
+        <rect x="230" y="140" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="230" y="140" width="170" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="315" y="170" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Prepare API</text>
+        <text x="315" y="186" class="t-muted" font-size="9" text-anchor="middle">POST /api/moss/prepare-create-task</text>
 
-        <rect x="210" y="180" width="130" height="62" rx="6" class="c-mask"/>
-        <rect x="210" y="180" width="130" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="275" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Rule Engine</text>
-        <text x="275" y="225" class="t-muted" font-size="9" text-anchor="middle">Deterministic checkers</text>
-        <text x="275" y="234" class="t-backend" font-size="7" text-anchor="middle">pure functions</text>
+        <rect x="440" y="140" width="160" height="64" rx="6" class="c-mask"/>
+        <rect x="440" y="140" width="160" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="520" y="170" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MossBridge</text>
+        <text x="520" y="186" class="t-muted" font-size="9" text-anchor="middle">prepareCreateTask() · buildE3()</text>
+        <text x="520" y="196" class="t-backend" font-size="7" text-anchor="middle">only Moss seam</text>
 
-        <rect x="380" y="180" width="150" height="62" rx="6" class="c-mask"/>
-        <rect x="380" y="180" width="150" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="455" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">AI Explanation</text>
-        <text x="455" y="225" class="t-muted" font-size="9" text-anchor="middle">Prosecution / Defense / Audit</text>
+        <rect x="650" y="140" width="160" height="64" rx="6" class="c-mask"/>
+        <rect x="650" y="140" width="160" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="730" y="170" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Testnet Runtime</text>
+        <text x="730" y="186" class="t-muted" font-size="9" text-anchor="middle">monadTestnetRuntime · 10143</text>
 
-        <rect x="580" y="180" width="140" height="62" rx="6" class="c-mask"/>
-        <rect x="580" y="180" width="140" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="650" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MossBridge</text>
-        <text x="650" y="225" class="t-muted" font-size="9" text-anchor="middle">prepareCreateTask()</text>
-        <text x="650" y="234" class="t-backend" font-size="7" text-anchor="middle">only Moss seam</text>
+        <rect x="850" y="140" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="850" y="140" width="170" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="935" y="170" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">createTask Capability</text>
+        <text x="935" y="186" class="t-muted" font-size="9" text-anchor="middle">ABI · intent · Receipt parser</text>
+        <text x="935" y="196" class="t-backend" font-size="7" text-anchor="middle">silicon-arbitration</text>
 
-        <rect x="790" y="180" width="150" height="62" rx="6" class="c-mask"/>
-        <rect x="790" y="180" width="150" height="62" rx="6" class="c-frontend" stroke-width="1.5"/>
-        <text x="865" y="209" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Next.js UI</text>
-        <text x="865" y="225" class="t-muted" font-size="9" text-anchor="middle">demo dossier · freshPotatoCase()</text>
-        <text x="865" y="234" class="t-frontend" font-size="7" text-anchor="middle">current mock</text>
+        <rect x="1060" y="140" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="1060" y="140" width="170" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="1145" y="170" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Trace Simulator</text>
+        <text x="1145" y="186" class="t-muted" font-size="9" text-anchor="middle">unsigned tx · Changes · warnings</text>
 
-        <rect x="280" y="340" width="150" height="62" rx="6" class="c-mask"/>
-        <rect x="280" y="340" width="150" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="355" y="369" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Testnet Runtime</text>
-        <text x="355" y="385" class="t-muted" font-size="9" text-anchor="middle">monadTestnetRuntime</text>
+        <rect x="230" y="320" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="230" y="320" width="170" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="315" y="350" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Chain Adapter</text>
+        <text x="315" y="366" class="t-muted" font-size="9" text-anchor="middle">lifecycle + fallback createTask</text>
+        <text x="315" y="376" class="t-backend" font-size="7" text-anchor="middle">direct tx builders</text>
 
-        <rect x="470" y="340" width="150" height="62" rx="6" class="c-mask"/>
-        <rect x="470" y="340" width="150" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="545" y="369" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Protocol Package</text>
-        <text x="545" y="385" class="t-muted" font-size="9" text-anchor="middle">silicon-arbitration</text>
-        <text x="545" y="394" class="t-backend" font-size="7" text-anchor="middle">createTask only</text>
+        <rect x="850" y="320" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="850" y="320" width="170" height="64" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="935" y="350" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">User Wallet</text>
+        <text x="935" y="366" class="t-muted" font-size="9" text-anchor="middle">review · sign · broadcast</text>
+        <text x="935" y="376" class="t-security" font-size="7" text-anchor="middle">signing boundary</text>
 
-        <rect x="660" y="340" width="150" height="62" rx="6" class="c-mask"/>
-        <rect x="660" y="340" width="150" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
-        <text x="735" y="369" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Trace Simulator</text>
-        <text x="735" y="385" class="t-muted" font-size="9" text-anchor="middle">TraceCall + Receipt parser</text>
+        <rect x="1060" y="320" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="1060" y="320" width="170" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="1145" y="350" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Monad Testnet RPC</text>
+        <text x="1145" y="366" class="t-muted" font-size="9" text-anchor="middle">debug_traceCall · eth_sendRawTx</text>
 
-        <rect x="850" y="340" width="160" height="62" rx="6" class="c-mask"/>
-        <rect x="850" y="340" width="160" height="62" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="930" y="369" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Chain Adapter</text>
-        <text x="930" y="385" class="t-muted" font-size="9" text-anchor="middle">viem tx builders · direct path</text>
-        <text x="930" y="394" class="t-backend" font-size="7" text-anchor="middle">post-create writes</text>
+        <rect x="1060" y="500" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="1060" y="500" width="170" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="1145" y="530" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TaskEscrow</text>
+        <text x="1145" y="546" class="t-muted" font-size="9" text-anchor="middle">0x6704…FFCcF · Solidity 0.8.24</text>
+        <text x="1145" y="556" class="t-cloud" font-size="7" text-anchor="middle">deployed on 10143</text>
 
-        <rect x="280" y="500" width="150" height="62" rx="6" class="c-mask"/>
-        <rect x="280" y="500" width="150" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
-        <text x="355" y="529" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TaskEscrow</text>
-        <text x="355" y="545" class="t-muted" font-size="9" text-anchor="middle">0x6704...FFCcF</text>
-        <text x="355" y="554" class="t-cloud" font-size="7" text-anchor="middle">Monad Testnet 10143</text>
+        <rect x="40" y="500" width="150" height="64" rx="6" class="c-mask"/>
+        <rect x="40" y="500" width="150" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="115" y="530" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Domain</text>
+        <text x="115" y="546" class="t-muted" font-size="9" text-anchor="middle">Case · Requirements · Evidence · E3</text>
+        <text x="115" y="556" class="t-backend" font-size="7" text-anchor="middle">shared library</text>
 
-        <rect x="560" y="500" width="170" height="62" rx="6" class="c-mask"/>
-        <rect x="560" y="500" width="170" height="62" rx="6" class="c-cloud" stroke-width="1.5"/>
-        <text x="645" y="529" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Monad RPC</text>
-        <text x="645" y="545" class="t-muted" font-size="9" text-anchor="middle">testnet-rpc.monad.xyz</text>
+        <rect x="230" y="500" width="170" height="64" rx="6" class="c-mask"/>
+        <rect x="230" y="500" width="170" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="315" y="530" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Rule Engine</text>
+        <text x="315" y="546" class="t-muted" font-size="9" text-anchor="middle">deterministic RuleResult</text>
+
+        <rect x="440" y="500" width="160" height="64" rx="6" class="c-mask"/>
+        <rect x="440" y="500" width="160" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="520" y="530" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">AI Explanation</text>
+        <text x="520" y="546" class="t-muted" font-size="9" text-anchor="middle">prosecution · defense · audit</text>
+        <text x="520" y="556" class="t-backend" font-size="7" text-anchor="middle">does not judge</text>
 
         <!-- Connection labels -->
-        <rect x="166.5" y="366" width="82" height="14" rx="3" class="c-mask"/>
-        <text x="207.5" y="376" class="t-security" font-size="8" text-anchor="middle">direct viem txs</text>
-        <rect x="161" y="246" width="58" height="14" rx="3" class="c-mask"/>
-        <text x="190" y="256" class="t-messagebus" font-size="8" text-anchor="middle">Case types</text>
-        <rect x="246" y="246" width="58" height="14" rx="3" class="c-mask"/>
-        <text x="275" y="256" class="t-messagebus" font-size="8" text-anchor="middle">Case types</text>
-        <rect x="350.8" y="246" width="48.4" height="14" rx="3" class="c-mask"/>
-        <text x="375" y="256" class="t-messagebus" font-size="8" text-anchor="middle">E3 types</text>
-        <rect x="304.6" y="131" width="110.8" height="14" rx="3" class="c-mask"/>
-        <text x="360" y="141" class="t-messagebus" font-size="8" text-anchor="middle">undecidable → explain</text>
-        <rect x="471.1" y="271" width="62.8" height="14" rx="3" class="c-mask"/>
-        <text x="502.5" y="281" class="t-muted" font-size="8" text-anchor="middle">Runtime API</text>
-        <rect x="411.4" y="406" width="77.2" height="14" rx="3" class="c-mask"/>
-        <text x="450" y="416" class="t-muted" font-size="8" text-anchor="middle">registry.use()</text>
-        <rect x="615.8" y="260" width="48.4" height="14" rx="3" class="c-mask"/>
-        <text x="640" y="270" class="t-muted" font-size="8" text-anchor="middle">action()</text>
-        <rect x="649" y="471" width="82" height="14" rx="3" class="c-mask"/>
-        <text x="690" y="481" class="t-messagebus" font-size="8" text-anchor="middle">debug_traceCall</text>
-        <rect x="470.8" y="511" width="48.4" height="14" rx="3" class="c-mask"/>
-        <text x="495" y="521" class="t-muted" font-size="8" text-anchor="middle">JSON-RPC</text>
-        <rect x="606.3" y="476" width="72.4" height="14" rx="3" class="c-mask"/>
-        <text x="642.5" y="486" class="t-security" font-size="8" text-anchor="middle">direct writes</text>
+        <rect x="188.2" y="152" width="43.6" height="14" rx="3" class="c-mask"/>
+        <text x="210" y="162" class="t-backend" font-size="8" text-anchor="middle">prepare</text>
+
+
+
+
+        <rect x="1056" y="242" width="82" height="14" rx="3" class="c-mask"/>
+        <text x="1097" y="252" class="t-messagebus" font-size="8" text-anchor="middle">debug_traceCall</text>
+        <rect x="112.7" y="258" width="67.6" height="14" rx="3" class="c-mask"/>
+        <text x="146.5" y="268" class="t-messagebus" font-size="8" text-anchor="middle">later writes</text>
+        <rect x="493.6" y="240" width="62.8" height="14" rx="3" class="c-mask"/>
+        <text x="525" y="250" class="t-security" font-size="8" text-anchor="middle">prepared tx</text>
+        <rect x="588.8" y="332" width="72.4" height="14" rx="3" class="c-mask"/>
+        <text x="625" y="342" class="t-security" font-size="8" text-anchor="middle">wagmi request</text>
+
+        <rect x="1160" y="422" width="58" height="14" rx="3" class="c-mask"/>
+        <text x="1189" y="432" class="t-muted" font-size="8" text-anchor="middle">execute tx</text>
+
+
+        <rect x="46" y="332" width="58" height="14" rx="3" class="c-mask"/>
+        <text x="75" y="342" class="t-messagebus" font-size="8" text-anchor="middle">typed data</text>
 
         <!-- Legend -->
-        <text x="40" y="621" class="t-primary" font-size="9" font-weight="600">Legend</text>
-        <rect x="40" y="626" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
-        <text x="60" y="634" class="t-muted" font-size="8">External</text>
-        <rect x="138" y="626" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-        <text x="158" y="634" class="t-muted" font-size="8">Database</text>
-        <rect x="236" y="626" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-        <text x="256" y="634" class="t-muted" font-size="8">Backend</text>
-        <rect x="329" y="626" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-        <text x="349" y="634" class="t-muted" font-size="8">Frontend</text>
-        <rect x="427" y="626" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
-        <text x="447" y="634" class="t-muted" font-size="8">Cloud</text>
+        <text x="40" y="623" class="t-primary" font-size="9" font-weight="600">Legend</text>
+        <rect x="40" y="628" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+        <text x="60" y="636" class="t-muted" font-size="8">Frontend</text>
+        <rect x="138" y="628" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+        <text x="158" y="636" class="t-muted" font-size="8">Backend</text>
+        <rect x="231" y="628" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+        <text x="251" y="636" class="t-muted" font-size="8">Cloud</text>
+        <rect x="314" y="628" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+        <text x="334" y="636" class="t-muted" font-size="8">Security</text>
       </svg>

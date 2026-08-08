@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.10.0">
-  <title>End-to-End Task Creation · Moss Path Diagram</title>
+  <title>createTask · Current Moss Path Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -525,14 +525,14 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>End-to-End Task Creation · Moss Path</h1>
+        <h1>createTask · Current Moss Path</h1>
       </div>
-      <p class="subtitle">createTask via MossBridge → simulate → E3 → wallet sign → on-chain confirm</p>
+      <p class="subtitle">Implemented flow, including the currently missing Warning guard</p>
     </div>
 
     <!-- Main Diagram -->
     <div class="diagram-container">
-      <svg viewBox="0 0 720 528" role="img" aria-label="End-to-End Task Creation · Moss Path — createTask via MossBridge → simulate → E3 → wallet sign → on-chain confirm (workflow diagram)">
+      <svg viewBox="0 0 720 652" role="img" aria-label="createTask · Current Moss Path — Implemented flow, including the currently missing Warning guard (workflow diagram)">
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -560,10 +560,14 @@
         <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / User / Wallet</text>
 
         <rect x="40" y="176" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / Silicon Packages (Server-side)</text>
+        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / Next.js + MossBridge (server)</text>
 
         <rect x="40" y="300" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="322" class="t-dim" font-size="10" font-weight="600">03 / Moss + Monad Testnet</text>
+        <text x="54" y="322" class="t-dim" font-size="10" font-weight="600">03 / Moss Fork + Monad Testnet</text>
+
+        <rect x="40" y="424" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <rect x="46" y="430" width="628" height="92" rx="8" class="c-security-group" stroke-width="1"/>
+        <text x="54" y="446" class="t-security" font-size="10" font-weight="600">EX / Known Safety Gap</text>
 
         <!-- Phase headers -->
         <line x1="42" y1="35" x2="266" y2="35" class="a-default" stroke-width="1.1"/>
@@ -571,54 +575,60 @@
         <text x="154" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">1. Prepare</text>
         <line x1="254" y1="35" x2="476" y2="35" class="a-default" stroke-width="1.1"/>
         <rect x="254" y="27" width="222" height="16" rx="4" class="c-mask"/>
-        <text x="365" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">2. Simulate &amp; E3</text>
+        <text x="365" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">2. Simulate + Verify</text>
         <line x1="454" y1="35" x2="671" y2="35" class="a-default" stroke-width="1.1"/>
         <rect x="454" y="27" width="217" height="16" rx="4" class="c-mask"/>
-        <text x="562.5" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">3. Sign &amp; Confirm</text>
+        <text x="562.5" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">3. Sign + Confirm</text>
 
         <!-- Workflow groups -->
-        <rect x="38" y="338" width="637" height="58" rx="9" class="c-lane" stroke-width="1"/>
-        <text x="48" y="352" class="t-backend" font-size="7" font-weight="600">Moss covers ONLY createTask</text>
+
 
         <!-- Edge paths -->
-        <path d="M 134 119 L 134 166 L 165 166 L 165 243" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 220 269 L 220 290 L 300 290 L 300 333" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path d="M 300 401 L 300 290 L 430 290 L 430 209" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path d="M 485 243 L 485 166 L 454 166 L 454 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 500 145 L 500 228 L 625 228 L 625 341" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 134 119 L 134 166 L 167 166 L 167 243" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 273 243 L 273 290 L 245 290 L 245 367" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 355 367 L 355 290 L 372 290 L 372 243" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 488 243 L 488 166 L 454 166 L 454 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 546 119 L 546 228 L 573 228 L 573 367" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 430 277 L 430 352 L 500 352 L 500 465" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
 
         <!-- Nodes -->
         <rect x="42" y="93" width="92" height="52" rx="6" class="c-mask"/>
         <rect x="42" y="93" width="92" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
-        <text x="88" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">User Input</text>
-        <text x="88" y="131" class="t-muted" font-size="8" text-anchor="middle">Task + MON amount</text>
+        <text x="88" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Task Input</text>
+        <text x="88" y="131" class="t-muted" font-size="8" text-anchor="middle">requirements + MON</text>
 
-        <rect x="165" y="217" width="110" height="52" rx="6" class="c-mask"/>
-        <rect x="165" y="217" width="110" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="220" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MossBridge</text>
-        <text x="220" y="255" class="t-muted" font-size="8" text-anchor="middle">prepareCreateTask()</text>
+        <rect x="167" y="217" width="106" height="52" rx="6" class="c-mask"/>
+        <rect x="167" y="217" width="106" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="220" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Prepare API</text>
+        <text x="220" y="255" class="t-muted" font-size="8" text-anchor="middle">validate request</text>
 
-        <rect x="254" y="333" width="92" height="68" rx="6" class="c-mask"/>
-        <rect x="254" y="333" width="92" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
-        <text x="300" y="354" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Simulate</text>
+        <rect x="245" y="333" width="110" height="68" rx="6" class="c-mask"/>
+        <rect x="245" y="333" width="110" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="300" y="354" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Action + Simulate</text>
         <text x="300" y="371" class="t-muted" font-size="8" text-anchor="middle">Capability → unsigned tx</text>
-        <text x="300" y="389" class="t-cloud" font-size="7" text-anchor="middle">debug_traceCall</text>
+        <text x="300" y="389" class="t-cloud" font-size="7" text-anchor="middle">Receipt parser</text>
 
-        <rect x="375" y="209" width="110" height="68" rx="6" class="c-mask"/>
-        <rect x="375" y="209" width="110" height="68" rx="6" class="c-security" stroke-width="1.5"/>
-        <text x="430" y="230" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Verify &amp; E3</text>
-        <text x="430" y="247" class="t-muted" font-size="8" text-anchor="middle">No warnings → evidence</text>
-        <text x="430" y="265" class="t-security" font-size="7" text-anchor="middle">gate</text>
+        <rect x="372" y="209" width="116" height="68" rx="6" class="c-mask"/>
+        <rect x="372" y="209" width="116" height="68" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="430" y="230" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Build E3 + Return</text>
+        <text x="430" y="247" class="t-muted" font-size="8" text-anchor="middle">archives receipt + warnings</text>
+        <text x="430" y="265" class="t-security" font-size="7" text-anchor="middle">always returns</text>
 
         <rect x="454" y="93" width="92" height="52" rx="6" class="c-mask"/>
         <rect x="454" y="93" width="92" height="52" rx="6" class="c-security" stroke-width="1.5"/>
-        <text x="500" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Wallet Sign</text>
-        <text x="500" y="131" class="t-muted" font-size="8" text-anchor="middle">User reviews &amp; signs</text>
+        <text x="500" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Review + Sign</text>
+        <text x="500" y="131" class="t-muted" font-size="8" text-anchor="middle">reuses to · data · value</text>
 
-        <rect x="575" y="341" width="100" height="52" rx="6" class="c-mask"/>
-        <rect x="575" y="341" width="100" height="52" rx="6" class="c-cloud" stroke-width="1.5"/>
-        <text x="625" y="362" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TaskCreated</text>
-        <text x="625" y="379" class="t-muted" font-size="8" text-anchor="middle">Tx confirmed on-chain</text>
+        <rect x="573" y="333" width="104" height="68" rx="6" class="c-mask"/>
+        <rect x="573" y="333" width="104" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="625" y="354" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TaskCreated</text>
+        <text x="625" y="371" class="t-muted" font-size="8" text-anchor="middle">tx hash → manual load</text>
+        <text x="625" y="389" class="t-cloud" font-size="7" text-anchor="middle">receipt → taskId</text>
+
+        <rect x="454" y="465" width="92" height="52" rx="6" class="c-mask"/>
+        <rect x="454" y="465" width="92" height="52" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="500" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guard Missing</text>
+        <text x="500" y="503" class="t-muted" font-size="8" text-anchor="middle">not blocked</text>
 
         <!-- Edge labels -->
 
@@ -626,19 +636,21 @@
 
 
 
+        <rect x="421.6" y="332" width="86.8" height="14" rx="3" class="c-mask"/>
+        <text x="465" y="342" class="t-security" font-size="8" text-anchor="middle">warning / revert</text>
 
         <!-- Legend -->
-        <text x="175" y="428" class="t-primary" font-size="10" font-weight="600">Legend</text>
-        <rect x="175" y="440" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-        <text x="195" y="448" class="t-muted" font-size="7">User UI</text>
-        <rect x="260" y="440" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-        <text x="280" y="448" class="t-muted" font-size="7">Agent logic</text>
-        <rect x="370" y="440" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-        <text x="390" y="448" class="t-muted" font-size="7">Policy</text>
-        <rect x="455" y="440" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
-        <text x="475" y="448" class="t-muted" font-size="7">Tool action</text>
-        <rect x="565" y="440" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-        <text x="585" y="448" class="t-muted" font-size="7">Context / trace</text>
+        <text x="175" y="552" class="t-primary" font-size="10" font-weight="600">Legend</text>
+        <rect x="175" y="564" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+        <text x="195" y="572" class="t-muted" font-size="7">User UI</text>
+        <rect x="260" y="564" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+        <text x="280" y="572" class="t-muted" font-size="7">Agent logic</text>
+        <rect x="370" y="564" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+        <text x="390" y="572" class="t-muted" font-size="7">Policy</text>
+        <rect x="455" y="564" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
+        <text x="475" y="572" class="t-muted" font-size="7">Tool action</text>
+        <rect x="565" y="564" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+        <text x="585" y="572" class="t-muted" font-size="7">Context / trace</text>
       </svg>
     </div>
 
@@ -647,36 +659,33 @@
       <div class="card">
         <div class="card-header">
           <div class="card-dot cyan"></div>
-          <h3>Moss Path (this flow)</h3>
+          <h3>Implemented</h3>
         </div>
         <ul>
-          <li>&bull; MossBridge builds capability + unsigned tx, simulates on Testnet</li>
-          <li>&bull; E3 pre-sign evidence generated (canonical hash)</li>
-          <li>&bull; Warnings → BLOCK; wallet signs only after clean simulation</li>
+          <li>&bull; E3 is built for every simulation result and warnings are displayed</li>
+          <li>&bull; Wallet request reuses Moss to, data and value</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>Required fix</h3>
+        </div>
+        <ul>
+          <li>&bull; simulationFailed must block signing; post-broadcast consistency is not wired</li>
+          <li>&bull; Moss never signs, broadcasts or judges the dispute</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>Direct Path (post-creation)</h3>
+          <h3>Confirmation</h3>
         </div>
         <ul>
-          <li>&bull; assignAgent → submitDelivery → acceptDelivery via viem</li>
-          <li>&bull; openDispute → settle: rule engine splits by weightBps</li>
-          <li>&bull; Undecidable portion frozen → Manual Review</li>
-          <li>&bull; Direct-path txs are NOT marked as Moss-verified</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot violet"></div>
-          <h3>Evidence</h3>
-        </div>
-        <ul>
-          <li>&bull; E3 binds Moss commit + simulation + wallet consistency</li>
-          <li>&bull; Post-sign tx hash anchors the responsibility chain</li>
+          <li>&bull; Broadcast only prefills the transaction hash</li>
+          <li>&bull; User manually loads the receipt to parse TaskCreated.taskId</li>
         </ul>
       </div>
     </div>

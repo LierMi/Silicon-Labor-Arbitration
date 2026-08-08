@@ -180,6 +180,23 @@
   box-shadow: none;
 }
 
+.sourceBadge {
+  grid-column: 1 / -1;
+  justify-self: start;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  color: #77c98b;
+}
+
+.mockBadge {
+  color: var(--gold);
+}
+
+.hybridBadge {
+  color: #7fb3e8;
+}
+
 .courtGrid {
   position: absolute;
   z-index: 5;

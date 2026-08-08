@@ -1,0 +1,745 @@
+"use client";
+
+/**
+ * 任务工作台 —— live 全流程（创建 → 指派 → 交付 → 验收 → 争议 → 结算）
+ *
+ * 签名边界（AGENTS.md）：createTask 的 unsigned tx 来自服务端 Moss 桥
+ * （Moss 只模拟，不签名不广播）；这里用钱包签原始交易并广播。
+ * 后续写操作走 chain 包 direct hooks（viem），不标 Moss verified。
+ */
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useAccount, useConnect, useDisconnect, useSendTransaction, useReadContract, useWriteContract, useSwitchChain, usePublicClient } from "wagmi";
+import {
+  TASK_ESCROW_ADDRESS,
+  taskEscrowAbi,
+  buildAssignAgent,
+  buildSubmitDelivery,
+  buildAcceptDelivery,
+  buildOpenDispute,
+} from "@sla/chain";
+import { POTATO_REQUIREMENTS, computeRequirementsHash, deadlineFromNow } from "@sla/domain";
+import type { Requirement } from "@sla/domain";
+import { decodeEventLog, formatEther, isAddress, parseAbiItem } from "viem";
+
+const CHAIN_ID = 10143;
+const REQUIRED_AMOUNT = "0.1";
+/** e2e-verify 用的固定交付哈希（演示用；真实流程应来自交付文件指纹） */
+const DELIVERY_HASH = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+
+const STATUS_LABELS: Record<number, string> = {
+  0: "None", 1: "Created", 2: "Delivered", 3: "Disputed", 4: "ManualReview", 5: "Accepted", 6: "Settled", 7: "Refunded",
+};
+
+type Prepared = {
+  unsignedTransaction: { to: string; data: string; value: string; from: string };
+  estimatedGas: string;
+  simulationFailed: boolean;
+  warnings: string[];
+  evidenceHash: string | null;
+  receipt: unknown;
+  capabilityParams: Record<string, unknown>;
+  rpcFingerprint: string;
+  intent?: {
+    intent: string;
+    verb: string;
+    category: string;
+    risk: string[];
+    tags: string[];
+  };
+  e3?: {
+    explanation: string;
+    canonicalPayloadHash: string;
+    mossCommit: string;
+    protocolVersion: string;
+    contractAddress: string;
+    abiHash: string;
+    chainId: number;
+  };
+};
+
+// ── 读链上任务状态 ─────────────────────────────────────────
+function useTaskStatus(taskId: `0x${string}` | undefined) {
+  const { data } = useReadContract({
+    address: TASK_ESCROW_ADDRESS,
+    abi: taskEscrowAbi,
+    functionName: "getTaskStatus",
+    args: taskId ? [taskId] : undefined,
+    query: { enabled: Boolean(taskId), refetchInterval: 4000 },
+  });
+  return data === undefined ? null : Number(data);
+}
+
+function useTaskDetails(taskId: `0x${string}` | undefined) {
+  const { data } = useReadContract({
+    address: TASK_ESCROW_ADDRESS,
+    abi: taskEscrowAbi,
+    functionName: "tasks",
+    args: taskId ? [taskId] : undefined,
+    query: { enabled: Boolean(taskId), refetchInterval: 4000 },
+  });
+  if (!data) return null;
+  const t = data as unknown as [
+    `0x${string}`, `0x${string}`, bigint, `0x${string}`, `0x${string}`, `0x${string}`, bigint,
+  ];
+  return {
+    client: t[0],
+    agent: t[1],
+    amount: formatEther(t[2]),
+    deliveryHash: t[4],
+    caseId: t[5],
+    deadline: new Date(Number(t[6]) * 1000).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" }),
+  };
+}
+
+const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
+
+/** 演示用候选 Agent 列表：e2e-verify 同法派生（deployer + 偏移，各有余额） */
+const DEMO_AGENTS: Array<{ label: string; address: `0x${string}`; offset: number }> = [
+  { label: "Agent Alpha", address: "0x0FCd781bB12e1EDFd1783A3C899C9382f0b247Ea", offset: 999 },   // +999
+  { label: "Agent Beta", address: "0xC51C61a2347Ce409DE3bD6ea242e3538eA1abCEd", offset: 1000 },   // +1000
+  { label: "Agent Gamma", address: "0xF608c6Ab439DC5193E72EF1428fF0161D16D933b", offset: 1001 },  // +1001
+  { label: "Agent Delta", address: "0x16c64B9d49b58F05D1574C4A122B2eDF120C1fC1", offset: 1002 },  // +1002
+  { label: "Agent Epsilon", address: "0xb48652F38DdB5157961Eb68f6AC33C1F32e910f4", offset: 1003 },// +1003
+];
+
+const TASK_CREATED_EVENT = parseAbiItem(
+  "event TaskCreated(bytes32 indexed taskId, address indexed client, uint256 amount, bytes32 reqHash, uint256 deadline)",
+);
+
+export default function Workbench() {
+  const { address, isConnected, chain } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { switchChainAsync } = useSwitchChain();
+  const publicClient = usePublicClient();
+  const onWrongChain = isConnected && (!chain || chain.id !== CHAIN_ID);
+  // 签名前的余额诊断（显示给用户，定位「钱包估算 0 vs 链上真实余额」）
+  const [diag, setDiag] = useState<string | null>(null);
+
+  const [prepared, setPrepared] = useState<Prepared | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  const [prepareError, setPrepareError] = useState<string | null>(null);
+  const [signError, setSignError] = useState<string | null>(null);
+  const [taskId, setTaskId] = useState<`0x${string}` | undefined>(undefined);
+  const [agentAddress, setAgentAddress] = useState("");
+  const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // 需求条款表单：默认预填土豆案 C1-C4，用户可增删改
+  const [requirements, setRequirements] = useState<Requirement[]>(() =>
+    POTATO_REQUIREMENTS.map((r) => ({ ...r })),
+  );
+  const requirementsHash = useMemo(() => computeRequirementsHash(requirements), [requirements]);
+  const weightsOk = requirements.reduce((s, r) => s + r.weightBps, 0) === 10000;
+  const updateReq = (i: number, patch: Partial<Requirement>) => {
+    setRequirements((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  };
+  // 托管金额（MON）可输入；权重用百分比编辑（25 = 25%，内部 ×100）
+  const [amountMon, setAmountMon] = useState(REQUIRED_AMOUNT);
+  const weightPercent = (bps: number) => bps / 100;
+  const setWeightPercent = (i: number, pct: number) => updateReq(i, { weightBps: Math.round(pct * 100) });
+
+  const { sendTransactionAsync, isPending: isSending } = useSendTransaction();
+  const { writeContractAsync, isPending: writePending } = useWriteContract();
+
+  // 用 tx.ts 纯函数构造 + 本文件的 wagmi 实例签名（避免跨包 wagmi 双实例 context 不互通）
+  const write = useCallback(
+    (request: ReturnType<typeof buildAssignAgent>) => writeContractAsync(request as never),
+    [writeContractAsync],
+  );
+
+  const status = useTaskStatus(taskId);
+  const details = useTaskDetails(taskId);
+
+  const run = useCallback(async (action: () => Promise<`0x${string}`>) => {
+    setActionError(null);
+    try {
+      setTxHash(await action());
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : String(err));
+    }
+  }, []);
+
+  // 创建任务：调服务端 Moss 桥拿 unsigned tx + E3
+  const prepareTask = useCallback(async () => {
+    if (!address) return;
+    if (!weightsOk) {
+      setPrepareError("条款权重之和必须 = 10000（100%），当前不满足");
+      return;
+    }
+    const amount = Number(amountMon);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPrepareError("托管金额必须是正数（如 0.1）");
+      return;
+    }
+    setPreparing(true);
+    setPrepareError(null);
+    setPrepared(null);
+    try {
+      const deadline = deadlineFromNow(2).toString();
+      const res = await fetch("/api/moss/prepare-create-task", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account: address,
+          amountMon,
+          requirementsHash,
+          deadline,
+          requirements: requirements.map(({ id, type, label, weightBps }) => ({ id, type, label, weightBps })),
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setPrepared(body);
+    } catch (err) {
+      setPrepareError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setPreparing(false);
+    }
+  }, [address, requirementsHash, weightsOk, amountMon]);
+
+  // 签名并广播 Moss 模拟出的那笔 unsigned tx
+  const signAndCreate = useCallback(async () => {
+    if (!prepared) return;
+    if (!isConnected || !address) {
+      setSignError("钱包未连接，请先点右上角「连接钱包」");
+      return;
+    }
+    if (onWrongChain) {
+      try {
+        await switchChainAsync({ chainId: CHAIN_ID });
+      } catch (err) {
+        setSignError(`切换到 Monad Testnet (${CHAIN_ID}) 失败：${err instanceof Error ? err.message : String(err)}`);
+        return;
+      }
+    }
+    setSignError(null);
+    setDiag(null);
+    try {
+      // 诊断：钱包看到的链 + Monad 链上真实余额
+      let diagParts = [`钱包 chain: ${chain?.id ?? "(null)"}`];
+      if (publicClient && address) {
+        try {
+          const bal = await publicClient.getBalance({ address });
+          diagParts.push(`Monad(10143) 链上余额: ${formatEther(bal)} MON`);
+        } catch (e) {
+          diagParts.push(`余额查询失败: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
+      setDiag(diagParts.join(" · "));
+      const { to, data, value } = prepared.unsignedTransaction;
+      const hash = await sendTransactionAsync({
+        to: to as `0x${string}`,
+        data: data as `0x${string}`,
+        value: BigInt(value),
+        // 强制在 Monad Testnet 上估算/发送——wagmi 默认用钱包 provider 当前网络，
+        // 钱包停在别的链时余额估算为 0（真实链上余额 112 MON）
+        chainId: CHAIN_ID,
+      });
+      setTxHash(hash);
+      // 预填到载入框，交易确认后可直接点「载入」解析出 taskId
+      setInputValue(hash);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setSignError(msg);
+      console.error("[workbench] sign failed:", msg);
+    }
+  }, [prepared, sendTransactionAsync, isConnected, address, onWrongChain, switchChainAsync]);
+
+  const doAssign = useCallback(() => {
+    if (!taskId || !isAddress(agentAddress)) return;
+    run(() => write(buildAssignAgent(taskId, agentAddress as `0x${string}`)));
+  }, [taskId, agentAddress, write, run]);
+
+  const doSubmit = useCallback(() => {
+    if (!taskId) return;
+    run(() => write(buildSubmitDelivery(taskId, DELIVERY_HASH)));
+  }, [taskId, write, run]);
+
+  void doSubmit;
+  const doAccept = useCallback(() => {
+    if (!taskId) return;
+    run(() => write(buildAcceptDelivery(taskId)));
+  }, [taskId, write, run]);
+
+  const doDispute = useCallback(() => {
+    if (!taskId) return;
+    run(() => write(buildOpenDispute(taskId)));
+  }, [taskId, write, run]);
+
+  // 演示自动签名：服务端用派生 Agent 私钥签名广播（仅演示）
+  const [demoPending, setDemoPending] = useState(false);
+  const [demoResult, setDemoResult] = useState<string | null>(null);
+  const demoAgentAction = useCallback(async (action: "submitDelivery" | "acceptDelivery") => {
+    if (!taskId) return;
+    setDemoPending(true);
+    setDemoResult(null);
+    setActionError(null);
+    try {
+      const selected = DEMO_AGENTS.find((a) => a.address === agentAddress);
+      if (!selected) throw new Error("请先从列表选择候选 Agent（演示自动签名仅支持候选 Agent）");
+      const res = await fetch("/api/demo/agent-action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId, action, agentOffset: selected.offset }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setDemoResult(`${action} ✓ ${body.txHash}（签名者 ${body.signer.slice(0, 8)}…）`);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setDemoPending(false);
+    }
+  }, [taskId, agentAddress]);
+
+  // 载入任务：输入可能是 taskId，也可能是 tx hash。
+  // 先试当 taskId 读链（status 非 None 即有效）；否则当 tx hash 解析
+  // TaskCreated 事件取 taskId。找不到时报错而不是静默。
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState("");
+  const loadTask = useCallback(async (raw: string) => {
+    if (!raw.startsWith("0x")) {
+      setLoadError("输入必须是 0x 开头的 taskId 或交易哈希");
+      return;
+    }
+    setLoadError(null);
+    const asTaskId = raw as `0x${string}`;
+    try {
+      if (publicClient) {
+        // 先试当 taskId：读链上状态，非 None 说明有效
+        const s = await publicClient.readContract({
+          address: TASK_ESCROW_ADDRESS,
+          abi: taskEscrowAbi,
+          functionName: "getTaskStatus",
+          args: [asTaskId],
+        });
+        if (Number(s) !== 0) {
+          setTaskId(asTaskId);
+          return;
+        }
+        // 当 tx hash 解析 receipt
+        const receipt = await publicClient.getTransactionReceipt({ hash: asTaskId });
+        const logs = receipt.logs.filter((l) => l.address.toLowerCase() === TASK_ESCROW_ADDRESS.toLowerCase());
+        for (const log of logs) {
+          try {
+            const decoded = decodeEventLog({ abi: taskEscrowAbi, data: log.data, topics: log.topics });
+            if (decoded.eventName === "TaskCreated") {
+              const { taskId: createdId } = decoded.args as { taskId: `0x${string}` };
+              setTaskId(createdId);
+              return;
+            }
+          } catch {
+            // 不是 TaskCreated 的日志，跳过
+          }
+        }
+      }
+      setLoadError("既不是有效 taskId（链上无此任务），也不是含 TaskCreated 的 tx hash");
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : String(err));
+    }
+  }, [publicClient]);
+
+  const step = useMemo(() => {
+    if (status === null) return "idle";
+    switch (status) {
+      case 1: return "created";
+      case 2: return "delivered";
+      case 3: return "disputed";
+      case 4: return "manual-review";
+      case 5: return "accepted";
+      case 6: return "settled";
+      case 7: return "refunded";
+      default: return "none";
+    }
+  }, [status]);
+
+  // 剧场页全局 overflow:hidden，workbench 需要整页滚动；挂载时解锁，卸载恢复
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  // 连接后自动切到 Monad Testnet。
+  // ⚠️ chain 为 null 也要切：钱包在 Monad 之外的链时，wagmi 的 chains 只配了
+  // Monad，useAccount().chain 无法识别返回 null——条件漏掉 null 就永远不触发。
+  useEffect(() => {
+    if (isConnected && (!chain || chain.id !== CHAIN_ID)) {
+      switchChainAsync({ chainId: CHAIN_ID }).catch((err) => {
+        console.error("[workbench] auto switch chain failed:", err);
+      });
+    }
+  }, [isConnected, chain?.id, switchChainAsync]);
+
+  return (
+    <main style={{ maxWidth: 860, margin: "0 auto", padding: "2rem 1.5rem", fontFamily: "var(--font-mono), monospace", color: "#f4efe4", background: "#0b0906", minHeight: "100dvh" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h1 style={{ fontSize: "1.2rem", letterSpacing: "0.08em" }}>任务工作台 · WORKBENCH</h1>
+        <nav style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <Link href="/courtroom" style={{ color: "#d6cdb9" }}>法庭 →</Link>
+          <Link href="/" style={{ color: "#d6cdb9" }}>体验 →</Link>
+          {isConnected ? (
+            <>
+              <code style={{ fontSize: "0.75rem" }}>{address?.slice(0, 6)}…{address?.slice(-4)}</code>
+              {onWrongChain && (
+                <code style={{ fontSize: "0.7rem", color: "#c0392b" }}>⚠ 链 {chain?.id}（需 {CHAIN_ID}）</code>
+              )}
+              <button onClick={() => disconnect()} type="button" style={btn}>断开</button>
+            </>
+          ) : (
+            <button onClick={() => connect({ connector: connectors[0] })} type="button" style={btn}>连接钱包</button>
+          )}
+        </nav>
+      </header>
+
+      {!isConnected ? (
+        <section style={card}>
+          <h2>连接钱包开始</h2>
+          <p style={{ color: "#b8ae99", fontSize: "0.85rem" }}>链：Monad Testnet ({CHAIN_ID}) · 合约 {TASK_ESCROW_ADDRESS.slice(0, 10)}…</p>
+          <p style={{ color: "#b8ae99", fontSize: "0.85rem" }}>浏览器只负责签名；createTask 的交易由服务端 Moss 模拟后交给你签。</p>
+        </section>
+      ) : (
+        <>
+          {/* 阶段 1：创建任务（Moss 路径） */}
+          <section style={card}>
+            <h2>① 创建任务 <span style={{ color: "#7d7462", fontSize: "0.7rem" }}>MOSS PATH</span></h2>
+
+            {/* 托管金额 */}
+            <div style={{ marginTop: 4, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.8rem", color: "#b8ae99" }}>托管金额</span>
+              <input
+                value={amountMon}
+                onChange={(e) => setAmountMon(e.target.value)}
+                type="number"
+                step="0.1"
+                min="0.1"
+                style={{ ...input, width: 120 }}
+              />
+              <span style={{ fontSize: "0.8rem", color: "#b8ae99" }}>MON</span>
+              <span style={{ fontSize: "0.7rem", color: "#7d7462" }}>锁入托管合约，验收通过才释放</span>
+            </div>
+
+            {/* 需求条款编辑器 */}
+            <p style={{ color: "#b8ae99", fontSize: "0.85rem", marginTop: 12 }}>
+              验收条款（预填土豆案，可增删改）——每条：判定方式 + 描述 + 占托管金额的比例（合计必须 100%）
+            </p>
+            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
+              {requirements.map((req, i) => (
+                <div key={req.id} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                  <code style={{ fontSize: "0.7rem", color: "#7d7462", width: 34 }}>{req.id}</code>
+                  <select
+                    value={req.type}
+                    onChange={(e) => updateReq(i, { type: e.target.value as Requirement["type"] })}
+                    style={{ ...input, width: 150 }}
+                    title="客观：机器可自动判定；主观：需要人工判断（保持 undecidable）"
+                  >
+                    <option value="objective">客观 · 机器判定</option>
+                    <option value="subjective">主观 · 人工判定</option>
+                  </select>
+                  <input
+                    value={req.label}
+                    onChange={(e) => updateReq(i, { label: e.target.value })}
+                    placeholder="条款描述，如：在截止时间前交付"
+                    style={{ ...input, flex: 1, minWidth: 220 }}
+                  />
+                  <input
+                    value={weightPercent(req.weightBps)}
+                    onChange={(e) => setWeightPercent(i, Number(e.target.value) || 0)}
+                    type="number"
+                    step="5"
+                    min="0"
+                    max="100"
+                    title="该条款占总托管金额的比例（%）"
+                    style={{ ...input, width: 80 }}
+                  />
+                  <span style={{ fontSize: "0.75rem", color: "#7d7462" }}>%</span>
+                  <button
+                    onClick={() => setRequirements((rs) => rs.filter((_, j) => j !== i))}
+                    type="button"
+                    title="删除该条款"
+                    style={{ ...btn, padding: "0.3rem 0.5rem", borderColor: "#7d7462", background: "transparent" }}
+                  >×</button>
+                </div>
+              ))}
+              <button
+                onClick={() => setRequirements((rs) => [
+                  ...rs,
+                  { id: `C${rs.length + 1}`, type: "objective", check: "custom", expect: true, label: "", weightBps: 0, essential: false },
+                ])}
+                type="button"
+                style={{ ...btn, alignSelf: "flex-start", borderColor: "#7d7462", background: "transparent" }}
+              >+ 添加条款</button>
+            </div>
+
+            {/* 哈希预览 + 权重校验 */}
+            <div style={{ marginTop: 8, fontSize: "0.7rem", color: weightsOk ? "#b8ae99" : "#c0392b" }}>
+              requirementsHash: <code style={{ wordBreak: "break-all" }}>{requirementsHash}</code>
+              <span style={{ marginLeft: 8 }}>权重合计 {requirements.reduce((s, r) => s + r.weightBps, 0) / 100}% {weightsOk ? "✓" : "✗（必须 = 100%）"}</span>
+            </div>
+
+            {!prepared && (
+              <div style={{ marginTop: 10 }}>
+                <button onClick={prepareTask} disabled={preparing || !weightsOk} type="button" style={{ ...btn, ...(preparing || !weightsOk ? { opacity: 0.5 } : {}) }}>
+                  {preparing ? "Moss 模拟中…" : "① 通过 Moss 准备交易"}
+                </button>
+              </div>
+            )}
+            {prepareError && <p style={{ color: "#c0392b", fontSize: "0.8rem" }}>✗ {prepareError}</p>}
+            {prepared && (
+              <div style={{ marginTop: 12, border: "1px solid rgba(214,205,185,0.2)", padding: 12, borderRadius: 6 }}>
+                <p style={{ fontSize: "0.8rem" }}>Moss 模拟完成：{prepared.simulationFailed ? "⚠ 有 Warning" : "✓ 无 Warning"}</p>
+
+                {/* 第 1 层：人话解释（与 E3.explanation 逐字一致） */}
+                {prepared.e3?.explanation && (
+                  <div style={{ marginTop: 10, border: "1px solid rgba(119,201,139,0.35)", borderRadius: 6, padding: 10, background: "rgba(119,201,139,0.05)" }}>
+                    <p style={{ fontSize: "0.7rem", color: "#7d7462", letterSpacing: "0.12em", marginBottom: 6 }}>签名前解释 · PRE-SIGN EXPLANATION（E3 归档原文）</p>
+                    <p style={{ fontSize: "0.85rem", lineHeight: 1.7 }}>{prepared.e3.explanation}</p>
+                  </div>
+                )}
+
+                {/* Intents：Moss Capability 语义元数据 */}
+                {prepared.intent && (
+                  <div style={{ marginTop: 10, border: "1px solid rgba(192,57,43,0.4)", borderRadius: 6, padding: 10, background: "rgba(192,57,43,0.06)" }}>
+                    <p style={{ fontSize: "0.7rem", color: "#7d7462", letterSpacing: "0.12em", marginBottom: 6 }}>INTENT · Moss 意图（签前证据）</p>
+                    <p style={{ fontSize: "0.85rem", lineHeight: 1.6 }}>{prepared.intent.intent}</p>
+                    <dl style={{ fontSize: "0.75rem", color: "#b8ae99", lineHeight: 1.9, marginTop: 6 }}>
+                      <div>verb: <code style={{ color: "#e0a253" }}>{prepared.intent.verb}</code> · category: <code style={{ color: "#e0a253" }}>{prepared.intent.category}</code></div>
+                      <div>risk: {prepared.intent.risk.map((r, i) => <span key={i}><code style={{ color: "#c0392b" }}>[{r}]</code> </span>)}</div>
+                      <div>tags: {prepared.intent.tags.map((t, i) => <span key={i}><code style={{ color: "#948b78" }}>{t}</code> </span>)}</div>
+                    </dl>
+                  </div>
+                )}
+
+                {/* Capability 参数 */}
+                <div style={{ marginTop: 10, fontSize: "0.75rem" }}>
+                  <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 4 }}>CAPABILITY PARAMS · 实际发给 Moss 的参数</p>
+                  <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.7 }}>
+{JSON.stringify(prepared.capabilityParams, null, 2)}
+                  </pre>
+                </div>
+
+                {/* 未签名交易 */}
+                <div style={{ marginTop: 10, fontSize: "0.75rem" }}>
+                  <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 4 }}>UNSIGNED TX · 钱包将签署的原始交易</p>
+                  <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.7 }}>
+{JSON.stringify(prepared.unsignedTransaction, null, 2)}
+                  </pre>
+                  <p style={{ color: "#b8ae99", marginTop: 4 }}>estimatedGas: {prepared.estimatedGas} · RPC: {prepared.rpcFingerprint}</p>
+                </div>
+
+                {/* 模拟 Receipt */}
+                <div style={{ marginTop: 10, fontSize: "0.75rem" }}>
+                  <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 4 }}>SIMULATION RECEIPT · 模拟执行结果</p>
+                  <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.7, maxHeight: 220, overflow: "auto" }}>
+{JSON.stringify(prepared.receipt, null, 2)}
+                  </pre>
+                </div>
+
+                {prepared.warnings.length > 0 && (
+                  <ul style={{ color: "#e0a253", fontSize: "0.75rem", marginTop: 8 }}>
+                    {prepared.warnings.map((w) => <li key={w}>{w}</li>)}
+                  </ul>
+                )}
+
+                {/* 第 4 层：溯源与哈希（事后可验证） */}
+                {prepared.e3 && (
+                  <div style={{ marginTop: 10, fontSize: "0.75rem", borderTop: "1px solid rgba(214,205,185,0.15)", paddingTop: 10 }}>
+                    <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 6 }}>E3 溯源与哈希 · PROVENANCE</p>
+                    <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.8 }}>{`canonicalPayloadHash: ${prepared.e3.canonicalPayloadHash}
+mossCommit:           ${prepared.e3.mossCommit}
+protocolVersion:     ${prepared.e3.protocolVersion}
+contract:            ${prepared.e3.contractAddress}
+abiHash:             ${prepared.e3.abiHash}
+chainId:             ${prepared.e3.chainId}`}</pre>
+                  </div>
+                )}
+
+                <div style={{ marginTop: 12 }}>
+                  <button onClick={signAndCreate} disabled={isSending} type="button" style={btn}>
+                    {isSending ? "等待钱包签名…" : "② 签名并广播（钱包）"}
+                  </button>
+                </div>
+                {signError && <p style={{ color: "#c0392b", fontSize: "0.75rem", marginTop: 8 }}>✗ 签名失败：{signError}</p>}
+                {diag && <p style={{ color: "#948b78", fontSize: "0.7rem", marginTop: 4 }}>诊断：{diag}</p>}
+              </div>
+            )}
+            {txHash && <p style={{ fontSize: "0.75rem", color: "#77c98b", wordBreak: "break-all" }}>✓ tx: {txHash}</p>}
+          </section>
+
+          {/* 阶段 2：载入任务（接受 taskId 或交易哈希） */}
+          <section style={card}>
+            <h2>② 任务 ID</h2>
+            <p style={{ color: "#b8ae99", fontSize: "0.85rem" }}>
+              粘贴 taskId 或刚才广播的交易哈希（自动从 TaskCreated 事件解析）。
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="taskId 或 tx hash 0x…"
+                style={{ ...input, width: 380 }}
+              />
+              <button
+                onClick={() => loadTask(inputValue.trim())}
+                type="button"
+                style={btn}
+                disabled={!inputValue.trim().startsWith("0x")}
+              >
+                载入
+              </button>
+            </div>
+            {loadError && <p style={{ color: "#c0392b", fontSize: "0.75rem", marginTop: 8 }}>✗ {loadError}</p>}
+            {taskId && <p style={{ fontSize: "0.75rem", color: "#77c98b", marginTop: 8 }}>✓ 已载入：{taskId}</p>}
+            {txHash && step !== "idle" && (
+              <p style={{ fontSize: "0.75rem", color: "#77c98b", marginTop: 8 }}>
+                ✓ 已读取链上状态：{STATUS_LABELS[status ?? 0]}
+              </p>
+            )}
+          </section>
+
+          {/* 阶段 3：生命周期操作 */}
+          {taskId && (
+            <section style={card}>
+              <h2>③ 生命周期 <span style={{ color: "#7d7462", fontSize: "0.7rem" }}>DIRECT PATH</span></h2>
+              <p style={{ fontSize: "0.8rem" }}>状态：<b style={{ color: "#e0a253" }}>{STATUS_LABELS[status ?? 0]}</b></p>
+              {details && (
+                <dl style={{ fontSize: "0.75rem", color: "#b8ae99", lineHeight: 1.8 }}>
+                  <div>委托人 {details.client.slice(0, 8)}… · 承接 Agent {details.agent === ZERO_ADDR ? "（未指派）" : details.agent.slice(0, 8) + "…"}</div>
+                  <div>托管 {details.amount} MON · 截止 {details.deadline}</div>
+                  <div>deliveryHash {details.deliveryHash === "0x" + "0".repeat(64) ? "（未提交）" : details.deliveryHash.slice(0, 16) + "…"}</div>
+                </dl>
+              )}
+              {actionError && <p style={{ color: "#c0392b", fontSize: "0.8rem" }}>✗ {actionError}</p>}
+              {writePending && <p style={{ color: "#e0a253", fontSize: "0.75rem" }}>⏳ 等待钱包签名…（如果钱包没弹出，请检查当前账户角色）</p>}
+
+              {step === "created" && (
+                <div style={{ marginTop: 8 }}>
+                  <p style={{ fontSize: "0.7rem", color: "#7d7462", marginBottom: 6 }}>选择承接 Agent（谁来做这个任务）：</p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                    {DEMO_AGENTS.map((a) => (
+                      <button
+                        key={a.address}
+                        onClick={() => setAgentAddress(a.address)}
+                        type="button"
+                        style={{
+                          ...btn,
+                          borderColor: agentAddress === a.address ? "#e0a253" : "#7d7462",
+                          background: agentAddress === a.address ? "rgba(224,162,83,0.12)" : "transparent",
+                        }}
+                      >
+                        {a.label}
+                        <br />
+                        <code style={{ fontSize: "0.6rem", color: "#948b78" }}>{a.address.slice(0, 8)}…{a.address.slice(-4)}</code>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => {
+                        const pool = DEMO_AGENTS.filter((a) => a.address !== details?.client);
+                        setAgentAddress(pool[Math.floor(Math.random() * pool.length)].address);
+                      }}
+                      type="button"
+                      style={{ ...btn, borderColor: "#e0a253", background: "rgba(224,162,83,0.08)" }}
+                      title="随机分配一个候选 Agent"
+                    >
+                      🎲 自动分配
+                    </button>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <input
+                      value={agentAddress}
+                      onChange={(e) => setAgentAddress(e.target.value)}
+                      placeholder="或手动输入 Agent 地址 0x…"
+                      style={{ ...input, width: 280 }}
+                    />
+                    <button onClick={doAssign} type="button" style={btn} disabled={!isAddress(agentAddress) || writePending}>
+                      {writePending ? "等待签名…" : "指派 Agent"}
+                    </button>
+                    <span style={{ fontSize: "0.7rem", color: "#7d7462" }}>← 需要委托人（当前钱包）签名</span>
+                  </div>
+                  <p style={{ fontSize: "0.75rem", color: "#b8ae99", marginTop: 8, lineHeight: 1.6 }}>
+                    ⚠️ 指派后：下一步「提交交付」必须由<b style={{ color: "#e0a253" }}>被指派的 Agent 钱包</b>操作（合约要求 msg.sender == agent）。
+                    当前浏览器钱包是委托人，无法提交交付——需切换到演示 Agent 的私钥，或用本地派生签名。
+                  </p>
+                  <div style={{ marginTop: 8, border: "1px dashed rgba(192,57,43,0.4)", borderRadius: 6, padding: 10 }}>
+                    <p style={{ fontSize: "0.7rem", color: "#7d7462", marginBottom: 6 }}>Agent 角色操作（演示环境：服务端用所选 Agent 的派生私钥自动签名广播）：</p>
+                    <button onClick={() => demoAgentAction("submitDelivery")} type="button" style={btn} disabled={demoPending}>
+                      {demoPending ? "签名中…" : "提交交付"}
+                    </button>
+                    {demoResult && <p style={{ fontSize: "0.7rem", color: "#77c98b", marginTop: 6, wordBreak: "break-all" }}>{demoResult}</p>}
+                  </div>
+                </div>
+              )}
+              {step === "delivered" && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <button onClick={doAccept} type="button" style={btn} disabled={writePending}>
+                      {writePending ? "等待签名…" : "验收（全款给 Agent）"}
+                    </button>
+                    <span style={{ fontSize: "0.7rem", color: "#7d7462" }}>← 需要委托人签名</span>
+                    <button onClick={doDispute} type="button" style={btn} disabled={writePending}>
+                      {writePending ? "等待签名…" : "发起争议"}
+                    </button>
+                  </div>
+                  <p style={{ fontSize: "0.7rem", color: "#b8ae99", marginTop: 6 }}>当前状态 Delivered：Agent 已提交交付，等待委托人验收或争议。</p>
+                </div>
+              )}
+              {step === "disputed" && (
+                <div style={{ marginTop: 8 }}>
+                  <p style={{ fontSize: "0.8rem", color: "#e0a253" }}>争议已开启 → 规则引擎按事前承诺条款复算，提出结算方案（settle 需 settlementAuthority 钱包）。</p>
+                  <div style={{ marginTop: 10 }}>
+                    <Link
+                      href={`/courtroom?taskId=${taskId}`}
+                      style={{ ...btn, textDecoration: "none", display: "inline-block", borderColor: "#e0a253", background: "rgba(224,162,83,0.08)" }}
+                    >
+                      在法庭上查看案件详情 →
+                    </Link>
+                  </div>
+                </div>
+              )}
+              {(step === "accepted" || step === "settled" || step === "refunded") && (
+                <p style={{ fontSize: "0.8rem", color: "#77c98b" }}>任务已进入终态：{STATUS_LABELS[status ?? 0]}</p>
+              )}
+            </section>
+          )}
+        </>
+      )}
+
+      <footer style={{ marginTop: 32, fontSize: "0.7rem", color: "#7d7462" }}>
+        Moss 只负责 createTask 的模拟与 E3；后续写操作走 direct viem 路径，不标 Moss verified。钱包是唯一签名与广播边界。
+      </footer>
+    </main>
+  );
+}
+
+const btn: React.CSSProperties = {
+  background: "rgba(192,57,43,0.15)",
+  border: "1px solid #c0392b",
+  color: "#f4efe4",
+  padding: "0.5rem 1rem",
+  borderRadius: 4,
+  cursor: "pointer",
+  fontSize: "0.8rem",
+  fontFamily: "inherit",
+};
+
+const input: React.CSSProperties = {
+  background: "rgba(11,9,6,0.8)",
+  border: "1px solid rgba(214,205,185,0.3)",
+  color: "#f4efe4",
+  padding: "0.5rem 0.6rem",
+  borderRadius: 4,
+  fontSize: "0.75rem",
+  fontFamily: "inherit",
+};
+
+const card: React.CSSProperties = {
+  border: "1px solid rgba(214,205,185,0.15)",
+  borderRadius: 8,
+  padding: "1.2rem 1.4rem",
+  marginBottom: 16,
+  background: "rgba(11,9,6,0.6)",
+};

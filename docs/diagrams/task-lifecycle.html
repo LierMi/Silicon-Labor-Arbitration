@@ -527,12 +527,12 @@
         <div class="pulse-dot"></div>
         <h1>TaskEscrow · On-chain State Machine</h1>
       </div>
-      <p class="subtitle">8 contract states: creation → delivery → accept | dispute → settle → manual review</p>
+      <p class="subtitle">7 persisted task states · exact transitions from TaskEscrow.sol</p>
     </div>
 
     <!-- Main Diagram -->
     <div class="diagram-container">
-      <svg viewBox="0 0 980 660" role="img" aria-label="TaskEscrow · On-chain State Machine — 8 contract states: creation → delivery → accept | dispute → settle → manual review (lifecycle diagram)">
+      <svg viewBox="0 0 980 660" role="img" aria-label="TaskEscrow · On-chain State Machine — 7 persisted task states · exact transitions from TaskEscrow.sol (lifecycle diagram)">
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -557,9 +557,9 @@
 
         <!-- Lifecycle bands -->
         <path d="M 72 112 L 908 112" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
-        <text x="72" y="100" class="t-dim" font-size="10" font-weight="600">01 / Task Lifecycle</text>
+        <text x="72" y="100" class="t-dim" font-size="10" font-weight="600">01 / Funded Task</text>
         <path d="M 72 264 L 908 264" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
-        <text x="72" y="252" class="t-dim" font-size="10" font-weight="600">02 / Dispute Resolution</text>
+        <text x="72" y="252" class="t-dim" font-size="10" font-weight="600">02 / Dispute + Human Review</text>
         <path d="M 72 436 L 908 436" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
         <text x="72" y="424" class="t-dim" font-size="10" font-weight="600">03 / Terminal Outcomes</text>
 
@@ -568,67 +568,63 @@
 
         <!-- Transition paths -->
         <path d="M 153 157 L 343 157" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 94 188 L 94 309 Q 94 319 104 319 L 700 319 Q 710 319 710 329 L 710 450" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
-        <path d="M 402 188 L 402 319 L 402 319 L 402 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 402 188 L 402 233 L 402 233 L 402 278" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
-        <path d="M 402 336 L 402 383 Q 402 393 412 393 L 546 393 Q 556 393 556 403 L 556 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 465 307 L 647 307" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
-        <path d="M 710 336 L 710 383 Q 710 393 700 393 L 566 393 Q 556 393 556 403 L 556 450" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 94 188 L 30 188 Q 20 188 20 198 L 20 469 Q 20 479 30 479 L 343 479" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 402 188 L 402 309 Q 402 319 412 319 L 546 319 Q 556 319 556 329 L 556 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 402 188 L 402 223 Q 402 233 412 233 L 546 233 Q 556 233 556 243 L 556 278" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path d="M 556 278 L 556 260 Q 556 250 566 250 L 700 250 Q 710 250 710 260 L 710 278" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path d="M 556 336 L 556 383 Q 556 393 566 393 L 700 393 Q 710 393 710 403 L 710 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 710 336 L 710 450" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
 
         <!-- States -->
         <rect x="35" y="126" width="118" height="62" rx="7" class="c-mask"/>
         <rect x="35" y="126" width="118" height="62" rx="7" class="c-frontend" stroke-width="1.5"/>
         <text x="45" y="140" class="t-frontend" font-size="7" font-weight="700">01</text>
         <text x="94" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Created</text>
-        <text x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">Funds locked · reqHash committed</text>
+        <text x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">funds locked · agent optional</text>
+        <text x="94" y="177" class="t-frontend" font-size="7" text-anchor="middle">createTask</text>
 
         <rect x="343" y="126" width="118" height="62" rx="7" class="c-mask"/>
         <rect x="343" y="126" width="118" height="62" rx="7" class="c-backend" stroke-width="1.5"/>
         <text x="353" y="140" class="t-backend" font-size="7" font-weight="700">02</text>
         <text x="402" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Delivered</text>
-        <text x="402" y="163" class="t-muted" font-size="7" text-anchor="middle">Agent submitted delivery hash</text>
+        <text x="402" y="163" class="t-muted" font-size="7" text-anchor="middle">deliveryHash committed</text>
+        <text x="402" y="177" class="t-backend" font-size="7" text-anchor="middle">submitDelivery</text>
 
-        <rect x="339" y="278" width="126" height="58" rx="7" class="c-mask"/>
-        <rect x="339" y="278" width="126" height="58" rx="7" class="c-backend" stroke-width="1.5"/>
-        <text x="349" y="292" class="t-backend" font-size="7" font-weight="700">03</text>
-        <text x="402" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Disputed</text>
-        <text x="402" y="315" class="t-muted" font-size="7" text-anchor="middle">caseId created · Rules run</text>
+        <rect x="493" y="278" width="126" height="58" rx="7" class="c-mask"/>
+        <rect x="493" y="278" width="126" height="58" rx="7" class="c-backend" stroke-width="1.5"/>
+        <text x="556" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Disputed</text>
+        <text x="556" y="315" class="t-muted" font-size="7" text-anchor="middle">client or agent opens case</text>
+        <text x="556" y="325" class="t-backend" font-size="7" text-anchor="middle">openDispute</text>
 
         <rect x="647" y="278" width="126" height="58" rx="7" class="c-mask"/>
         <rect x="647" y="278" width="126" height="58" rx="7" class="c-cloud" stroke-width="1.5"/>
-        <text x="657" y="292" class="t-cloud" font-size="7" font-weight="700">04</text>
-        <text x="710" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Manual Review</text>
-        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">Undecidable portion frozen</text>
+        <text x="710" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">ManualReview</text>
+        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">subjective funds frozen</text>
+        <text x="710" y="325" class="t-cloud" font-size="7" text-anchor="middle">frozen &gt; 0</text>
 
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
-        <text x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Accepted</text>
-        <text x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">Full escrow → agent</text>
+        <text x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Refunded</text>
+        <text x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">client paid or credited</text>
 
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
-        <text x="556" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Settled</text>
-        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">Objective + human portions released</text>
+        <text x="556" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Accepted</text>
+        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">agent paid or credited</text>
 
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
-        <text x="710" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Refunded</text>
-        <text x="710" y="487" class="t-muted" font-size="7" text-anchor="middle">No delivery · deadline passed</text>
+        <text x="710" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Settled</text>
+        <text x="710" y="487" class="t-muted" font-size="7" text-anchor="middle">allocations paid or credited</text>
 
         <!-- Transition labels -->
-        <rect x="202.8" y="136" width="90.4" height="16" rx="4" class="c-mask"/>
-        <text x="248" y="147" class="t-backend" font-size="8" text-anchor="middle">submitDelivery()</text>
 
-        <rect x="356.8" y="348" width="90.4" height="16" rx="4" class="c-mask"/>
-        <text x="402" y="359" class="t-backend" font-size="8" text-anchor="middle">acceptDelivery()</text>
-        <rect x="364.15" y="212" width="75.7" height="16" rx="4" class="c-mask"/>
-        <text x="402" y="223" class="t-security" font-size="8" text-anchor="middle">openDispute()</text>
-        <rect x="431.35" y="372" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
-        <text x="479" y="383" class="t-backend" font-size="8" text-anchor="middle">settle() frozen=0</text>
-        <rect x="508.35" y="286" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
-        <text x="556" y="297" class="t-security" font-size="8" text-anchor="middle">settle() frozen&gt;0</text>
-        <rect x="590.25" y="372" width="85.5" height="16" rx="4" class="c-mask"/>
-        <text x="633" y="383" class="t-messagebus" font-size="8" text-anchor="middle">releaseFrozen()</text>
+
+
+
+
+
+
 
         <!-- Legend -->
         <text x="220" y="542" class="t-primary" font-size="10" font-weight="600">Legend</text>
@@ -648,32 +644,33 @@
       <div class="card">
         <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>Happy Path</h3>
+          <h3>Happy path</h3>
         </div>
         <ul>
           <li>&bull; Created → Delivered → Accepted</li>
-          <li>&bull; Full escrow released to agent</li>
+          <li>&bull; assignAgent changes the agent field but remains Created</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>Dispute Path</h3>
+          <h3>Dispute path</h3>
         </div>
         <ul>
-          <li>&bull; Delivered → Disputed → settle(): objective splits paid, frozen&gt;0 → Manual Review</li>
-          <li>&bull; releaseFrozen() releases the subjective portion after human decision</li>
+          <li>&bull; settle(frozen=0) → Settled</li>
+          <li>&bull; settle(frozen&gt;0) → ManualReview → releaseFrozen → Settled</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot rose"></div>
-          <h3>Expiry</h3>
+          <h3>Expiry + payments</h3>
         </div>
         <ul>
-          <li>&bull; Created → Refunded when deadline passes (refundExpiredTask)</li>
+          <li>&bull; refundExpiredTask: Created → Refunded after deadline</li>
+          <li>&bull; Failed push payments become claimable for later withdrawal</li>
         </ul>
       </div>
     </div>

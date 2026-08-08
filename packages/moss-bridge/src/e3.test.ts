@@ -43,6 +43,13 @@ const TASK: PreparedTask = {
     deadline: "1785928734",
   },
   rpcFingerprint: "https://testnet-rpc.monad.xyz",
+  intent: {
+    intent: "Create a funded escrow task that commits requirements on-chain before the Agent begins work.",
+    verb: "transfer",
+    category: "token",
+    risk: ["fundOut"],
+    tags: ["task-creation", "escrow", "agent-work", "arbitration"],
+  },
   // 嵌套结构 —— 这正是旧写法会清空的部分
   receipt: {
     kind: "receipt",
