@@ -190,6 +190,11 @@ export const taskEscrowAbi = [
       { name: "amount", type: "uint256", indexed: false },
     ],
   },
+  // ── 错误（用于解码 revert，让前端显示可读错误而非乱码）─────────
+  { type: "error", name: "Unauthorized", inputs: [{ name: "caller", type: "address" }] },
+  { type: "error", name: "InvalidStatus", inputs: [{ name: "taskId", type: "bytes32" }, { name: "expected", type: "uint8" }, { name: "actual", type: "uint8" }] },
+  { type: "error", name: "EmptyDeliveryHash", inputs: [] },
+  { type: "error", name: "DeliveryWindowClosed", inputs: [{ name: "deadline", type: "uint256" }, { name: "currentTimestamp", type: "uint256" }] },
 ] as const;
 
 /** 合约 TaskStatus 枚举 → 我们 domain 的 CaseStatus 用的是不同集合，见 status.ts 的映射 */

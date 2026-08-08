@@ -94,6 +94,15 @@ function useTaskDetails(taskId: `0x${string}` | undefined) {
 
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
+/** 演示用候选 Agent 列表：e2e-verify 同法派生（deployer + 偏移，各有余额） */
+const DEMO_AGENTS: Array<{ label: string; address: `0x${string}`; offset: number }> = [
+  { label: "Agent Alpha", address: "0x0FCd781bB12e1EDFd1783A3C899C9382f0b247Ea", offset: 999 },   // +999
+  { label: "Agent Beta", address: "0xC51C61a2347Ce409DE3bD6ea242e3538eA1abCEd", offset: 1000 },   // +1000
+  { label: "Agent Gamma", address: "0xF608c6Ab439DC5193E72EF1428fF0161D16D933b", offset: 1001 },  // +1001
+  { label: "Agent Delta", address: "0x16c64B9d49b58F05D1574C4A122B2eDF120C1fC1", offset: 1002 },  // +1002
+  { label: "Agent Epsilon", address: "0xb48652F38DdB5157961Eb68f6AC33C1F32e910f4", offset: 1003 },// +1003
+];
+
 const TASK_CREATED_EVENT = parseAbiItem(
   "event TaskCreated(bytes32 indexed taskId, address indexed client, uint256 amount, bytes32 reqHash, uint256 deadline)",
 );
@@ -128,7 +137,7 @@ export default function Workbench() {
   };
 
   const { sendTransactionAsync, isPending: isSending } = useSendTransaction();
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync, isPending: writePending } = useWriteContract();
 
   // 用 tx.ts 纯函数构造 + 本文件的 wagmi 实例签名（避免跨包 wagmi 双实例 context 不互通）
   const write = useCallback(
@@ -239,6 +248,7 @@ export default function Workbench() {
     run(() => write(buildSubmitDelivery(taskId, DELIVERY_HASH)));
   }, [taskId, write, run]);
 
+  void doSubmit;
   const doAccept = useCallback(() => {
     if (!taskId) return;
     run(() => write(buildAcceptDelivery(taskId)));
@@ -248,6 +258,32 @@ export default function Workbench() {
     if (!taskId) return;
     run(() => write(buildOpenDispute(taskId)));
   }, [taskId, write, run]);
+
+  // 演示自动签名：服务端用派生 Agent 私钥签名广播（仅演示）
+  const [demoPending, setDemoPending] = useState(false);
+  const [demoResult, setDemoResult] = useState<string | null>(null);
+  const demoAgentAction = useCallback(async (action: "submitDelivery" | "acceptDelivery") => {
+    if (!taskId) return;
+    setDemoPending(true);
+    setDemoResult(null);
+    setActionError(null);
+    try {
+      const selected = DEMO_AGENTS.find((a) => a.address === agentAddress);
+      if (!selected) throw new Error("请先从列表选择候选 Agent（演示自动签名仅支持候选 Agent）");
+      const res = await fetch("/api/demo/agent-action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId, action, agentOffset: selected.offset }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setDemoResult(`${action} ✓ ${body.txHash}（签名者 ${body.signer.slice(0, 8)}…）`);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setDemoPending(false);
+    }
+  }, [taskId, agentAddress]);
 
   // 载入任务：输入可能是 taskId，也可能是 tx hash。
   // 先试当 taskId 读链（status 非 None 即有效）；否则当 tx hash 解析
@@ -541,9 +577,7 @@ chainId:             ${prepared.e3.chainId}`}</pre>
           {taskId && (
             <section style={card}>
               <h2>③ 生命周期 <span style={{ color: "#7d7462", fontSize: "0.7rem" }}>DIRECT PATH</span></h2>
-              <p style={{ fontSize: "0.8rem" }}>状态：<b style={{ color: "#e0a253" }}>{STATUS_LABELS[status ?? 0]}</b>
-                {" "}<Link href={`/courtroom?taskId=${taskId}`} style={{ color: "#d6cdb9", fontSize: "0.75rem" }}>在法庭页查看 →</Link>
-              </p>
+              <p style={{ fontSize: "0.8rem" }}>状态：<b style={{ color: "#e0a253" }}>{STATUS_LABELS[status ?? 0]}</b></p>
               {details && (
                 <dl style={{ fontSize: "0.75rem", color: "#b8ae99", lineHeight: 1.8 }}>
                   <div>委托人 {details.client.slice(0, 8)}… · 承接 Agent {details.agent === ZERO_ADDR ? "（未指派）" : details.agent.slice(0, 8) + "…"}</div>
@@ -552,27 +586,91 @@ chainId:             ${prepared.e3.chainId}`}</pre>
                 </dl>
               )}
               {actionError && <p style={{ color: "#c0392b", fontSize: "0.8rem" }}>✗ {actionError}</p>}
+              {writePending && <p style={{ color: "#e0a253", fontSize: "0.75rem" }}>⏳ 等待钱包签名…（如果钱包没弹出，请检查当前账户角色）</p>}
 
               {step === "created" && (
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
-                  <input
-                    value={agentAddress}
-                    onChange={(e) => setAgentAddress(e.target.value)}
-                    placeholder="Agent 地址 0x…"
-                    style={{ ...input, width: 280 }}
-                  />
-                  <button onClick={doAssign} type="button" style={btn}>指派 Agent</button>
-                  <button onClick={doSubmit} type="button" style={btn}>提交交付</button>
+                <div style={{ marginTop: 8 }}>
+                  <p style={{ fontSize: "0.7rem", color: "#7d7462", marginBottom: 6 }}>选择承接 Agent（谁来做这个任务）：</p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                    {DEMO_AGENTS.map((a) => (
+                      <button
+                        key={a.address}
+                        onClick={() => setAgentAddress(a.address)}
+                        type="button"
+                        style={{
+                          ...btn,
+                          borderColor: agentAddress === a.address ? "#e0a253" : "#7d7462",
+                          background: agentAddress === a.address ? "rgba(224,162,83,0.12)" : "transparent",
+                        }}
+                      >
+                        {a.label}
+                        <br />
+                        <code style={{ fontSize: "0.6rem", color: "#948b78" }}>{a.address.slice(0, 8)}…{a.address.slice(-4)}</code>
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => {
+                        const pool = DEMO_AGENTS.filter((a) => a.address !== details?.client);
+                        setAgentAddress(pool[Math.floor(Math.random() * pool.length)].address);
+                      }}
+                      type="button"
+                      style={{ ...btn, borderColor: "#e0a253", background: "rgba(224,162,83,0.08)" }}
+                      title="随机分配一个候选 Agent"
+                    >
+                      🎲 自动分配
+                    </button>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <input
+                      value={agentAddress}
+                      onChange={(e) => setAgentAddress(e.target.value)}
+                      placeholder="或手动输入 Agent 地址 0x…"
+                      style={{ ...input, width: 280 }}
+                    />
+                    <button onClick={doAssign} type="button" style={btn} disabled={!isAddress(agentAddress) || writePending}>
+                      {writePending ? "等待签名…" : "指派 Agent"}
+                    </button>
+                    <span style={{ fontSize: "0.7rem", color: "#7d7462" }}>← 需要委托人（当前钱包）签名</span>
+                  </div>
+                  <p style={{ fontSize: "0.75rem", color: "#b8ae99", marginTop: 8, lineHeight: 1.6 }}>
+                    ⚠️ 指派后：下一步「提交交付」必须由<b style={{ color: "#e0a253" }}>被指派的 Agent 钱包</b>操作（合约要求 msg.sender == agent）。
+                    当前浏览器钱包是委托人，无法提交交付——需切换到演示 Agent 的私钥，或用本地派生签名。
+                  </p>
+                  <div style={{ marginTop: 8, border: "1px dashed rgba(192,57,43,0.4)", borderRadius: 6, padding: 10 }}>
+                    <p style={{ fontSize: "0.7rem", color: "#7d7462", marginBottom: 6 }}>Agent 角色操作（演示环境：服务端用所选 Agent 的派生私钥自动签名广播）：</p>
+                    <button onClick={() => demoAgentAction("submitDelivery")} type="button" style={btn} disabled={demoPending}>
+                      {demoPending ? "签名中…" : "提交交付"}
+                    </button>
+                    {demoResult && <p style={{ fontSize: "0.7rem", color: "#77c98b", marginTop: 6, wordBreak: "break-all" }}>{demoResult}</p>}
+                  </div>
                 </div>
               )}
               {step === "delivered" && (
-                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                  <button onClick={doAccept} type="button" style={btn}>验收（全款给 Agent）</button>
-                  <button onClick={doDispute} type="button" style={btn}>发起争议</button>
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <button onClick={doAccept} type="button" style={btn} disabled={writePending}>
+                      {writePending ? "等待签名…" : "验收（全款给 Agent）"}
+                    </button>
+                    <span style={{ fontSize: "0.7rem", color: "#7d7462" }}>← 需要委托人签名</span>
+                    <button onClick={doDispute} type="button" style={btn} disabled={writePending}>
+                      {writePending ? "等待签名…" : "发起争议"}
+                    </button>
+                  </div>
+                  <p style={{ fontSize: "0.7rem", color: "#b8ae99", marginTop: 6 }}>当前状态 Delivered：Agent 已提交交付，等待委托人验收或争议。</p>
                 </div>
               )}
               {step === "disputed" && (
-                <p style={{ fontSize: "0.8rem", color: "#e0a253" }}>争议已开启 → 规则引擎提出结算方案（settle 需 settlementAuthority 钱包，本页暂未接）</p>
+                <div style={{ marginTop: 8 }}>
+                  <p style={{ fontSize: "0.8rem", color: "#e0a253" }}>争议已开启 → 规则引擎按事前承诺条款复算，提出结算方案（settle 需 settlementAuthority 钱包）。</p>
+                  <div style={{ marginTop: 10 }}>
+                    <Link
+                      href={`/courtroom?taskId=${taskId}`}
+                      style={{ ...btn, textDecoration: "none", display: "inline-block", borderColor: "#e0a253", background: "rgba(224,162,83,0.08)" }}
+                    >
+                      在法庭上查看案件详情 →
+                    </Link>
+                  </div>
+                </div>
               )}
               {(step === "accepted" || step === "settled" || step === "refunded") && (
                 <p style={{ fontSize: "0.8rem", color: "#77c98b" }}>任务已进入终态：{STATUS_LABELS[status ?? 0]}</p>
