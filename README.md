@@ -424,6 +424,16 @@ Deployment is restricted to Monad Testnet. Record any new address, transaction, 
 | **Next** | Replace hybrid narrative mappings with fully captured live evidence, add durable indexing, and harden independent Agent signing. |
 | **Vision** | A reusable responsibility and settlement layer for Agent frameworks, procurement systems, and regulated operators. |
 
+## Commercial Path
+
+- **Target customers**: Initially focused on Agent platforms and automated outsourcing platforms, then expanding to DAOs, enterprise AI procurement teams, and compliance teams.
+- **Core value**: Infrastructure for pre-transaction commitments, responsibility tracing, dispute-based fund allocation, and human review in Agent transactions.
+- **Business model**: Protocol fees on protected escrow transactions, with enterprise subscriptions priced by API usage, case volume, or compliance seats.
+- **Go-to-market**: Start with high-value Agent engagements whose acceptance criteria can be structured, then expand into a cross-platform responsibility and settlement layer.
+- **Long-term moat**: Not “using another AI to judge AI,” but progressively building verifiable responsibility chains, reusable rule templates, and a dispute-resolution network through real transactions.
+
+**Internet Court sells adjudication, ERC-8004 records identity, and ERC-7710 manages delegation; Silicon Labor Arbitration sells what is scarcest before adjudication—facts that are trustworthy, complete, and attributable.**
+
 ## Documentation
 
 | Document | Scope |
