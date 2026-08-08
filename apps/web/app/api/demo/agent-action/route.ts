@@ -22,11 +22,14 @@ import { monadTestnet, TASK_ESCROW_ADDRESS, taskEscrowAbi } from "@sla/chain";
 const RPC = "https://testnet-rpc.monad.xyz";
 
 function loadDeployerKey(): `0x${string}` {
-  // contracts/.env 在仓库根（apps/web 上溯两级）
+  // 优先读环境变量（Vercel 等托管环境在 dashboard 配置，不进代码）
+  const fromEnv = process.env.DEPLOYER_PRIVATE_KEY;
+  if (fromEnv?.startsWith("0x")) return fromEnv as `0x${string}`;
+  // 本地开发 fallback：contracts/.env 文件（仓库根，apps/web 上溯两级）
   const envPath = resolve(process.cwd(), "..", "..", "contracts", ".env");
   const raw = readFileSync(envPath, "utf-8");
   const line = raw.split("\n").find((l) => l.startsWith("DEPLOYER_PRIVATE_KEY="));
-  if (!line) throw new Error("contracts/.env 缺 DEPLOYER_PRIVATE_KEY");
+  if (!line) throw new Error("缺 DEPLOYER_PRIVATE_KEY：请设置环境变量或 contracts/.env");
   return line.slice(line.indexOf("=") + 1).trim() as `0x${string}`;
 }
 
