@@ -55,8 +55,8 @@ function loadDeployerKey(): `0x${string}` {
 }
 
 export async function POST(request: Request) {
-  // 演示开关：默认关闭；生产/部署环境必须显式 DEMO_AGENT_ACTION_ENABLED=true 才启用
-  if (process.env.DEMO_AGENT_ACTION_ENABLED !== "true") {
+  // 演示开关：默认开启；如确需关闭，显式设置 DEMO_AGENT_ACTION_ENABLED=false
+  if (process.env.DEMO_AGENT_ACTION_ENABLED === "false") {
     return NextResponse.json({ error: "演示自动签名未启用（需设置 DEMO_AGENT_ACTION_ENABLED=true）" }, { status: 403 });
   }
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";

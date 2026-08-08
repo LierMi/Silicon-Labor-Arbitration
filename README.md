@@ -1,527 +1,444 @@
-<h1 align="center">硅基劳动仲裁院</h1>
+<div align="center">
 
-<p align="center">
-  <b>SILICON LABOR ARBITRATION</b><br>
-  <b>SLA · The Unfinished Verdict</b>　—— 未完成的判决
-</p>
+# Silicon Labor Arbitration
 
-<br>
+### Evidence-backed responsibility infrastructure for the Agent economy
 
-<p align="center">
-  <i>AI can arbitrate the measurable. Humans decide the meaningful.</i><br>
-</p>
+**Deterministic rules settle what is measurable. AI explains the evidence. Humans keep the final say.**
 
-<p align="center">
-  <i>Here, SLA means two things: Silicon Labor Arbitration<br>
-  —and the Service Level Agreement an agent failed to fulfill.</i><br>
-</p>
+[![English](https://img.shields.io/badge/English-current-4f46e5)](./README.md)
+[![简体中文](https://img.shields.io/badge/简体中文-README-64748b)](./README.zh-CN.md)
 
-<br>
+[![Public Demo](https://img.shields.io/badge/Public_Demo-Open-4f46e5)](https://silicon-labor-arbitration.vercel.app/)
+[![Monad Testnet](https://img.shields.io/badge/Monad_Testnet-10143-836EF9)](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.22-000000?logo=nextdotjs)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2.8-149ECA?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-MIT-22c55e)](./LICENSE)
 
-<p align="center">
-  <b>当人类把行动委托给 AI，责任不能也一起被委托掉。</b>
-</p>
+[Live Experience](https://silicon-labor-arbitration.vercel.app/demo) · [Case Workbench](https://silicon-labor-arbitration.vercel.app/workbench) · [Courtroom](https://silicon-labor-arbitration.vercel.app/courtroom) · [Contract](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF)
 
-<p align="center">
-  <b>在线演示：</b><br>
-  <a href="https://silicon-labor-arbitration.vercel.app/">开屏页</a>
-  ·
-  <a href="https://silicon-labor-arbitration.vercel.app/courtroom">六幕法庭体验</a>
-</p>
+</div>
 
 ---
 
-## 问题
+## 30-Second Overview
 
-一次委托，今天会经过这样一条链：
+Silicon Labor Arbitration is an on-chain accountability layer for work delegated through AI Agents. When a task passes from a human to a coordinator Agent, a specialist Agent, tools, and a wallet, responsibility can disappear between the handoffs. This project reconstructs that chain as verifiable evidence instead of asking another AI to issue a final judgment.
 
-```
-人类提出目标
-  → 主 Agent 理解任务
-    → 主 Agent 雇佣专业 Agent
-      → 专业 Agent 调用第三方工具
-        → 工具生成交易或交付结果
-          → 钱包完成支付
-```
+| | What it means |
+| --- | --- |
+| **Positioning** | An evidence-backed responsibility timeline and settlement system for Agent-delivered work—not an AI court. |
+| **Core innovation** | Objective requirements can drive deterministic settlement; subjective requirements remain `undecidable` and retain human review. |
+| **Moss integration** | Moss builds and simulates the unsigned `createTask` transaction before signing; the wallet remains the signing and broadcasting boundary. |
+| **Monad-native value** | Escrow state, commitments, lifecycle events, and settlement evidence are recorded on Monad Testnet with task-scoped state. |
+| **Primary demo** | A commissioned “orange cat” is delivered as a potato: format checks pass, meaning does not. The system refuses to fake certainty. |
 
-出问题的时候，每一环都有理由：
+> **We do not issue final judgments. We recover responsibility and put it in front of the human reviewer.**
 
-| 谁 | 说什么 |
-|---|---|
-| 人类 | "我没有让它这样做。" |
-| 主 Agent | "我是根据用户意图推理的。" |
-| 工作 Agent | "我只是完成上游给我的任务。" |
-| 工具提供者 | "我只执行收到的参数。" |
-| 钱包 | "交易签名是合法的。" |
+## Problem
 
-每个环节似乎都站得住，最后却没有主体承担责任。
-
-> **真正的被告不是人类，也不是 AI，而是责任在委托链中的消失。**
-
----
-
-## 我们不出判决
-
-2026 年 7 月 10 日，27 家公司（含 OKX、MetaMask、ZKsync）发布了 **Internet Court**——1,001 个 AI validator 在 30–60 分钟内给出**终局判决**，明确声明不含人类法官。
-
-我们做相反的事。
-
-```
-Internet Court    →  判决书      （AI 判，人退出）
-Silicon Labor Arbitration  →  责任时间线  （AI 只解释，人保留终审）
-```
-
-**我们叫仲裁院，不叫法院。仲裁本来就不是终审**——不服的可以上诉。这不是我们的妥协，是"仲裁"这个制度自带的属性。
-
-空难调查（NTSB 模式）也从不定罪，只还原事实。**调查的合法性来自还原，不来自定罪。**
-
----
-
-## SLA 的两个意思
-
-**SLA** 既是 **S**ilicon **L**abor **A**rbitration，
-也是那份 Agent 没能履行的 **S**ervice **L**evel **A**greement。
-
-这不是巧合。我们的机制在结构上就是一份 SLA：
-
-| SLA 的结构 | 我们的实现 |
-|---|---|
-| 事先约定的可测量标准 | 验收条件 C1–C4 |
-| 托管的赔偿准备金 | `TaskEscrow` 锁定的资金 |
-| 事后核算是否达标 | 确定性规则层 |
-| 未达标的赔付 | 分账 / 冻结 |
-
-**但 SLA 只能写客观指标**——可用率、延迟、交付时间、文件格式。
-
-> **没有任何一份 SLA 能写"必须是一只猫"。**
-
-主观条件写不进 SLA，这是这套工业标准二十年来的公认边界。而 Agent 时代的委托恰恰大量是主观的——"适合儿童产品的橙色猫"这种话，人听得懂，SLA 装不下。
-
-**所以我们的名字里藏着我们的边界：SLA 能仲裁可测量的，剩下的交给人。**
-
----
-
-## 三条腿的桌子
-
-判不了 C4 之后，还有一个更难的问题：**那 0.2 MON 怎么办？**
-
-最自然的做法是按权重分——C1、C2、C3 各占 25% 且全部满足，那就先付 75%。
-
-**这个做法是错的。**
-
-加权求和有一个隐含前提：**条款之间可分割，价值可以独立累加。**
-
-- 买 10 箱水，送到 7 箱 → 那 7 箱**有独立价值**，付 70% 合理
-- 定制一张桌子，少一条腿 → **没有独立价值**，桌子不能用
-
-一张按时交付的、PNG 的、背景透明的**土豆**图，对委托人的价值是零。格式条款之所以有意义，是因为它服务于「一只猫」这个主体。**主体没了，格式合规一文不值。**
-
-> 大陆法系管这个叫**可分给付 / 不可分给付**，判断标准是「部分履行对债权人是否有独立价值」。
-
-更要命的是第二层：按权重付 75%，**本身就是一个价值判断**——它认定「格式合规值 75%」，而这个判断没有依据。
-
-**我们一边说「我判不了」，一边把 75% 的钱付出去了。**
-
-所以条款在签名前就要标明是否为**核心条款**（`essential`），并和权重一起进哈希：
-
-| 核心条款的状态 | 结果 |
-|---|---|
-| ✅ 满足 | 按 `weightBps` 正常结算 |
-| ❌ 违反 | 全额退委托人，附属条款权重不予兑现 |
-| ⬜ **不可裁决** | **全额冻结，交给人** |
-
-规则引擎依然会算出「本可支付 0.15」并保留在 `essentialOverride.wouldHaveBeen` 里——**它算得出来，但主动不动手。**
-
-> **能算，但克制。这比直接付 75% 更接近我们想说的话。**
-
----
-
-## 怎么运作
-
-```
-第一层  链上证据层     任务、授权、时间、交付哈希、支付与申诉记录
-                        ↓
-第二层  确定性规则层   预算、截止、格式、是否交付、是否越权
-                        ⚠️ 只有这一层能动钱
-                        ↓
-第三层  解释与复核层   AI 交叉质询和解释；人类保留最终申诉权
-                        ⚠️ 这一层不能动钱
-```
-
-AI 在这里**不判**。它只负责：把任务转成结构化验收条件、生成检方/辩方/审计三路意见、**引用证据编号**解释结论、对不确定的事实明确标注"不确定"。
-
-不允许：修改链上证据、决定资金金额、无证据编造事实、绕过用户签名。
-
-### 为什么不能是「五个 AI 投票，票多者胜」
-
-**模型数量更多不代表更正确，也不能自然获得审判人类的合法性。**
-
-投票把「谁说了算」的问题偷换成了「谁人多」。而我们要回答的从来不是「哪个答案更受欢迎」，是「**这笔钱凭什么这么分**」——那需要一条能被复算的推导，不是一次表决。
-
-所以动钱的那一层完全不依赖 AI 共识：金额由**签名前就哈希上链**的权重算出，任何人拿到条款原文都能自己复算一遍。
-
-### 三条铁律
-
-1. **不出判决。** 发现自己在写「AI 投票决定钱怎么分」，立刻停手。
-2. **不伪造性能数据。** 推断模型必须在页面上标注为推断。
-3. **C4 判不了这件事不许被优化掉。** 它是产品最想说的话，不是待修的 bug。
-
----
-
-## 演示：土豆案
-
-用户支付 0.2 MON，要求 Agent：
-
-> 画一只适合儿童产品的橙色猫，背景透明，PNG 格式，北京时间 2026 年 8 月 6 日 00:10 前交付。
-
-Agent 交付了**一颗土豆**，并解释：
-
-> "这是对猫这一概念的后现代重构。"
-
-用户拒绝付款。Agent 发起劳动仲裁。规则层逐条核验：
-
-| 条款 | 内容 | 判定 |
-|:--:|---|---|
-| C1 | 按时交付 | ✅ 满足 |
-| C2 | PNG 格式 | ✅ 满足 |
-| C3 | 背景透明 | ✅ 满足 |
-| **C4** | **是一只猫** | ⬜ **不可自动裁决** |
-
-由于 C4 在签名前已标记为不可分割的核心条款，C4 不可裁决时，**0.2 MON 全额冻结并转人工复核**。C1–C3 的格式合规不能单独产生可用交付价值。
-
-**系统诚实地说：我判不了 C4。我告诉你我判不了。你来判。**
-
-在所有人都在吹"AI 全自动"的 2026 年，敢标记自己判不了，就是我们的立场。
-
-笑点来自"土豆是不是猫"，留下的问题是——
-
-> **一个 Agent 能否用漂亮的解释，掩盖它没有完成约定的事实？**
-
----
-
-## 技术
-
-### 合约
-
-原方案是四个合约（TaskEscrow / CaseRegistry / Settlement / EvidenceRegistry）。
-实现时**塌缩成一个 `TaskEscrow.sol`** —— 案件、结算、证据哈希都挂在同一个
-`taskId` 上，跨合约调用只会增加重入面积和 gas，换不到任何隔离收益。
-
-| 职责 | 实现 |
-|---|---|
-| 任务与托管 | `createTask` 锁定资金，`taskId` 由参数哈希导出 |
-| 生命周期 | 8 状态机：`Created → Delivered → Accepted \| Disputed → Settled / ManualReview / Refunded` |
-| 结算 | `settle(toAgent, toClient, frozen)` 只搬运规则层算出的金额，链上只校验守恒 |
-| 人类终审 | `releaseFrozen` 释放冻结部分，必须写入 `reviewDecisionHash` |
-| 证据 | 只存哈希（`requirementsHash` / `deliveryHash` / `settlementProposalHash`），正文在链下 |
-
-已部署 Monad Testnet：[`0x67040374b8A9756586De0885f01d1291cE8FFCcF`](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF)（chain 10143，区块 49534792）
-
-**全网统计通过事件在链下聚合**，合约内不维护任何全局计数器。
-
-### 承诺：为什么「0.2 全额冻结」是可复算的，不是我们说了算
-
-这是整套机制的技术支点。
-
-验收条款和各自的权重，在 `createTask` **之前**就被规范化序列化并哈希上链：
-
-```
-{"version":"req-canon-v1","requirements":[
-  {"check":"...","essential":false,"expect":"...","id":"C1","label":"...","type":"objective","weightBps":2500},
-  ...
-]}
-                    ↓ keccak256
-requirementsHash → createTask 的第一个参数
-```
-
-**任何人拿到条款原文，跑一遍同样的规范化，就能自己算出这个哈希**，与链上入参比对。对不上，就说明条款被事后改过。
-
-规范化本身是有讲究的——同一份数据能写成很多种字节（键序、空格、数组顺序），所以必须钉死唯一写法：键升序、无空格、条款按 id 排序、字段清单固定、带格式版本号。序列化器还会**拒绝**任何无法确定性表示的值（浮点、`undefined`、`Date`、`Map`、类实例），宁可报错也不猜——**承诺环节里，静默的转换就是静默的伪造。**
-
-同一套机制也用在 E3 上：Moss 签前证据的 `canonicalPayloadHash` 覆盖的是**案件里真正存着的那一份**，改一个字就对不上。
-
-### 合约安全
-
-| 做法 | 防的是什么 |
-|---|---|
-| 逐级相减校验守恒 | `a + b + c != total` 的直觉写法会溢出绕回，凭空造出钱 |
-| Checks-Effects-Interactions + **按 taskId 隔离**的重入锁 | 转账瞬间控制权交给对方；全局锁会让不相干的案件互相争抢 |
-| Pull over Push | 一方收款失败不阻塞另一方，失败额度转为可提取 |
-| `settlementAuthority` / `authorityAdmin` **强制不同地址** | 职责分离：一个能动钱，一个能换「谁能动钱」 |
-| 权限两步转移（提名 → 主动接受） | 手滑填错地址不会把权限打进黑洞 |
-| 部署守卫（生命周期未完成前拒绝上主网） | 合约不能改，防手滑必须写进代码 |
-
-### 测试
-
-```
-合约（Foundry）   33 passed    单元 + fuzz 1000 runs + 不变量 1000 runs × 500,000 calls，0 reverts
-TypeScript        67 passed    domain 31 · moss-bridge 23 · web 13
-```
-
-不变量测试的核心那条：**把七个操作随机打乱顺序调用 50 万次，每次之后检查「这个任务欠出去的钱有没有超过最初存进来的钱」。**`reverts: 0` 说明这 50 万次全都真的执行了，不是靠报错蒙混过关。
-
-CI 在每个 PR 上跑完整门禁（`pnpm verify` + Foundry + 卫生检查）。
-
-### 为什么是 Monad
-
-每个 `caseId` / `taskId` 都是**独立状态**，案件之间不争用任何全局变量：
-
-```
-案件 A → 独立证据、质押、裁决、结算
-案件 B → 独立证据、质押、裁决、结算
-案件 C → 独立证据、质押、裁决、结算
-```
-
-大量案件可以同时提交证据、进入审查、完成结算。**Monad 的意义不是让单个案件更复杂，而是让未来数千个 Agent 微任务产生的争议能够低成本、并行处理。**
-
-并行执行改变了一条设计原则：**交易之间不能争抢同一块存储**。所以 `taskId` 不是自增的，是从参数导出的：
-
-```solidity
-taskId = keccak256(abi.encode(
-    block.chainid, address(this), msg.sender,
-    requirementsHash, deadline, msg.value
-));
-```
-
-自增计数器意味着每一笔 `createTask` 都要读写同一个变量——一百个人同时下单，一百笔交易排队甚至重跑。哈希导出让每个任务落在自己的存储槽里，互不干扰。
-
-实测：10 个任务并发创建，10/10 成功，4.4 秒。
-
-> ⚠️ 确定性 ID 有个副作用：**同样的参数会算出同样的 ID**，第二次必然撞车。所以 `deadline` 必须在运行时计算，绝不能写死——写死那天是好的，几天后突然开始失败。
-
-> 我们不使用全局递增计数器与全局统计变量。不伪造性能数据——推断模型在页面上标注为推断。
-
-### Moss
-
-Moss 让用户用自然语言表达链上任务，**在签名前解释将要发生什么**。
-我们处理的是**签完之后，发生的事和说好的不一样**。
-
-> **Moss 是事前解释，仲裁院是事后追责。仲裁院是 Moss 的下半场。**
-
-我们把用户看到的签前解释原文，与 Capability、未签交易、模拟 Receipt、Moss/Protocol/ABI 版本、语义映射和 canonical hash 一起组成案件的第一份证据 `E3`。
-当事情没按这份可重算、可追溯的签前证据发生时，它才具有归责价值。
-
-### 系统架构
-
-<img src="docs/diagrams/architecture.svg" alt="System Architecture" width="100%">
-
-**当前实现：**
-
-| 层 | 说明 |
-|---|---|
-| **Next.js Web** | Workbench 通过服务端 Prepare API 获取 Moss 未签交易与 E3；后续操作使用 Chain Adapter |
-| **Product Packages** | `Domain`（共享类型）· `Rules`（确定性规则）· `AI`（解释层）· `Chain`（Direct tx）· `MossBridge`（唯一 Moss seam） |
-| **Moss Fork (`vendor/moss`)** | Monad Testnet Runtime → `silicon-arbitration.createTask` Capability → Trace Simulator / Receipt parser |
-| **Monad Testnet** | RPC + `TaskEscrow`（已部署 `0x6704...FFCcF`，chain 10143） |
-
-**Moss 边界：** Moss 只覆盖 `createTask`（构造 → 模拟 → E3 签前证据）。`assignAgent`、`submitDelivery`、`acceptDelivery`、`openDispute`、`settle` 全部通过 viem 直接调用，不标记为 Moss verified。
-
-> Workbench 提供真实创建与生命周期操作；演示案卷仍保留明确标注的 fixture，法庭页可按链上 `taskId` 加载真实案件。页面区分 Mock 案件、Moss 模拟与链上确认。
-
-### 端到端流程
-
-<img src="docs/diagrams/e2e-flow.svg" alt="E2E Flow" width="100%">
-
-**Moss Path（创建任务）：** 用户输入 → MossBridge 构造未签交易 → Simulator 在 Testnet 模拟 → API 归档 E3 与 warnings → 用户通过钱包签名广播 → 手动载入交易回执并解析 `TaskCreated.taskId`。架构要求 Warning/revert 阻断签名；当前 Workbench 的该守卫仍待接入。
-
-**Direct Path（后续生命周期）：** `assignAgent → submitDelivery → acceptDelivery`（viem 直接调用）→ 争议时 `openDispute → settle`（规则引擎按 `weightBps` 分账）→ 无法自动裁决的部分冻结为 Manual Review。
-
-**签名边界：** 钱包是唯一签名与广播边界。Moss 从不签名、从不广播；Direct Path 交易不得标为 Moss verified。
-
-### TaskEscrow 状态机
-
-<img src="docs/diagrams/task-lifecycle.svg" alt="Task Lifecycle" width="100%">
-
-**Happy Path:** Created → Delivered → Accepted（全款归 Agent）  
-**Dispute Path:** Delivered → Disputed → `settle()` 客观部分按 `weightBps` 分账；`frozen>0` 则进入 Manual Review，`releaseFrozen()` 人类终审后释放  → Settled  
-**Expiry:** Created → Refunded（截止时间到，无人交付，`refundExpiredTask`）
-
-> 完整交互版（含 dark/light 主题切换、PNG/SVG 导出）见 `docs/diagrams/architecture.html`、`docs/diagrams/e2e-flow.html`、`docs/diagrams/task-lifecycle.html`。
-
----
-
-## 路线图：从仲裁到审计
-
-**现在（黑客松）**——一个能亲手走完一次仲裁的可验证 Demo：下单、交付、争议、责任链、规则判定、结算、人类终审。
-
-**下一步**——把托管与归因做成开源协议，让 Agent 框架可以直接接入；消费而不是挑战既有标准（ERC-7710 授权链、ERC-8004 Agent 身份与验证），别人的标准越普及，我们的原料越多。
-
-**再往后**——真正的需求不在"纠纷双方"，在**要向监管交代的人**。当企业开始大规模部署 Agent，合规、风控与保险会要求：出了事，能证明是哪一步、谁的授权、谁忽略了警告。
-
-那时候我们今天的三个"劣势"会全部翻转：
-
-| 今天看起来像妥协的 | 在合规场景里是 |
-|---|---|
-| 人保留终审权 | **刚需**——人类问责是监管强制的 |
-| 不出判决，只出时间线 | **正是审计报告要的形态** |
-| 不做行业标准 | **只做工具，卖给已经在用标准的人** |
-
-**不是给 Agent 建法院，是给部署 Agent 的人做黑匣子。**
-
----
-
-> ### 我们没有替你做决定。
-> ### 我们只是把责任找回来，摆在你面前。
-
----
-
-## 快速开始
-
-> **当前状态：开发阶段。** 合约已部署 Monad Testnet，Moss Protocol 和 MossBridge 已实现并通过 live simulation。下列命令需要完成 PR 合并、依赖安装和钱包配置后才能完整执行。
-
-### 前置条件
-
-- Node.js ≥ 22、pnpm、Foundry
-- Monad Testnet RPC（`https://testnet-rpc.monad.xyz`，chain ID `10143`）
-- 有 MON 测试币的 Testnet 钱包
-
-### 合约
-
-```bash
-cd contracts
-cp .env.example .env  # 填入 DEPLOYER_PRIVATE_KEY、SETTLEMENT_AUTHORITY_ADDRESS、AUTHORITY_ADMIN_ADDRESS
-forge build
-forge test -vvv        # 33 tests, 2 fuzz @ 1000 runs, 1 stateful invariant @ 1000 runs / 500k calls
-```
-
-已部署合约：
-
-| 字段 | 值 |
-|---|---|
-| 合约地址 | `0x67040374b8A9756586De0885f01d1291cE8FFCcF` |
-| 链 | Monad Testnet（10143） |
-| 部署交易 | `0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34` |
-| 部署区块 | 49534792 |
-| Moss-facing ABI hash | `0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5` |
-
-### Moss 集成
-
-```bash
-git submodule update --init --recursive  # vendor/moss
-```
-
-Moss live simulation 已通过：
+Agentic work creates a long delegation chain:
 
 ```text
-Protocol: silicon-arbitration | Method: createTask
-Reverted: false | Gas: 217,941 | Warnings: 0
-Receipt: TaskCreated (taskId, client, amount, reqHash, deadline)
+Human intent
+  → coordinator Agent
+    → specialist Agent
+      → third-party tool
+        → transaction or delivery
+          → wallet and payment
 ```
 
-### E2E 验证
+When the result is wrong, every participant can point to the previous instruction. A valid signature proves that a transaction was authorized; it does not prove that the final work matched the original intent.
 
-```bash
-cd scripts && npm install && npx tsx e2e-verify.ts
+Existing approaches often ask AI juries to produce a definitive answer. Silicon Labor Arbitration takes the opposite position: **facts should be reconstructed, measurable commitments should be enforced deterministically, and subjective meaning should remain open to human review.**
+
+## Solution
+
+The protocol separates responsibility into three layers:
+
+| Layer | Responsibility | Can move funds? |
+| --- | --- | :---: |
+| **On-chain evidence** | Task creation, escrow, Agent assignment, delivery hash, dispute, settlement commitments, and lifecycle events | Through contract rules |
+| **Deterministic rules** | Deadline, file format, alpha channel, authorization, amount conservation, and other objective checks | **Yes** |
+| **AI explanation and human review** | Evidence-cited prosecution, defense, and audit views; review of subjective conditions | **No** |
+
+```text
+objective condition  → satisfied / violated / undecidable from missing evidence
+subjective condition → always undecidable → human review
 ```
 
-全生命周期：`createTask → assignAgent → submitDelivery → acceptDelivery → status=Accepted`
+## Main Use Cases
 
-### 并发 Demo
+- **Agent outsourcing**: reconstruct what a client requested, what an Agent accepted, which warnings were visible, and what was delivered.
+- **DAO and team procurement**: escrow payment against measurable delivery requirements while preserving human review for quality and intent.
+- **Automated service SLAs**: settle objective failures such as deadlines and file properties without pretending that code can judge subjective meaning.
+- **Agent audit and incident review**: produce a tamper-evident timeline for operators, compliance teams, and framework developers.
 
-```bash
-npx tsx scripts/concurrency-demo.ts 30
+## Key Highlights
+
+### 1. Honest uncertainty is a product feature
+
+In the demo case, C1–C3 are measurable and can be evaluated. C4—“does the delivery depict a cat?”—is subjective and must remain `undecidable`. The empty verdict stamp is the product’s trust boundary, not an unfinished feature.
+
+### 2. Moss is load-bearing, not branding
+
+The task-creation path uses the pinned team fork of [Moss](https://github.com/LierMi/moss):
+
+```text
+discover → load → action → simulate → pre-sign evidence (E3)
 ```
 
-30 个独立任务并发创建，记录真实 tx hash、确认时间、gas。
+Moss prepares and simulates the unsigned `TaskEscrow.createTask` transaction. It **never** stores a private key, signs, broadcasts, or decides a dispute. The product blocks the signing path when simulation reverts or returns a terminal warning.
+
+### 3. The wallet is the signing boundary
+
+The wallet must receive the same `chainId`, `to`, `data`, and `value` that Moss simulated. Post-sign receipt data is linked back to the pre-sign E3 record so the project can prove what was explained before approval.
+
+### 4. AI explains evidence but cannot allocate money
+
+The AI output schema contains only `role`, `text`, `cites`, and `uncertain`. Settlement amounts and requirement weights are removed from model input. Opinions with missing or unknown evidence citations are rejected.
+
+### 5. Settlement preserves subjective value
+
+The contract enforces amount conservation:
+
+```text
+toAgent + toClient + frozen = escrowed
+```
+
+Funds associated with unresolved subjective conditions can remain frozen until an explicit human review commitment is submitted.
+
+## Demo
+
+| Entry | Purpose |
+| --- | --- |
+| [Landing page](https://silicon-labor-arbitration.vercel.app/) | Product thesis and narrative entry |
+| [Interactive experience](https://silicon-labor-arbitration.vercel.app/demo) | Six-act responsibility reconstruction |
+| [Case workbench](https://silicon-labor-arbitration.vercel.app/workbench) | Wallet-driven task lifecycle and demo Agent actions |
+| [Courtroom](https://silicon-labor-arbitration.vercel.app/courtroom) | Evidence timeline, deterministic findings, AI arguments, and human review boundary |
+
+### Demo data modes
+
+| Mode | What is real | UI label |
+| --- | --- | --- |
+| **Demo fixture** (default) | Deployed contract and implementation; the displayed case narrative is a fixed fixture and is not broadcast | `DEMO` |
+| **Hybrid** | Task status and amount are read from Monad Testnet; the evidence narrative remains demo data | `HYBRID` |
+
+Append `?taskId=0x...` to the experience or courtroom URL to force the live chain reader for a specific task. If the read fails, the UI falls back to the clearly labeled demo fixture.
+
+**Demo account**: none. The narrative can be explored without an account. Chain writes require a browser wallet connected to Monad Testnet and funded with testnet MON.
+
+## End-to-End Flow
+
+```text
+1. Client defines requirements, deadline, and escrow amount
+2. Requirements are canonically hashed
+3. Moss loads silicon-arbitration.createTask
+4. Moss builds the unsigned transaction and simulates it on Monad Testnet
+5. The application generates E3 pre-sign evidence
+6. The client reviews and signs the exact simulated transaction in a wallet
+7. TaskEscrow records the task, funds, and TaskCreated event
+8. An assigned Agent submits a delivery commitment
+9. Objective rules evaluate measurable evidence
+10. Subjective requirements remain undecidable
+11. Deterministic settlement pays, refunds, or freezes funds
+12. A human may release the frozen portion with a review commitment
+```
+
+## Architecture
+
+<p align="center">
+  <img src="./docs/diagrams/architecture.svg" alt="Silicon Labor Arbitration system architecture" width="100%">
+</p>
+
+```text
+Browser / Wallet
+  ├── Next.js experience and workbench
+  ├── wagmi + viem wallet boundary
+  └── DEMO / HYBRID case adapter
+            │
+            ▼
+Product modules
+  ├── @sla/domain       shared case and evidence contracts
+  ├── @sla/rules        deterministic objective rule engine
+  ├── @sla/ai           evidence-cited explanation layer
+  ├── @sla/chain        ABI, reads, and direct lifecycle writes
+  └── @sla/moss-bridge  prepare → simulate → E3
+            │
+            ▼
+Pinned team Moss fork
+  └── Monad Testnet Runtime + silicon-arbitration Protocol
+            │
+            ▼
+Monad Testnet
+  └── TaskEscrow
+```
+
+### Moss and direct transaction boundaries
+
+| Operation | Path | Evidence label |
+| --- | --- | --- |
+| `createTask` | Moss Capability → simulation → wallet | Moss E3 |
+| `assignAgent`, `submitDelivery`, `acceptDelivery`, `openDispute` | Product transaction builder → wallet | Direct on-chain evidence |
+| `settle`, `releaseFrozen`, `withdrawPayment` | Authorized direct contract path | Direct on-chain evidence |
+
+Later lifecycle writes are intentionally not presented as Moss-verified operations.
+
+## On-Chain Evidence
+
+Deployment data comes from [`deployments/monad-testnet.json`](./deployments/monad-testnet.json).
+
+| Field | Value |
+| --- | --- |
+| Network | Monad Testnet |
+| Chain ID | `10143` (`0x279f`) |
+| Contract | [`TaskEscrow`](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF) |
+| Address | `0x67040374b8A9756586De0885f01d1291cE8FFCcF` |
+| Deployment transaction | [`0xb96e...96e34`](https://testnet.monadexplorer.com/tx/0xb96eecedc5038735c40aa9918c3369f829bb3b93468d38b3b66f87ce9e896e34) |
+| Deployment block | `49534792` |
+| Runtime bytecode | `6021` bytes |
+| Moss-facing ABI hash | `0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5` |
+| Pinned Moss commit | `b00ed2db0454219e468e8a0e4928c364a869fb79` |
+
+E3 preserves the Capability parameters, unsigned transaction, simulation receipt, warnings, pre-sign explanation, chain ID, contract address, ABI hash, Moss revision, Protocol version, sanitized RPC fingerprint, and canonical payload hash.
+
+## Main Features
+
+- Funded task creation with requirement and deadline commitments.
+- Client-controlled Agent assignment and Agent-only delivery submission.
+- Delivery acceptance, expired-task refund, and participant dispute opening.
+- Deterministic rule evaluation for objective requirements.
+- Mandatory `undecidable` output for subjective requirements.
+- Evidence-cited prosecution, defense, and audit explanations.
+- Evidence-linked settlement with subjective-fund freezing.
+- Human-reviewed frozen-fund release.
+- Deferred claimable payments when a direct push transfer fails.
+- Task-scoped reentrancy protection and two-step settlement-authority rotation.
+- Mock and live-chain adapters without component rewrites.
+
+## Tech Stack
+
+| Layer | Technology |
+| --- | --- |
+| Web application | Next.js 15.5.22, React 19.2.8, TypeScript 5.6.2 |
+| Interaction | GSAP, TanStack Query |
+| Wallet and chain | wagmi 2.12.20, viem 2.55.10 |
+| Smart contract | Solidity 0.8.24, Foundry, Cancun EVM target |
+| Agent transaction simulation | Moss team fork, custom Monad Testnet Runtime, `silicon-arbitration` Protocol Package |
+| Domain and rules | TypeScript workspace packages with canonical evidence hashing |
+| AI explanation | Anthropic-compatible SDK; Gonka default, Anthropic fallback |
+| Network | Monad Testnet only |
+| Deployment | Vercel for the Next.js application; Foundry for contracts |
+
+## Repository Structure
+
+```text
+.
+├── apps/web/                 Next.js UI, API routes, DEMO/HYBRID adapters
+├── contracts/                TaskEscrow, Foundry tests, deployment scripts, ABI
+├── deployments/              Versioned Monad Testnet deployment evidence
+├── packages/
+│   ├── ai/                   Evidence-cited AI explanations
+│   ├── chain/                Chain config, ABI, tx builders, wagmi hooks
+│   ├── domain/               Shared Case, Evidence, RuleResult, and E3 types
+│   ├── moss-bridge/          Stable product boundary around Moss
+│   └── rules/                Deterministic objective rule engine
+├── scripts/                  E2E and concurrency evidence scripts
+├── vendor/moss/              Pinned team Moss fork submodule
+├── docs/                     Product, architecture, risk, and demo documents
+├── moss.lock.json            Moss provenance lock
+└── pnpm-workspace.yaml       Monorepo workspace definition
+```
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 22 recommended (`package.json` requires Node.js 20 or newer)
+- pnpm `11.15.1`
+- Git with submodule support
+- [Foundry](https://getfoundry.sh/) for contract builds and tests
+- A browser wallet and testnet MON for on-chain writes
+
+### Install
 
 ```bash
-# ⚠️ 必须带 --recurse-submodules。vendor/moss 是 submodule，
-#    不带的话它是空目录，pnpm install 会报 ENOENT 且看不出原因。
 git clone --recurse-submodules https://github.com/LierMi/Silicon-Labor-Arbitration.git
-
-# 已经 clone 过的：git pull 不会自动更新 submodule，装依赖时会自动补
-pnpm install                   # postinstall 会跑 git submodule update --init
-
-cp packages/ai/.env.example packages/ai/.env.local   # 填 GONKA_API_KEY
-pnpm typecheck                 # 检查全部 packages
+cd Silicon-Labor-Arbitration
+corepack enable
+pnpm install
 ```
 
-合约测试需要 [Foundry](https://getfoundry.sh)：
+If the repository was cloned without submodules:
 
 ```bash
-pnpm test:contracts            # 33 个测试，含 50 万次调用的资金不变量
+git submodule update --init --recursive
+pnpm install
 ```
 
-合约：
+The submodule step must happen before pnpm resolves the workspace because `pnpm-workspace.yaml` includes packages under `vendor/moss`.
+
+### Run the web application
+
+```bash
+cp apps/web/.env.example apps/web/.env.local
+pnpm --filter @sla/web dev
+```
+
+Open `http://localhost:3000`. The default case source is the clearly labeled demo fixture.
+
+### Run verification
+
+```bash
+pnpm verify
+pnpm test:contracts
+```
+
+`pnpm verify` builds the required Moss packages, type-checks the product workspaces, runs package tests, and builds the Next.js app. Foundry is required only for `pnpm test:contracts`.
+
+## Configuration
+
+### Web and demo
+
+| Variable | Required | Default | Purpose |
+| --- | :---: | --- | --- |
+| `NEXT_PUBLIC_CASE_SOURCE` | No | `mock` | Selects `mock` or `live` case data. |
+| `NEXT_PUBLIC_LIVE_TASK_ID` | No | Latest task in the 20,000-block scan window | Selects a specific live `bytes32` task ID. |
+| `DEMO_AGENT_ACTION_ENABLED` | No | Enabled unless set to `false` | Controls the server-side demo Agent action endpoint. |
+| `DEPLOYER_PRIVATE_KEY` | Conditional | None | Required by hosted demo Agent actions and contract deployment. Use a testnet-only key. |
+
+### AI explanation regeneration
+
+The checked-in potato-case demo uses a frozen, traceable AI fixture and does not call a model during the presentation.
+
+| Variable | Required | Default | Purpose |
+| --- | :---: | --- | --- |
+| `GONKA_API_KEY` | Conditional | None | Regenerates AI arguments through Gonka. |
+| `GONKA_BASE_URL` | No | `https://api.gonkarouter.io` | Anthropic-compatible API host. |
+| `GONKA_MODEL` | No | `moonshotai/Kimi-K2.6` | Gonka model identifier. |
+| `ANTHROPIC_API_KEY` | Conditional | None | Fallback provider when Gonka is not configured. |
+| `ANTHROPIC_MODEL` | No | `claude-opus-5` | Anthropic model identifier. |
+
+### Contract deployment
+
+Copy `contracts/.env.example` to `contracts/.env` and provide a testnet-only deployer plus distinct settlement authority and authority admin addresses. Never reuse a wallet that holds mainnet assets.
+
+## Available Commands
+
+| Command | Description |
+| --- | --- |
+| `pnpm --filter @sla/web dev` | Start the Next.js development server. |
+| `pnpm build:web` | Create the production web build. |
+| `pnpm build:moss` | Build only the Moss packages required by the product. |
+| `pnpm typecheck` | Build Moss dependencies and type-check all product packages/apps. |
+| `pnpm test` | Build Moss dependencies and run product package tests. |
+| `pnpm test:contracts` | Run the Foundry contract suite. |
+| `pnpm verify` | Run Moss build, typecheck, package tests, and web build. |
+| `npx tsx scripts/concurrency-demo.ts 30` | Submit independent testnet tasks and record transaction evidence. |
+| `cd scripts && npm install && npx tsx e2e-verify.ts` | Exercise the direct task lifecycle with testnet accounts. |
+
+## Deployment
+
+### Web application on Vercel
+
+The public deployment is [silicon-labor-arbitration.vercel.app](https://silicon-labor-arbitration.vercel.app/).
+
+| Setting | Value |
+| --- | --- |
+| Root directory | Repository root |
+| Install command | `pnpm install` |
+| Build command | `pnpm build:web` |
+| Framework | Next.js |
+
+Ensure Git submodules are available during checkout. Set `DEPLOYER_PRIVATE_KEY` only if the demo-only Agent action endpoint is required. For a non-demo deployment, set `DEMO_AGENT_ACTION_ENABLED=false` and use real Agent wallets instead of server-side signing.
+
+### Smart contract
 
 ```bash
 cd contracts
-forge test        # 资金路径测试
-forge script ...  # 部署到 Monad Testnet
+cp .env.example .env
+forge build
+forge test -vvv
+forge script script/DeployTaskEscrow.s.sol:DeployTaskEscrow \
+  --rpc-url "$MONAD_TESTNET_RPC_URL" \
+  --broadcast
 ```
 
-> `.gitignore` 使用 `.env*` 通配，任何形态的密钥文件都不会被提交。
+Deployment is restricted to Monad Testnet. Record any new address, transaction, block, bytecode hash, and ABI hash in `deployments/monad-testnet.json` before updating this README.
+
+## Security and Truth Boundaries
+
+| The system can prove | The system does not claim |
+| --- | --- |
+| Which task and requirement commitments were placed on-chain | That a hash proves the semantic quality of off-chain content |
+| Which unsigned transaction Moss simulated | That Moss signed, broadcast, or judged the transaction |
+| Which wallet transaction was confirmed and which events were emitted | That a valid signature proves the result matched human intent |
+| How objective rules produced a settlement proposal | That AI independently verified or selected the payment amounts |
+| Which facts were unavailable or subjective | That subjective meaning can be converted into an objective verdict |
+
+- Monad Testnet only; no mainnet funds or mainnet constants belong in the demo path.
+- Private keys, API keys, seed phrases, and `.env*` files must never be committed.
+- The server-side Agent signer is strictly a labeled demo convenience, not the production trust model.
+- Off-chain evidence bodies require reproducible canonical serialization and hashes.
+- Concurrency scripts report captured transaction facts, not unverified TPS or finality claims.
+
+## Current Limitations
+
+- Moss is intentionally integrated only for `createTask`; later writes use direct viem/wagmi paths.
+- The default hosted experience is a demo fixture. Live task reads are labeled `HYBRID` because the accompanying narrative evidence is still a fixture.
+- The demo Agent action endpoint derives funded testnet Agent accounts from a server-held demo key. Production deployments must replace it with independent Agent wallets.
+- The repository does not provide a production indexer or decentralized evidence-body storage.
+- Human review governance is represented by an authorized on-chain witness and evidence commitment; it is not yet a decentralized reviewer network.
+- The project never resolves C4 (“is the delivery a cat?”) automatically.
+
+## Roadmap
+
+| Stage | Direction |
+| --- | --- |
+| **Today** | Testnet escrow, Moss-simulated task creation, responsibility timeline, deterministic rules, AI evidence explanations, and human-review freeze/release path. |
+| **Next** | Replace hybrid narrative mappings with fully captured live evidence, add durable indexing, and harden independent Agent signing. |
+| **Vision** | A reusable responsibility and settlement layer for Agent frameworks, procurement systems, and regulated operators. |
+
+## Documentation
+
+| Document | Scope |
+| --- | --- |
+| [`docs/01-项目方案.md`](./docs/01-项目方案.md) | Product position and non-negotiable principles |
+| [`docs/02-开发执行案.md`](./docs/02-开发执行案.md) | Delivery scope and implementation plan |
+| [`docs/05-双仓库架构与Moss-Testnet集成.md`](./docs/05-双仓库架构与Moss-Testnet集成.md) | Product/Moss repository topology and runtime architecture |
+| [`docs/06-技术风险与决策清单.md`](./docs/06-技术风险与决策清单.md) | Risks, decisions, owners, and evidence gates |
+| [`docs/08-Moss边界与职责划分.md`](./docs/08-Moss边界与职责划分.md) | Accepted Moss boundary: `createTask` only for P0 |
+| [`AGENTS.md`](./AGENTS.md) | Repository invariants and contributor guardrails |
+
+## Team
+
+| Member | Focus |
+| --- | --- |
+| **NEO** | Smart contracts, Moss, and on-chain integration |
+| **RISO** | Product, deterministic rules, AI explanation, and coordination |
+| **ELEVEN** | UI, visual design, and interaction |
+
+For collaboration on Agent frameworks, verification infrastructure, or real-world design-partner workflows, contact NEO on [Telegram](https://t.me/neo_web3_nova).
+
+## Contributing
+
+1. Fork the repository and create a focused branch.
+2. Preserve the product invariants in [`AGENTS.md`](./AGENTS.md).
+3. Keep Moss internals behind `@sla/moss-bridge` and shared domain types in `@sla/domain`.
+4. Run `pnpm verify` and the relevant Foundry tests.
+5. Open a pull request with the behavior, trust boundary, and verification evidence clearly described.
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+The software is experimental and deployed on Monad Testnet. It is not legal advice, a court judgment, or a production custody service.
 
 ---
 
-## 文档
+<div align="center">
 
-| 文档 | 内容 |
-|---|---|
-| [01 · 项目方案](docs/01-项目方案.md) | 核心理念、立场、流程、范围 —— **先读这份** |
-| [02 · 开发执行案](docs/02-开发执行案.md) | 合约方案、分工、排期、Go/No-Go |
-| [03 · 视觉灵感与 3D 方案](docs/03-视觉灵感与3D方案.md) | 关键词、艺术与游戏参考、2D/3D、节奏 |
-| [04 · 竞品调研](docs/04-竞品调研.md) | Internet Court 拆解、五个差异点、Q&A 弹药库 |
-| [05 · 双仓库架构与 Moss Testnet 集成](docs/05-双仓库架构与Moss-Testnet集成.md) | 产品仓库、团队 Moss Fork、Testnet Runtime、Protocol 与 E3 证据链 |
-| [06 · 技术风险与决策清单](docs/06-技术风险与决策清单.md) | 已核验事实、P0/P1/P2 问题、负责人、决策门与验收证据 |
-| [08 · Moss 边界与职责划分](docs/08-Moss边界与职责划分.md) | P0 只集成 createTask、粗粒度 Verb 映射、后续直接调用边界与升级条件 |
-| [09 · 给 RISO 的 Moss 改动与 PR 合并说明](docs/09-给RISO的Moss改动与PR合并说明.md) | 两个 PR 的改动摘要、产品影响、审查重点、合并顺序与下一步 |
-| [AGENTS.md](AGENTS.md) | AI Agent 与团队共同遵循的网络、仓库、架构和验证约定 |
+**AI can arbitrate the measurable. Humans decide the meaningful.**
 
----
-
-## 团队
-
-| | |
-|---|---|
-| **Riso** | 产品 · 规则引擎 · AI 层 · 统筹 |
-| **Neo** | 合约 · Moss · 链上集成 |
-| **Eleven** | UI · 视觉 · 交互 |
-
----
-
-<p align="center">
-<b>我们没有替你做决定。</b><br>
-我们只是把责任找回来，摆在你面前。
-</p>
-
-## 本地验证
-
-```bash
-git clone --recurse-submodules <repo>     # ⚠️ 必须带 --recurse-submodules
-cd Silicon-Labor-Arbitration
-pnpm install
-pnpm verify                                # 构建 Moss + typecheck + 全部测试
-```
-
-已经克隆过但没带那个参数：
-
-```bash
-git submodule update --init --recursive && pnpm install
-```
-
-> **为什么不能靠 `postinstall` 自动 init**
->
-> `pnpm-workspace.yaml` 引用了 `vendor/moss/packages/*`，而 pnpm 在**任何**
-> 生命周期脚本（含 `preinstall`）之前就要解析 workspace。子模块没拉下来，
-> install 直接报 `ENOENT: scandir …/protocols/silicon-arbitration`。
-> 这个先后顺序没有脚本钩子能绕开——只能在克隆时就带上子模块。
-
-单独跑：
-
-| 命令 | 作用 |
-|---|---|
-| `pnpm build:moss` | 只构建 moss-bridge 真正依赖的 Moss 包 |
-| `pnpm typecheck` | 构建 Moss 后做类型检查 |
-| `pnpm test` | 构建 Moss 后跑测试 |
-| `pnpm test:contracts` | Foundry 合约测试（需先装 forge）|
-
-> **为什么 `build:moss` 只构建一部分**
->
-> `vendor/moss` 里有 16 个包，其中 `@themoss/abi-tools` 缺 `@types/node`，
-> 全量构建会挂在它的 dts 步骤上。而我们只用 `core` / `simulator` /
-> `system` / `protocol-silicon-arbitration` 四个，
-> 所以按 `--filter "<pkg>..."`（含依赖）精确构建，既绕开了那个失败，
-> 也快得多。
->
-> 上游修好 `abi-tools` 之后可以放开，但**没有理由为了构建用不到的包而失败**。
+</div>
