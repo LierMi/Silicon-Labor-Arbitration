@@ -18,6 +18,8 @@ test("the landing page uses the warmer gallery, readable copy, and a crimson una
   // 0.64rem 投屏读不出来，而这三块正是要评委看清的内容
   assert.match(css, /\.landing \.exhibit-panel p\s*\{[^}]*font-size:\s*0\.83rem/s);
   assert.match(css, /\.landing \.hang-tag\s*\{[^}]*font-size:\s*0\.72rem/s);
+  assert.match(css, /\.landing \.hang-tag\[data-tag-id="broken"\] b\s*\{[^}]*color:\s*var\(--gallery-bone\)/s);
+  assert.match(css, /\.landing \.hang-tag\[data-tag-id="broken"\] em\s*\{[^}]*color:\s*var\(--gallery-yellow\)/s);
   assert.match(css, /\.theatre :where\(\.responsibility-card-seq,[^}]*font-size:\s*0\.7rem/s);
 });
 

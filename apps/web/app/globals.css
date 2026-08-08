@@ -2438,7 +2438,7 @@ blockquote {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 0.45rem 1.5rem 1.2rem;
+  padding: 7% 1.5rem 1.2rem;
   filter: saturate(1.08) contrast(1.06) brightness(1.02);
 }
 
@@ -4786,3 +4786,109 @@ blockquote {
 
 .landing .hang-tag.is-warn b { color: #e0574a; }
 .landing .hang-tag.is-warn em { color: rgba(224, 87, 74, 0.82); }
+
+.landing .hang-tag[data-tag-id="broken"] b { color: var(--gallery-bone); }
+.landing .hang-tag[data-tag-id="broken"] em { color: var(--gallery-yellow); }
+
+/* 案件叙事 01–06：非标题小字统一 +2px，且不低于 13px。 */
+.act .act-rubric i,
+.act .label,
+.act .hop-detail dt,
+.act .cite,
+.act .hashline,
+.act .terms i,
+.act .concept-note span,
+.act .artifact-preview,
+.act .facts em,
+.act .clause-meta,
+.act .stamp-slot i,
+.act.scene-ruling .verdict-side .aside,
+.act.scene-ruling .verdict-side .concept-note p,
+.act .role,
+.act .role button,
+.act .argument-instruction,
+.act .testimony footer,
+.act .citation-matrix button b,
+.act .citation-matrix button span,
+.act .ai-boundary span,
+.act .archive-conclusions span,
+.act .archive-actions > button:not(.cta),
+.act .evidence-link-list em {
+  font-size: 13px;
+}
+
+.act .ai-boundary b { font-size: 13.04px; }
+
+.act .artifact-name,
+.act .responsibility-board-head span,
+.act .responsibility-board-head em,
+.act .responsibility-card-seq,
+.act .responsibility-card-role,
+.act .responsibility-card dt,
+.act .responsibility-card-main > i,
+.act .responsibility-card-evidence button,
+.act .responsibility-card-evidence span,
+.act .responsibility-break,
+.act .hop-detail .label,
+.act .liability-test span,
+.act .evidence-link-map > header span,
+.act .citation-matrix > header span,
+.act .archive-stats span {
+  font-size: 13.2px;
+}
+
+.act .evidence-link-list b,
+.act .evidence-link-list span,
+.act .inline-cite,
+.act .ai-boundary p,
+.act .archive-actions > .cta {
+  font-size: 13.52px;
+}
+
+.act .essential-warning { font-size: 13.84px; }
+
+.act .figure-unit,
+.act .concept-note p,
+.act .clause-body em,
+.act .archive-conclusions b {
+  font-size: 14.16px;
+}
+
+.act .responsibility-card dd,
+.act .evidence-link-map > header b,
+.act .citation-matrix > header b,
+.act .money dt {
+  font-size: 14.48px;
+}
+
+.act .facts b,
+.act .c4-review-action {
+  font-size: 15.12px;
+}
+
+.act .aside,
+.act .facts span,
+.act .responsibility-connector,
+.act .liability-test b {
+  font-size: 15.44px;
+}
+
+.act .act-thesis,
+.act .terms b,
+.act .terms span,
+.act .concept-note b,
+.act .hop-detail dd,
+.act .closing {
+  font-size: 16.08px;
+}
+
+.act .testimony-text,
+.act .archive-line {
+  font-size: 16.4px;
+}
+
+.act blockquote:not(.big-quote),
+.act .money dd {
+  font-size: 17.68px;
+}
+/* 案件叙事字号覆盖结束 */
