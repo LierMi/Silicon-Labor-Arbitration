@@ -14,7 +14,7 @@
   "states": [
     { "id": "created", "type": "start", "label": "Created", "lane": "main", "col": 0, "step": "01", "sublabel": "funds locked · agent optional", "tag": "createTask" },
     { "id": "delivered", "type": "active", "label": "Delivered", "lane": "main", "col": 2, "step": "02", "sublabel": "deliveryHash committed", "tag": "submitDelivery" },
-    { "id": "disputed", "type": "active", "label": "Disputed", "lane": "dispute", "col": 1, "sublabel": "client or agent opens case", "tag": "openDispute" },
+    { "id": "disputed", "type": "active", "label": "Disputed", "lane": "dispute", "col": 1, "width": 116, "sublabel": "client or agent opens case", "tag": "openDispute" },
     { "id": "review", "type": "waiting", "label": "ManualReview", "lane": "dispute", "col": 2, "sublabel": "subjective funds frozen", "tag": "frozen > 0" },
     { "id": "refunded", "type": "success", "label": "Refunded", "lane": "terminal", "col": 0, "sublabel": "client paid or credited" },
     { "id": "accepted", "type": "success", "label": "Accepted", "lane": "terminal", "col": 1, "sublabel": "agent paid or credited" },
@@ -22,12 +22,12 @@
   ],
   "transitions": [
     { "from": "created", "to": "delivered", "variant": "emphasis" },
-    { "from": "created", "to": "refunded", "variant": "dashed", "fromSide": "bottom", "toSide": "left", "via": [[20, 188], [20, 479]] },
-    { "from": "delivered", "to": "accepted", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "route": "drop" },
-    { "from": "delivered", "to": "disputed", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "drop" },
-    { "from": "disputed", "to": "review", "variant": "security", "fromSide": "top", "toSide": "top", "route": "top-channel" },
-    { "from": "disputed", "to": "settled", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "route": "drop" },
-    { "from": "review", "to": "settled", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "route": "straight" }
+    { "from": "created", "to": "refunded", "variant": "dashed", "fromSide": "bottom", "toSide": "left", "via": [[94, 230], [20, 230], [20, 479]] },
+    { "from": "delivered", "to": "accepted", "variant": "emphasis", "fromSide": "bottom", "toSide": "left", "via": [[402, 250], [480, 250], [480, 479]] },
+    { "from": "delivered", "to": "disputed", "variant": "security", "fromSide": "right", "toSide": "top", "via": [[556, 157]] },
+    { "from": "disputed", "to": "review", "variant": "security", "fromSide": "right", "toSide": "left", "route": "straight" },
+    { "from": "disputed", "to": "settled", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "via": [[556, 393], [710, 393]] },
+    { "from": "review", "to": "settled", "variant": "dashed", "fromSide": "right", "toSide": "right", "via": [[790, 307], [790, 479]] }
   ],
   "cards": [
     { "dot": "emerald", "title": "Happy path", "items": ["Created → Delivered → Accepted", "assignAgent changes the agent field but remains Created"] },
