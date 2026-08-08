@@ -20,7 +20,7 @@ import {
 } from "@sla/chain";
 import { POTATO_REQUIREMENTS, computeRequirementsHash, deadlineFromNow } from "@sla/domain";
 import type { Requirement } from "@sla/domain";
-import { formatEther, isAddress } from "viem";
+import { decodeEventLog, formatEther, isAddress, parseAbiItem } from "viem";
 
 const CHAIN_ID = 10143;
 const REQUIRED_AMOUNT = "0.1";
@@ -93,6 +93,10 @@ function useTaskDetails(taskId: `0x${string}` | undefined) {
 }
 
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
+
+const TASK_CREATED_EVENT = parseAbiItem(
+  "event TaskCreated(bytes32 indexed taskId, address indexed client, uint256 amount, bytes32 reqHash, uint256 deadline)",
+);
 
 export default function Workbench() {
   const { address, isConnected, chain } = useAccount();
@@ -207,14 +211,17 @@ export default function Workbench() {
       }
       setDiag(diagParts.join(" · "));
       const { to, data, value } = prepared.unsignedTransaction;
-      setTxHash(await sendTransactionAsync({
+      const hash = await sendTransactionAsync({
         to: to as `0x${string}`,
         data: data as `0x${string}`,
         value: BigInt(value),
         // 强制在 Monad Testnet 上估算/发送——wagmi 默认用钱包 provider 当前网络，
         // 钱包停在别的链时余额估算为 0（真实链上余额 112 MON）
         chainId: CHAIN_ID,
-      }));
+      });
+      setTxHash(hash);
+      // 预填到载入框，交易确认后可直接点「载入」解析出 taskId
+      setInputValue(hash);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setSignError(msg);
@@ -241,6 +248,53 @@ export default function Workbench() {
     if (!taskId) return;
     run(() => write(buildOpenDispute(taskId)));
   }, [taskId, write, run]);
+
+  // 载入任务：输入可能是 taskId，也可能是 tx hash。
+  // 先试当 taskId 读链（status 非 None 即有效）；否则当 tx hash 解析
+  // TaskCreated 事件取 taskId。找不到时报错而不是静默。
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState("");
+  const loadTask = useCallback(async (raw: string) => {
+    if (!raw.startsWith("0x")) {
+      setLoadError("输入必须是 0x 开头的 taskId 或交易哈希");
+      return;
+    }
+    setLoadError(null);
+    const asTaskId = raw as `0x${string}`;
+    try {
+      if (publicClient) {
+        // 先试当 taskId：读链上状态，非 None 说明有效
+        const s = await publicClient.readContract({
+          address: TASK_ESCROW_ADDRESS,
+          abi: taskEscrowAbi,
+          functionName: "getTaskStatus",
+          args: [asTaskId],
+        });
+        if (Number(s) !== 0) {
+          setTaskId(asTaskId);
+          return;
+        }
+        // 当 tx hash 解析 receipt
+        const receipt = await publicClient.getTransactionReceipt({ hash: asTaskId });
+        const logs = receipt.logs.filter((l) => l.address.toLowerCase() === TASK_ESCROW_ADDRESS.toLowerCase());
+        for (const log of logs) {
+          try {
+            const decoded = decodeEventLog({ abi: taskEscrowAbi, data: log.data, topics: log.topics });
+            if (decoded.eventName === "TaskCreated") {
+              const { taskId: createdId } = decoded.args as { taskId: `0x${string}` };
+              setTaskId(createdId);
+              return;
+            }
+          } catch {
+            // 不是 TaskCreated 的日志，跳过
+          }
+        }
+      }
+      setLoadError("既不是有效 taskId（链上无此任务），也不是含 TaskCreated 的 tx hash");
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : String(err));
+    }
+  }, [publicClient]);
 
   const step = useMemo(() => {
     if (status === null) return "idle";
@@ -452,23 +506,30 @@ chainId:             ${prepared.e3.chainId}`}</pre>
             {txHash && <p style={{ fontSize: "0.75rem", color: "#77c98b", wordBreak: "break-all" }}>✓ tx: {txHash}</p>}
           </section>
 
-          {/* 阶段 2：载入 taskId（交易确认后从事件取，演示先手填） */}
+          {/* 阶段 2：载入任务（接受 taskId 或交易哈希） */}
           <section style={card}>
             <h2>② 任务 ID</h2>
             <p style={{ color: "#b8ae99", fontSize: "0.85rem" }}>
-              广播确认后从 TaskCreated 事件拿到 taskId（或粘贴链上已有任务）。
+              粘贴 taskId 或刚才广播的交易哈希（自动从 TaskCreated 事件解析）。
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <input
-                value={taskId ?? ""}
-                onChange={(e) => setTaskId(e.target.value.startsWith("0x") ? e.target.value as `0x${string}` : undefined)}
-                placeholder="taskId 0x…"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder="taskId 或 tx hash 0x…"
                 style={{ ...input, width: 380 }}
               />
-              <button onClick={() => { setTaskId((taskId ?? "0x") as `0x${string}`); }} type="button" style={btn} disabled={!taskId}>
+              <button
+                onClick={() => loadTask(inputValue.trim())}
+                type="button"
+                style={btn}
+                disabled={!inputValue.trim().startsWith("0x")}
+              >
                 载入
               </button>
             </div>
+            {loadError && <p style={{ color: "#c0392b", fontSize: "0.75rem", marginTop: 8 }}>✗ {loadError}</p>}
+            {taskId && <p style={{ fontSize: "0.75rem", color: "#77c98b", marginTop: 8 }}>✓ 已载入：{taskId}</p>}
             {txHash && step !== "idle" && (
               <p style={{ fontSize: "0.75rem", color: "#77c98b", marginTop: 8 }}>
                 ✓ 已读取链上状态：{STATUS_LABELS[status ?? 0]}
