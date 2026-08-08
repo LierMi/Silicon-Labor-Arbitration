@@ -97,6 +97,25 @@ export const taskEscrowAbi = [
   // ── 只读 ────────────────────────────────────────────
   {
     type: "function",
+    name: "tasks",
+    stateMutability: "view",
+    inputs: [{ name: "taskId", type: "bytes32" }],
+    outputs: [
+      { name: "client", type: "address" },
+      { name: "agent", type: "address" },
+      { name: "amount", type: "uint256" },
+      { name: "requirementsHash", type: "bytes32" },
+      { name: "deliveryHash", type: "bytes32" },
+      { name: "caseId", type: "bytes32" },
+      { name: "deadline", type: "uint256" },
+      { name: "frozenAmount", type: "uint256" },
+      { name: "status", type: "uint8" },
+      { name: "settlementProposalHash", type: "bytes32" },
+      { name: "reviewDecisionHash", type: "bytes32" },
+    ],
+  },
+  {
+    type: "function",
     name: "getTaskStatus",
     stateMutability: "view",
     inputs: [{ name: "taskId", type: "bytes32" }],

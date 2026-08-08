@@ -3,11 +3,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
-import { freshPotatoCase } from "@sla/domain";
 import { caseRuntimeLabel, formatCaseTime, parseStoredReview, reviewStorageKey } from "../case-presentation";
+import { useCase } from "../case-source";
 import styles from "./courtroom.module.css";
-
-const caseFile = freshPotatoCase();
 
 const PROGRESS = [
   ["01", "签前模拟", "已固化"],
@@ -25,11 +23,11 @@ const RULE_LABELS: Record<string, string> = {
   C4: "画的是一只猫",
 };
 
-const EVIDENCE_COPY: Record<string, { title: string; summary: string; detail: string; image?: string; original?: string; imageAlt?: string }> = {
+const EVIDENCE_COPY: Record<string, { title: string; summary: string; detail: (deadline?: string) => string; image?: string; original?: string; imageAlt?: string }> = {
   E1: {
     title: "原始需求",
     summary: "适合儿童产品的橙色猫，PNG，透明背景。",
-    detail: `委托人要求交付一只适合儿童产品使用的橙色猫插画，背景必须透明，文件格式为 PNG，并在 ${formatCaseTime(caseFile.onchain.deadline ?? "")}（北京时间）前交付。当前画面展示委托人提供的视觉参考原文件，其文件指纹已记录在案件档案中。`,
+    detail: (deadline?: string) => `委托人要求交付一只适合儿童产品使用的橙色猫插画，背景必须透明，文件格式为 PNG，并在 ${formatCaseTime(deadline ?? "")}（北京时间）前交付。当前画面展示委托人提供的视觉参考原文件，其文件指纹已记录在案件档案中。`,
     image: "/courtroom/e1-orange-cat-display.png",
     original: "/courtroom/e1-orange-cat-reference.png",
     imageAlt: "委托人提供的橙色卡通猫视觉参考",
@@ -37,7 +35,7 @@ const EVIDENCE_COPY: Record<string, { title: string; summary: string; detail: st
   E2: {
     title: "实际交付",
     summary: "potato.png · 原始交付文件与指纹已固化。",
-    detail: "原始 potato.png 已纳入案件档案：按时送达，文件格式为 PNG，含透明通道。页面展示的就是本案原始交付文件；SHA-256 文件指纹用于复核展示素材与证据记录是否一致。",
+    detail: () => "原始 potato.png 已纳入案件档案：按时送达，文件格式为 PNG，含透明通道。页面展示的就是本案原始交付文件；SHA-256 文件指纹用于复核展示素材与证据记录是否一致。",
     image: "/courtroom/e2-potato-display.png",
     original: "/courtroom/e2-potato.png",
     imageAlt: "Agent 实际交付的透明背景土豆 PNG",
@@ -45,19 +43,19 @@ const EVIDENCE_COPY: Record<string, { title: string; summary: string; detail: st
   E3: {
     title: "Moss 签名前解释",
     summary: "拟议资金托管；争议时由规则层与人工复核接续。",
-    detail: "Moss 在签名前向委托人说明拟议的资金托管、交付验收和争议处理路径。E3 是真实模拟后固化的签前证据，但本案未广播；它不能替代对交付主体是否为猫的人工判断。",
+    detail: () => "Moss 在签名前向委托人说明拟议的资金托管、交付验收和争议处理路径。E3 是真实模拟后固化的签前证据，但本案未广播；它不能替代对交付主体是否为猫的人工判断。",
     image: "/courtroom/suspended-gavel.jpg",
     imageAlt: "悬停在槌座上方的法槌与案件文件",
   },
   E4: {
     title: "主 Agent 转译日志",
     summary: "产品用途约束在转译中丢失。",
-    detail: "主 Agent 将“适合儿童产品”压缩成“儿童向配色”，没有保留产品用途约束。该日志直接支撑检方关于意图漂移的陈述。",
+    detail: () => "主 Agent 将“适合儿童产品”压缩成“儿童向配色”，没有保留产品用途约束。该日志直接支撑检方关于意图漂移的陈述。",
   },
   E5: {
     title: "工具参数与警告",
     summary: "主体相似度偏低警告未触发回退。",
-    detail: "图像工具返回主体相似度偏低警告。插画 Agent 没有回退或请求人工确认，继续提交了交付物。",
+    detail: () => "图像工具返回主体相似度偏低警告。插画 Agent 没有回退或请求人工确认，继续提交了交付物。",
   },
 };
 
@@ -76,6 +74,7 @@ export default function CourtroomPage() {
   const rootRef = useRef<HTMLElement>(null);
   const evidenceDialogRef = useRef<HTMLElement>(null);
   const closeEvidenceRef = useRef<HTMLButtonElement>(null);
+  const { caseFile } = useCase();
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
   const [objectionRaised, setObjectionRaised] = useState(false);
   const [expandedArgument, setExpandedArgument] = useState<string | null>(null);
@@ -230,6 +229,7 @@ export default function CourtroomPage() {
           <span className={`${styles.liveDot} ${!caseFile.onchain.confirmed ? styles.fixtureDot : ""}`} />
           <span>{caseRuntimeLabel(caseFile.onchain.confirmed)}</span>
           <code>{shortAddress(caseFile.onchain.taskEscrowAddress)}</code>
+          {caseFile.isMock ? <b className={`${styles.sourceBadge} ${styles.mockBadge}`}>DEMO</b> : <b className={styles.sourceBadge}>LIVE</b>}
         </div>
       </header>
 
@@ -465,7 +465,7 @@ export default function CourtroomPage() {
               <p>EVIDENCE · {evidence.kind.replaceAll("_", " ")}</p>
               <h2>{EVIDENCE_COPY[evidence.id]?.title}</h2>
               <blockquote>{evidence.text}</blockquote>
-              <p className={styles.evidenceDetail}>{EVIDENCE_COPY[evidence.id]?.detail}</p>
+              <p className={styles.evidenceDetail}>{EVIDENCE_COPY[evidence.id]?.detail(caseFile.onchain.deadline)}</p>
               {EVIDENCE_COPY[evidence.id]?.original ? <a className={styles.downloadOriginal} href={EVIDENCE_COPY[evidence.id]?.original} download>下载原始证物文件 ↓</a> : null}
               <dl>
                 <div><dt>时间</dt><dd>{formatCaseTime(evidence.ts)}（北京时间）</dd></div>
