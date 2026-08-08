@@ -366,6 +366,16 @@ export interface E3Provenance {
 }
 
 export function getE3Provenance(): E3Provenance {
+  // serverless（Vercel）运行时没有仓库文件：构建期由 next.config 注入 env。
+  // 本地 dev / 直接 node 调用回退到下面从 cwd 上溯读仓库根文件，两条路径同源同序。
+  const envCommit = process.env.SLA_MOSS_LOCK_COMMIT;
+  const envProtocolVersion = process.env.SLA_MOSS_PROTOCOL_VERSION;
+  if (envCommit && envProtocolVersion) {
+    return {
+      mossCommit: envCommit,
+      protocolVersion: `silicon-arbitration@${envProtocolVersion}`,
+    };
+  }
   // 仓库根：从 cwd 上溯找 moss.lock.json（Next.js 编译后 import.meta.dirname 不可靠）
   let dir = process.cwd();
   let lockPath: string | null = null;
