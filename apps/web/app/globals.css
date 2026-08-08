@@ -2949,13 +2949,16 @@ blockquote {
   z-index: 8;
   opacity: 1;
   filter: brightness(1.12);
-  transform: translateY(-0.7rem) scale(1.055);
   box-shadow:
     inset 0 0 0 1px rgba(225, 245, 252, 0.08),
     inset 0 1px 0 rgba(232, 247, 252, 0.2),
     0 0 0 1px rgba(0, 0, 0, 0.72),
     0 24px 46px rgba(0, 0, 0, 0.52),
     0 0 38px var(--frame-glow);
+}
+
+.responsibility-card:hover {
+  transform: translateY(-0.7rem) scale(1.055);
 }
 
 .responsibility-card:hover::after,
@@ -3265,9 +3268,7 @@ blockquote {
     scroll-snap-align: center;
   }
 
-  .responsibility-card:hover,
-  .responsibility-card:focus-within,
-  .responsibility-card.is-active {
+  .responsibility-card:hover {
     transform: translateY(-0.3rem) scale(1.015);
   }
 }

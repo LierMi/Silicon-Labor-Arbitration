@@ -39,3 +39,16 @@ test("responsibility cards use click-driven details, consistent orange frames, a
   assert.match(css, /\.responsibility-card dl div:nth-child\(n \+ 2\)\s*\{[^}]*display:\s*none/s);
   assert.match(css, /\.scene-chain:has\(\.act-chain\.is-board\) \.hop-detail\s*\{[^}]*max-height:\s*11rem/s);
 });
+
+test("only pointer hover raises a responsibility card", async () => {
+  const css = await readFile(new URL("app/globals.css", appRoot), "utf8");
+
+  assert.match(
+    css,
+    /\.responsibility-card:hover\s*\{[^}]*transform:\s*translateY\(-0\.7rem\) scale\(1\.055\)/s,
+  );
+  assert.doesNotMatch(
+    css,
+    /\.responsibility-card:focus-within,\s*\.responsibility-card\.is-active\s*\{[^}]*transform:/s,
+  );
+});

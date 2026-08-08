@@ -16,7 +16,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-22c55e)](./LICENSE)
 
-[Live Experience](https://silicon-labor-arbitration.vercel.app/demo) · [Case Workbench](https://silicon-labor-arbitration.vercel.app/workbench) · [Courtroom](https://silicon-labor-arbitration.vercel.app/courtroom) · [Contract](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF)
+[Live Experience](https://silicon-labor-arbitration.vercel.app) · [Case Workbench](https://silicon-labor-arbitration.vercel.app/workbench) · [Courtroom](https://silicon-labor-arbitration.vercel.app/courtroom) · [Contract](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF)
 
 </div>
 
@@ -35,6 +35,30 @@ Silicon Labor Arbitration is an on-chain accountability layer for work delegated
 | **Primary demo** | A commissioned “orange cat” is delivered as a potato: format checks pass, meaning does not. The system refuses to fake certainty. |
 
 > **We do not issue final judgments. We recover responsibility and put it in front of the human reviewer.**
+
+## Why We Built This
+
+Our story begins with a cat.
+
+A user pays 0.2 MON and asks an Agent to draw an orange cat suitable for a children's product. The Agent delivers on time: a PNG with a transparent background, perfectly compliant in format—but what it delivers is a potato.
+
+It can even explain, with all the polish of a contemporary artist: “This is a postmodern reconstruction of the concept of the cat.” From an artistic perspective, it almost sounds convincing.
+
+The name SILICON LABOR ARBITRATION (SLA) is itself a pun: SLA also means Service Level Agreement. At heart, the potato case is an SLA dispute—was the promised level of service actually met?
+
+Transaction records can prove where the money went, and signatures can prove who clicked confirm. But neither can answer: at what point was human intent misunderstood? When every machine has “executed correctly,” who is responsible for the wrong result?
+
+In the Agent era, **what is truly scarce is responsibility**.
+
+That is why we built Silicon Labor Arbitration. We are not rushing to decide who is right or wrong. We are here to **reconstruct an undeniable timeline of responsibility**.
+
+In our early research, we found Internet Court, a product launched this July that uses 1,001 AI jurors to reach final verdicts quickly. Our view is different: more AI does not automatically produce justice. **Truth is not necessarily held by the majority of Agents. A vote can produce an answer, but it cannot confer legitimacy upon it.**
+
+So Silicon Labor Arbitration does not invent an omniscient AI judge. It reconstructs responsibility: who stated the requirement, who accepted the assignment, who called the tool, who signed the transaction, and who delivered the potato.
+
+Technically, Monad Testnet carries escrow and responsibility records, Moss constructs and simulates transactions before signing, and the wallet preserves the final authorization boundary.
+
+**What we seek to protect is not merely a payment, but the last right that must not be automated in the AI era: humanity's final authority to interpret meaning.**
 
 ## Problem
 
@@ -416,10 +440,10 @@ Deployment is restricted to Monad Testnet. Record any new address, transaction, 
 | Member | Focus |
 | --- | --- |
 | **NEO** | Smart contracts, Moss, and on-chain integration |
-| **RISO** | Product, deterministic rules, AI explanation, and coordination |
+| **RISO** | Product, deterministic rules, AI explanation, coordination, UI, and frontend development |
 | **ELEVEN** | UI, visual design, and interaction |
 
-For collaboration on Agent frameworks, verification infrastructure, or real-world design-partner workflows, contact NEO on [Telegram](https://t.me/neo_web3_nova).
+For collaboration on Agent frameworks, verification infrastructure, or real-world design-partner workflows, contact [NEO on Telegram](https://t.me/neo_web3_nova) or [RISO on Telegram](https://t.me/Lier_Mi).
 
 ## Contributing
 
@@ -439,6 +463,6 @@ The software is experimental and deployed on Monad Testnet. It is not legal advi
 
 <div align="center">
 
-**AI can arbitrate the measurable. Humans decide the meaningful.**
+**What we seek to protect is not merely a payment, but the last right that must not be automated in the AI era: humanity's final authority to interpret meaning.**
 
 </div>
