@@ -22,6 +22,13 @@
   <b>当人类把行动委托给 AI，责任不能也一起被委托掉。</b>
 </p>
 
+<p align="center">
+  <b>在线演示：</b><br>
+  <a href="https://silicon-labor-arbitration.vercel.app/">开屏页</a>
+  ·
+  <a href="https://silicon-labor-arbitration.vercel.app/courtroom">六幕法庭体验</a>
+</p>
+
 ---
 
 ## 问题
