@@ -11,9 +11,9 @@
     { "id": "api", "type": "backend", "label": "Prepare API", "sublabel": "POST /api/moss/prepare-create-task", "pos": [230, 140], "size": [170, 64] },
     { "id": "mossbridge", "type": "backend", "label": "MossBridge", "sublabel": "prepareCreateTask() · buildE3()", "pos": [440, 140], "size": [160, 64], "tag": "only Moss seam" },
 
-    { "id": "runtime", "type": "backend", "label": "Testnet Runtime", "sublabel": "monadTestnetRuntime · 10143", "pos": [650, 140], "size": [160, 64] },
-    { "id": "protocol", "type": "backend", "label": "createTask Capability", "sublabel": "ABI · intent · Receipt parser", "pos": [850, 140], "size": [170, 64], "tag": "silicon-arbitration" },
-    { "id": "simulator", "type": "cloud", "label": "Trace Simulator", "sublabel": "unsigned tx · Changes · warnings", "pos": [1060, 140], "size": [170, 64] },
+    { "id": "runtime", "type": "backend", "label": "Testnet Runtime", "sublabel": "monadTestnetRuntime · 10143", "pos": [670, 140], "size": [160, 64] },
+    { "id": "protocol", "type": "backend", "label": "createTask Capability", "sublabel": "ABI · intent · Receipt parser", "pos": [870, 140], "size": [170, 64], "tag": "silicon-arbitration" },
+    { "id": "simulator", "type": "cloud", "label": "Trace Simulator", "sublabel": "unsigned tx · Changes · warnings", "pos": [1080, 140], "size": [170, 64] },
 
     { "id": "chain", "type": "backend", "label": "Chain Adapter", "sublabel": "lifecycle + fallback createTask", "pos": [230, 320], "size": [170, 64], "tag": "direct tx builders" },
     { "id": "wallet", "type": "security", "label": "User Wallet", "sublabel": "review · sign · broadcast", "pos": [850, 320], "size": [170, 64], "tag": "signing boundary" },
@@ -30,24 +30,23 @@
     { "kind": "security-group", "label": "Monad Testnet · chain 10143", "wraps": ["rpc", "escrow"] }
   ],
   "connections": [
-    { "from": "ui", "to": "api", "label": "prepare", "variant": "emphasis" },
+    { "from": "ui", "to": "api", "label": "prepare", "variant": "emphasis", "labelAt": [210, 122] },
     { "from": "api", "to": "mossbridge" },
     { "from": "mossbridge", "to": "runtime" },
     { "from": "runtime", "to": "protocol" },
     { "from": "protocol", "to": "simulator" },
     { "from": "simulator", "to": "rpc", "label": "debug_traceCall", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "route": "orthogonal-v", "labelDx": -48 },
-    { "from": "ui", "to": "chain", "label": "later writes", "variant": "dashed", "fromSide": "bottom", "toSide": "left", "route": "orthogonal-v", "labelDx": -26 },
-    { "from": "ui", "to": "wallet", "label": "prepared tx", "variant": "security", "fromSide": "bottom", "toSide": "top", "via": [[115, 260], [935, 260]] },
+    { "from": "ui", "to": "chain", "label": "later writes", "variant": "dashed", "fromSide": "left", "toSide": "left", "via": [[20, 172], [20, 352]] },
+    { "from": "ui", "to": "wallet", "label": "prepared tx", "variant": "security", "fromSide": "bottom", "toSide": "top", "via": [[115, 270], [935, 270]] },
     { "from": "chain", "to": "wallet", "label": "wagmi request", "variant": "security" },
     { "from": "wallet", "to": "rpc", "variant": "emphasis" },
     { "from": "rpc", "to": "escrow", "label": "execute tx", "fromSide": "bottom", "toSide": "top", "route": "orthogonal-v", "labelDx": 44 },
     { "from": "domain", "to": "rules" },
-    { "from": "rules", "to": "ai", "variant": "dashed" },
-    { "from": "domain", "to": "ui", "label": "typed data", "variant": "dashed", "fromSide": "top", "toSide": "bottom", "route": "orthogonal-v", "labelDx": -40 }
+    { "from": "rules", "to": "ai", "variant": "dashed" }
   ],
   "cards": [
     { "dot": "cyan", "title": "Moss createTask path", "items": ["API returns unsigned transaction + E3 to the UI", "Moss constructs and simulates; it never signs or broadcasts"] },
     { "dot": "amber", "title": "Direct transaction path", "items": ["Lifecycle writes and fallback createTask use chain tx builders", "Direct transactions are not labeled Moss-verified"] },
-    { "dot": "rose", "title": "Trust boundaries", "items": ["Wallet is the only signing boundary", "Rule engine is deterministic; AI explains; humans decide subjective C4"] }
+    { "dot": "rose", "title": "Trust boundaries", "items": ["Wallet is the only signing boundary", "Rule engine is deterministic; AI explains; humans decide subjective C4", "UI, rules and chain share one Domain type set (Case / Evidence / E3)"] }
   ]
 }

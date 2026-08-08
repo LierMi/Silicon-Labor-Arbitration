@@ -1473,14 +1473,14 @@ const DIAGRAMS = [
     label: "系统架构",
     en: "System architecture",
     note: "monorepo 运行时：Next.js 演示层 + domain / rules / chain，Moss 是 createTask 唯一入口",
-    ratio: "1080 / 650",
+    ratio: "1320 / 652",
   },
   {
     id: "e2e-flow",
     label: "createTask 全链路",
     en: "End-to-end · Moss path",
     note: "MossBridge 构造 → 链上模拟 → 固化 E3 → 钱包签名 → 上链确认",
-    ratio: "720 / 528",
+    ratio: "720 / 652",
   },
   {
     id: "task-lifecycle",
