@@ -1,89 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 528" role="img" aria-label="End-to-End Task Creation · Moss Path — createTask via MossBridge → simulate → E3 → wallet sign → on-chain confirm (workflow diagram)"><style>
-  /* 硅基劳动仲裁院 · 夜间档案室配色
-     Archify 默认是蓝灰工程图，与我们的暗房+朱红不搭。
-     这里只重定义变量，不改任何图形结构——重新生成图时覆盖本文件即可，
-     把这段 style 再注一次就行（scripts/restyle-diagrams.py）。 */
-  :root {
-    --bg: transparent;
-    --grid: rgba(214, 205, 185, 0.05);
-    --mask: rgba(11, 9, 6, 0.72);
-
-    --text: #f4efe4;
-    --text-muted: #b8ae99;
-    --text-dim: #7d7462;
-    --arrow: #8a8272;
-    --arrow-emphasis: #c0392b;
-
-    --frontend-fill: rgba(233, 226, 209, 0.06);
-    --frontend-stroke: #d6cdb9;
-    --backend-fill: rgba(192, 57, 43, 0.09);
-    --backend-stroke: #c0392b;
-    --database-fill: rgba(233, 226, 209, 0.045);
-    --database-stroke: #948b78;
-    --cloud-fill: rgba(255, 202, 122, 0.07);
-    --cloud-stroke: #e0a253;
-    --security-fill: rgba(192, 57, 43, 0.07);
-    --security-stroke: #c0392b;
-    --messagebus-fill: rgba(233, 226, 209, 0.05);
-    --messagebus-stroke: #a99f88;
-    --external-fill: rgba(233, 226, 209, 0.035);
-    --external-stroke: #6b6455;
-    --lane-fill: rgba(233, 226, 209, 0.02);
-    --lane-stroke: rgba(214, 205, 185, 0.14);
-  }
-  text { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-  .c-grid { stroke: var(--grid); fill: none; }
-  .c-mask { fill: var(--mask); stroke: none; }
-  .c-frontend { fill: var(--frontend-fill); stroke: var(--frontend-stroke); }
-  .c-backend { fill: var(--backend-fill); stroke: var(--backend-stroke); }
-  .c-database { fill: var(--database-fill); stroke: var(--database-stroke); }
-  .c-cloud { fill: var(--cloud-fill); stroke: var(--cloud-stroke); }
-  .c-security { fill: var(--security-fill); stroke: var(--security-stroke); }
-  .c-messagebus { fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
-  .c-external { fill: var(--external-fill); stroke: var(--external-stroke); }
-  .c-security-group { fill: transparent; stroke: var(--security-stroke); stroke-dasharray: 4,4; }
-  .c-region { fill: rgba(255, 202, 122, 0.035); stroke: var(--cloud-stroke); stroke-dasharray: 8,4; }
-  .c-lane { fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6,6; }
-  .c-bg-rect { fill: var(--bg); }
-  .t-primary { fill: var(--text); }
-  .t-muted { fill: var(--text-muted); }
-  .t-dim { fill: var(--text-dim); }
-  .t-frontend { fill: var(--frontend-stroke); }
-  .t-backend { fill: var(--backend-stroke); }
-  .t-database { fill: var(--database-stroke); }
-  .t-cloud { fill: var(--cloud-stroke); }
-  .t-security { fill: var(--security-stroke); }
-  .t-messagebus { fill: var(--messagebus-stroke); }
-  .t-external { fill: var(--external-stroke); }
-  /* 连线用的是 a-* 前缀（不是 e-*）。漏定义的话 path 会按 SVG
-     默认 fill:black 填成大黑块，把整张图糊掉。
-     注意：本 style 块内绝不能出现尖括号，XML 解析器会当成标签。 */
-  .a-default { stroke: var(--arrow); fill: none; stroke-width: 1.5; }
-  .a-emphasis { stroke: var(--arrow-emphasis); fill: none; stroke-width: 1.8; }
-  .a-dashed { stroke: var(--database-stroke); fill: none; stroke-width: 1.3; stroke-dasharray: 5,4; }
-  .a-security { stroke: var(--security-stroke); fill: none; stroke-width: 1.5; }
-  /* marker 跟随线宽会被放得很大，锁成绝对尺寸 */
-
-  .e-emphasis { stroke: var(--arrow-emphasis); fill: none; }
-  .e-dashed { stroke: var(--database-stroke); fill: none; stroke-dasharray: 5,4; }
-  .e-security { stroke: var(--security-stroke); fill: none; }
-  .m-default { fill: var(--arrow); }
-  .m-emphasis { fill: var(--arrow-emphasis); }
-  .m-security { fill: var(--security-stroke); }
-  .m-dashed { fill: var(--database-stroke); }
-</style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 652" role="img" aria-label="createTask · Current Moss Path — Implemented flow, including the currently missing Warning guard (workflow diagram)"><style><![CDATA[
+text { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
+.c-bg-rect { fill: #020617; }
+.c-grid { fill: none; stroke: #1e293b; }
+.c-mask { fill: #0f172a; stroke: none; }
+.c-frontend { fill: rgba(8,51,68,0.72); stroke: #22d3ee; }
+.c-backend { fill: rgba(6,78,59,0.72); stroke: #34d399; }
+.c-database { fill: rgba(76,29,149,0.72); stroke: #a78bfa; }
+.c-cloud { fill: rgba(120,53,15,0.62); stroke: #fbbf24; }
+.c-security { fill: rgba(136,19,55,0.72); stroke: #fb7185; }
+.c-messagebus { fill: rgba(30,64,175,0.52); stroke: #60a5fa; }
+.c-external { fill: rgba(30,41,59,0.82); stroke: #94a3b8; }
+.c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
+.c-region { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
+.c-lane { fill: rgba(15,23,42,0.62); stroke: #334155; stroke-dasharray: 6,6; }
+.t-primary { fill: #f8fafc; }
+.t-muted { fill: #94a3b8; }
+.t-dim { fill: #64748b; }
+.t-frontend { fill: #22d3ee; }
+.t-backend { fill: #34d399; }
+.t-database { fill: #a78bfa; }
+.t-cloud { fill: #fbbf24; }
+.t-security { fill: #fb7185; }
+.t-messagebus { fill: #60a5fa; }
+.t-external { fill: #94a3b8; }
+.a-default { stroke: #64748b; fill: none; }
+.a-emphasis { stroke: #34d399; fill: none; }
+.a-security { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
+.a-dashed { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
+.m-default { fill: #64748b; }
+.m-emphasis { fill: #34d399; }
+.m-security { fill: #fb7185; }
+.m-dashed { fill: #a78bfa; }
+]]></style><rect width="100%" height="100%" fill="#020617"/>
         <!-- Definitions -->
         <defs>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
           </marker>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -99,10 +59,14 @@
         <text x="54" y="74" class="t-dim" font-size="10" font-weight="600">01 / User / Wallet</text>
 
         <rect x="40" y="176" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / Silicon Packages (Server-side)</text>
+        <text x="54" y="198" class="t-dim" font-size="10" font-weight="600">02 / Next.js + MossBridge (server)</text>
 
         <rect x="40" y="300" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
-        <text x="54" y="322" class="t-dim" font-size="10" font-weight="600">03 / Moss + Monad Testnet</text>
+        <text x="54" y="322" class="t-dim" font-size="10" font-weight="600">03 / Moss Fork + Monad Testnet</text>
+
+        <rect x="40" y="424" width="640" height="104" rx="10" class="c-lane" stroke-width="1"/>
+        <rect x="46" y="430" width="628" height="92" rx="8" class="c-security-group" stroke-width="1"/>
+        <text x="54" y="446" class="t-security" font-size="10" font-weight="600">EX / Known Safety Gap</text>
 
         <!-- Phase headers -->
         <line x1="42" y1="35" x2="266" y2="35" class="a-default" stroke-width="1.1"/>
@@ -110,54 +74,60 @@
         <text x="154" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">1. Prepare</text>
         <line x1="254" y1="35" x2="476" y2="35" class="a-default" stroke-width="1.1"/>
         <rect x="254" y="27" width="222" height="16" rx="4" class="c-mask"/>
-        <text x="365" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">2. Simulate &amp; E3</text>
+        <text x="365" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">2. Simulate + Verify</text>
         <line x1="454" y1="35" x2="671" y2="35" class="a-default" stroke-width="1.1"/>
         <rect x="454" y="27" width="217" height="16" rx="4" class="c-mask"/>
-        <text x="562.5" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">3. Sign &amp; Confirm</text>
+        <text x="562.5" y="39" class="t-muted" font-size="8" font-weight="600" text-anchor="middle">3. Sign + Confirm</text>
 
         <!-- Workflow groups -->
-        <rect x="38" y="338" width="637" height="58" rx="9" class="c-lane" stroke-width="1"/>
-        <text x="48" y="352" class="t-backend" font-size="7" font-weight="600">Moss covers ONLY createTask</text>
+
 
         <!-- Edge paths -->
-        <path d="M 134 119 L 134 166 L 165 166 L 165 243" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 220 269 L 220 290 L 300 290 L 300 333" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path d="M 300 401 L 300 290 L 430 290 L 430 209" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
-        <path d="M 485 243 L 485 166 L 454 166 L 454 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 500 145 L 500 228 L 625 228 L 625 341" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 134 119 L 134 166 L 167 166 L 167 243" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 273 243 L 273 290 L 245 290 L 245 367" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 355 367 L 355 290 L 372 290 L 372 243" class="a-default" stroke-width="1.4" marker-end="url(#arrowhead)"/>
+        <path d="M 488 243 L 488 166 L 454 166 L 454 119" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 546 119 L 546 228 L 573 228 L 573 367" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 430 277 L 430 352 L 500 352 L 500 465" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
 
         <!-- Nodes -->
         <rect x="42" y="93" width="92" height="52" rx="6" class="c-mask"/>
         <rect x="42" y="93" width="92" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
-        <text x="88" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">User Input</text>
-        <text x="88" y="131" class="t-muted" font-size="8" text-anchor="middle">Task + MON amount</text>
+        <text x="88" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Task Input</text>
+        <text x="88" y="131" class="t-muted" font-size="8" text-anchor="middle">requirements + MON</text>
 
-        <rect x="165" y="217" width="110" height="52" rx="6" class="c-mask"/>
-        <rect x="165" y="217" width="110" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-        <text x="220" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">MossBridge</text>
-        <text x="220" y="255" class="t-muted" font-size="8" text-anchor="middle">prepareCreateTask()</text>
+        <rect x="167" y="217" width="106" height="52" rx="6" class="c-mask"/>
+        <rect x="167" y="217" width="106" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+        <text x="220" y="238" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Prepare API</text>
+        <text x="220" y="255" class="t-muted" font-size="8" text-anchor="middle">validate request</text>
 
-        <rect x="254" y="333" width="92" height="68" rx="6" class="c-mask"/>
-        <rect x="254" y="333" width="92" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
-        <text x="300" y="354" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Simulate</text>
+        <rect x="245" y="333" width="110" height="68" rx="6" class="c-mask"/>
+        <rect x="245" y="333" width="110" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="300" y="354" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Action + Simulate</text>
         <text x="300" y="371" class="t-muted" font-size="8" text-anchor="middle">Capability → unsigned tx</text>
-        <text x="300" y="389" class="t-cloud" font-size="7" text-anchor="middle">debug_traceCall</text>
+        <text x="300" y="389" class="t-cloud" font-size="7" text-anchor="middle">Receipt parser</text>
 
-        <rect x="375" y="209" width="110" height="68" rx="6" class="c-mask"/>
-        <rect x="375" y="209" width="110" height="68" rx="6" class="c-security" stroke-width="1.5"/>
-        <text x="430" y="230" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Verify &amp; E3</text>
-        <text x="430" y="247" class="t-muted" font-size="8" text-anchor="middle">No warnings → evidence</text>
-        <text x="430" y="265" class="t-security" font-size="7" text-anchor="middle">gate</text>
+        <rect x="372" y="209" width="116" height="68" rx="6" class="c-mask"/>
+        <rect x="372" y="209" width="116" height="68" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="430" y="230" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Build E3 + Return</text>
+        <text x="430" y="247" class="t-muted" font-size="8" text-anchor="middle">archives receipt + warnings</text>
+        <text x="430" y="265" class="t-security" font-size="7" text-anchor="middle">always returns</text>
 
         <rect x="454" y="93" width="92" height="52" rx="6" class="c-mask"/>
         <rect x="454" y="93" width="92" height="52" rx="6" class="c-security" stroke-width="1.5"/>
-        <text x="500" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Wallet Sign</text>
-        <text x="500" y="131" class="t-muted" font-size="8" text-anchor="middle">User reviews &amp; signs</text>
+        <text x="500" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Review + Sign</text>
+        <text x="500" y="131" class="t-muted" font-size="8" text-anchor="middle">reuses to · data · value</text>
 
-        <rect x="575" y="341" width="100" height="52" rx="6" class="c-mask"/>
-        <rect x="575" y="341" width="100" height="52" rx="6" class="c-cloud" stroke-width="1.5"/>
-        <text x="625" y="362" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TaskCreated</text>
-        <text x="625" y="379" class="t-muted" font-size="8" text-anchor="middle">Tx confirmed on-chain</text>
+        <rect x="573" y="333" width="104" height="68" rx="6" class="c-mask"/>
+        <rect x="573" y="333" width="104" height="68" rx="6" class="c-cloud" stroke-width="1.5"/>
+        <text x="625" y="354" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">TaskCreated</text>
+        <text x="625" y="371" class="t-muted" font-size="8" text-anchor="middle">tx hash → manual load</text>
+        <text x="625" y="389" class="t-cloud" font-size="7" text-anchor="middle">receipt → taskId</text>
+
+        <rect x="454" y="465" width="92" height="52" rx="6" class="c-mask"/>
+        <rect x="454" y="465" width="92" height="52" rx="6" class="c-security" stroke-width="1.5"/>
+        <text x="500" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Guard Missing</text>
+        <text x="500" y="503" class="t-muted" font-size="8" text-anchor="middle">not blocked</text>
 
         <!-- Edge labels -->
 
@@ -165,17 +135,19 @@
 
 
 
+        <rect x="421.6" y="332" width="86.8" height="14" rx="3" class="c-mask"/>
+        <text x="465" y="342" class="t-security" font-size="8" text-anchor="middle">warning / revert</text>
 
         <!-- Legend -->
-        <text x="175" y="428" class="t-primary" font-size="10" font-weight="600">Legend</text>
-        <rect x="175" y="440" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-        <text x="195" y="448" class="t-muted" font-size="7">User UI</text>
-        <rect x="260" y="440" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-        <text x="280" y="448" class="t-muted" font-size="7">Agent logic</text>
-        <rect x="370" y="440" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-        <text x="390" y="448" class="t-muted" font-size="7">Policy</text>
-        <rect x="455" y="440" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
-        <text x="475" y="448" class="t-muted" font-size="7">Tool action</text>
-        <rect x="565" y="440" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-        <text x="585" y="448" class="t-muted" font-size="7">Context / trace</text>
+        <text x="175" y="552" class="t-primary" font-size="10" font-weight="600">Legend</text>
+        <rect x="175" y="564" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+        <text x="195" y="572" class="t-muted" font-size="7">User UI</text>
+        <rect x="260" y="564" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+        <text x="280" y="572" class="t-muted" font-size="7">Agent logic</text>
+        <rect x="370" y="564" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+        <text x="390" y="572" class="t-muted" font-size="7">Policy</text>
+        <rect x="455" y="564" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
+        <text x="475" y="572" class="t-muted" font-size="7">Tool action</text>
+        <rect x="565" y="564" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+        <text x="585" y="572" class="t-muted" font-size="7">Context / trace</text>
       </svg>

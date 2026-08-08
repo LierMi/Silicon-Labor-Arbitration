@@ -1,89 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 660" role="img" aria-label="TaskEscrow · On-chain State Machine — 8 contract states: creation → delivery → accept | dispute → settle → manual review (lifecycle diagram)"><style>
-  /* 硅基劳动仲裁院 · 夜间档案室配色
-     Archify 默认是蓝灰工程图，与我们的暗房+朱红不搭。
-     这里只重定义变量，不改任何图形结构——重新生成图时覆盖本文件即可，
-     把这段 style 再注一次就行（scripts/restyle-diagrams.py）。 */
-  :root {
-    --bg: transparent;
-    --grid: rgba(214, 205, 185, 0.05);
-    --mask: rgba(11, 9, 6, 0.72);
-
-    --text: #f4efe4;
-    --text-muted: #b8ae99;
-    --text-dim: #7d7462;
-    --arrow: #8a8272;
-    --arrow-emphasis: #c0392b;
-
-    --frontend-fill: rgba(233, 226, 209, 0.06);
-    --frontend-stroke: #d6cdb9;
-    --backend-fill: rgba(192, 57, 43, 0.09);
-    --backend-stroke: #c0392b;
-    --database-fill: rgba(233, 226, 209, 0.045);
-    --database-stroke: #948b78;
-    --cloud-fill: rgba(255, 202, 122, 0.07);
-    --cloud-stroke: #e0a253;
-    --security-fill: rgba(192, 57, 43, 0.07);
-    --security-stroke: #c0392b;
-    --messagebus-fill: rgba(233, 226, 209, 0.05);
-    --messagebus-stroke: #a99f88;
-    --external-fill: rgba(233, 226, 209, 0.035);
-    --external-stroke: #6b6455;
-    --lane-fill: rgba(233, 226, 209, 0.02);
-    --lane-stroke: rgba(214, 205, 185, 0.14);
-  }
-  text { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-  .c-grid { stroke: var(--grid); fill: none; }
-  .c-mask { fill: var(--mask); stroke: none; }
-  .c-frontend { fill: var(--frontend-fill); stroke: var(--frontend-stroke); }
-  .c-backend { fill: var(--backend-fill); stroke: var(--backend-stroke); }
-  .c-database { fill: var(--database-fill); stroke: var(--database-stroke); }
-  .c-cloud { fill: var(--cloud-fill); stroke: var(--cloud-stroke); }
-  .c-security { fill: var(--security-fill); stroke: var(--security-stroke); }
-  .c-messagebus { fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
-  .c-external { fill: var(--external-fill); stroke: var(--external-stroke); }
-  .c-security-group { fill: transparent; stroke: var(--security-stroke); stroke-dasharray: 4,4; }
-  .c-region { fill: rgba(255, 202, 122, 0.035); stroke: var(--cloud-stroke); stroke-dasharray: 8,4; }
-  .c-lane { fill: var(--lane-fill); stroke: var(--lane-stroke); stroke-dasharray: 6,6; }
-  .c-bg-rect { fill: var(--bg); }
-  .t-primary { fill: var(--text); }
-  .t-muted { fill: var(--text-muted); }
-  .t-dim { fill: var(--text-dim); }
-  .t-frontend { fill: var(--frontend-stroke); }
-  .t-backend { fill: var(--backend-stroke); }
-  .t-database { fill: var(--database-stroke); }
-  .t-cloud { fill: var(--cloud-stroke); }
-  .t-security { fill: var(--security-stroke); }
-  .t-messagebus { fill: var(--messagebus-stroke); }
-  .t-external { fill: var(--external-stroke); }
-  /* 连线用的是 a-* 前缀（不是 e-*）。漏定义的话 path 会按 SVG
-     默认 fill:black 填成大黑块，把整张图糊掉。
-     注意：本 style 块内绝不能出现尖括号，XML 解析器会当成标签。 */
-  .a-default { stroke: var(--arrow); fill: none; stroke-width: 1.5; }
-  .a-emphasis { stroke: var(--arrow-emphasis); fill: none; stroke-width: 1.8; }
-  .a-dashed { stroke: var(--database-stroke); fill: none; stroke-width: 1.3; stroke-dasharray: 5,4; }
-  .a-security { stroke: var(--security-stroke); fill: none; stroke-width: 1.5; }
-  /* marker 跟随线宽会被放得很大，锁成绝对尺寸 */
-
-  .e-emphasis { stroke: var(--arrow-emphasis); fill: none; }
-  .e-dashed { stroke: var(--database-stroke); fill: none; stroke-dasharray: 5,4; }
-  .e-security { stroke: var(--security-stroke); fill: none; }
-  .m-default { fill: var(--arrow); }
-  .m-emphasis { fill: var(--arrow-emphasis); }
-  .m-security { fill: var(--security-stroke); }
-  .m-dashed { fill: var(--database-stroke); }
-</style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 660" role="img" aria-label="TaskEscrow · On-chain State Machine — 7 persisted task states · exact transitions from TaskEscrow.sol (lifecycle diagram)"><style><![CDATA[
+text { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
+.c-bg-rect { fill: #020617; }
+.c-grid { fill: none; stroke: #1e293b; }
+.c-mask { fill: #0f172a; stroke: none; }
+.c-frontend { fill: rgba(8,51,68,0.72); stroke: #22d3ee; }
+.c-backend { fill: rgba(6,78,59,0.72); stroke: #34d399; }
+.c-database { fill: rgba(76,29,149,0.72); stroke: #a78bfa; }
+.c-cloud { fill: rgba(120,53,15,0.62); stroke: #fbbf24; }
+.c-security { fill: rgba(136,19,55,0.72); stroke: #fb7185; }
+.c-messagebus { fill: rgba(30,64,175,0.52); stroke: #60a5fa; }
+.c-external { fill: rgba(30,41,59,0.82); stroke: #94a3b8; }
+.c-security-group { fill: transparent; stroke: #fb7185; stroke-dasharray: 4,4; }
+.c-region { fill: rgba(251,191,36,0.05); stroke: #fbbf24; stroke-dasharray: 8,4; }
+.c-lane { fill: rgba(15,23,42,0.62); stroke: #334155; stroke-dasharray: 6,6; }
+.t-primary { fill: #f8fafc; }
+.t-muted { fill: #94a3b8; }
+.t-dim { fill: #64748b; }
+.t-frontend { fill: #22d3ee; }
+.t-backend { fill: #34d399; }
+.t-database { fill: #a78bfa; }
+.t-cloud { fill: #fbbf24; }
+.t-security { fill: #fb7185; }
+.t-messagebus { fill: #60a5fa; }
+.t-external { fill: #94a3b8; }
+.a-default { stroke: #64748b; fill: none; }
+.a-emphasis { stroke: #34d399; fill: none; }
+.a-security { stroke: #fb7185; fill: none; stroke-dasharray: 5,5; }
+.a-dashed { stroke: #a78bfa; fill: none; stroke-dasharray: 4,4; }
+.m-default { fill: #64748b; }
+.m-emphasis { fill: #34d399; }
+.m-security { fill: #fb7185; }
+.m-dashed { fill: #a78bfa; }
+]]></style><rect width="100%" height="100%" fill="#020617"/>
         <!-- Definitions -->
         <defs>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
           </marker>
-          <marker markerUnits="userSpaceOnUse" id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
           </marker>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -96,9 +56,9 @@
 
         <!-- Lifecycle bands -->
         <path d="M 72 112 L 908 112" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
-        <text x="72" y="100" class="t-dim" font-size="10" font-weight="600">01 / Task Lifecycle</text>
+        <text x="72" y="100" class="t-dim" font-size="10" font-weight="600">01 / Funded Task</text>
         <path d="M 72 264 L 908 264" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
-        <text x="72" y="252" class="t-dim" font-size="10" font-weight="600">02 / Dispute Resolution</text>
+        <text x="72" y="252" class="t-dim" font-size="10" font-weight="600">02 / Dispute + Human Review</text>
         <path d="M 72 436 L 908 436" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
         <text x="72" y="424" class="t-dim" font-size="10" font-weight="600">03 / Terminal Outcomes</text>
 
@@ -107,67 +67,63 @@
 
         <!-- Transition paths -->
         <path d="M 153 157 L 343 157" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 94 188 L 94 309 Q 94 319 104 319 L 700 319 Q 710 319 710 329 L 710 450" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
-        <path d="M 402 188 L 402 319 L 402 319 L 402 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 402 188 L 402 233 L 402 233 L 402 278" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
-        <path d="M 402 336 L 402 383 Q 402 393 412 393 L 546 393 Q 556 393 556 403 L 556 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
-        <path d="M 465 307 L 647 307" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
-        <path d="M 710 336 L 710 383 Q 710 393 700 393 L 566 393 Q 556 393 556 403 L 556 450" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 94 188 L 30 188 Q 20 188 20 198 L 20 469 Q 20 479 30 479 L 343 479" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
+        <path d="M 402 188 L 402 309 Q 402 319 412 319 L 546 319 Q 556 319 556 329 L 556 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 402 188 L 402 223 Q 402 233 412 233 L 546 233 Q 556 233 556 243 L 556 278" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path d="M 556 278 L 556 260 Q 556 250 566 250 L 700 250 Q 710 250 710 260 L 710 278" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path d="M 556 336 L 556 383 Q 556 393 566 393 L 700 393 Q 710 393 710 403 L 710 450" class="a-emphasis" stroke-width="2" marker-end="url(#arrowhead-emphasis)"/>
+        <path d="M 710 336 L 710 450" class="a-dashed" stroke-width="1.1" marker-end="url(#arrowhead-dashed)"/>
 
         <!-- States -->
         <rect x="35" y="126" width="118" height="62" rx="7" class="c-mask"/>
         <rect x="35" y="126" width="118" height="62" rx="7" class="c-frontend" stroke-width="1.5"/>
         <text x="45" y="140" class="t-frontend" font-size="7" font-weight="700">01</text>
         <text x="94" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Created</text>
-        <text x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">Funds locked · reqHash committed</text>
+        <text x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">funds locked · agent optional</text>
+        <text x="94" y="177" class="t-frontend" font-size="7" text-anchor="middle">createTask</text>
 
         <rect x="343" y="126" width="118" height="62" rx="7" class="c-mask"/>
         <rect x="343" y="126" width="118" height="62" rx="7" class="c-backend" stroke-width="1.5"/>
         <text x="353" y="140" class="t-backend" font-size="7" font-weight="700">02</text>
         <text x="402" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Delivered</text>
-        <text x="402" y="163" class="t-muted" font-size="7" text-anchor="middle">Agent submitted delivery hash</text>
+        <text x="402" y="163" class="t-muted" font-size="7" text-anchor="middle">deliveryHash committed</text>
+        <text x="402" y="177" class="t-backend" font-size="7" text-anchor="middle">submitDelivery</text>
 
-        <rect x="339" y="278" width="126" height="58" rx="7" class="c-mask"/>
-        <rect x="339" y="278" width="126" height="58" rx="7" class="c-backend" stroke-width="1.5"/>
-        <text x="349" y="292" class="t-backend" font-size="7" font-weight="700">03</text>
-        <text x="402" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Disputed</text>
-        <text x="402" y="315" class="t-muted" font-size="7" text-anchor="middle">caseId created · Rules run</text>
+        <rect x="493" y="278" width="126" height="58" rx="7" class="c-mask"/>
+        <rect x="493" y="278" width="126" height="58" rx="7" class="c-backend" stroke-width="1.5"/>
+        <text x="556" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Disputed</text>
+        <text x="556" y="315" class="t-muted" font-size="7" text-anchor="middle">client or agent opens case</text>
+        <text x="556" y="325" class="t-backend" font-size="7" text-anchor="middle">openDispute</text>
 
         <rect x="647" y="278" width="126" height="58" rx="7" class="c-mask"/>
         <rect x="647" y="278" width="126" height="58" rx="7" class="c-cloud" stroke-width="1.5"/>
-        <text x="657" y="292" class="t-cloud" font-size="7" font-weight="700">04</text>
-        <text x="710" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Manual Review</text>
-        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">Undecidable portion frozen</text>
+        <text x="710" y="299" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">ManualReview</text>
+        <text x="710" y="315" class="t-muted" font-size="7" text-anchor="middle">subjective funds frozen</text>
+        <text x="710" y="325" class="t-cloud" font-size="7" text-anchor="middle">frozen &gt; 0</text>
 
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="343" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
-        <text x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Accepted</text>
-        <text x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">Full escrow → agent</text>
+        <text x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Refunded</text>
+        <text x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">client paid or credited</text>
 
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="497" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
-        <text x="556" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Settled</text>
-        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">Objective + human portions released</text>
+        <text x="556" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Accepted</text>
+        <text x="556" y="487" class="t-muted" font-size="7" text-anchor="middle">agent paid or credited</text>
 
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-mask"/>
         <rect x="651" y="450" width="118" height="58" rx="7" class="c-database" stroke-width="1.5"/>
-        <text x="710" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Refunded</text>
-        <text x="710" y="487" class="t-muted" font-size="7" text-anchor="middle">No delivery · deadline passed</text>
+        <text x="710" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">Settled</text>
+        <text x="710" y="487" class="t-muted" font-size="7" text-anchor="middle">allocations paid or credited</text>
 
         <!-- Transition labels -->
-        <rect x="202.8" y="136" width="90.4" height="16" rx="4" class="c-mask"/>
-        <text x="248" y="147" class="t-backend" font-size="8" text-anchor="middle">submitDelivery()</text>
 
-        <rect x="356.8" y="348" width="90.4" height="16" rx="4" class="c-mask"/>
-        <text x="402" y="359" class="t-backend" font-size="8" text-anchor="middle">acceptDelivery()</text>
-        <rect x="364.15" y="212" width="75.7" height="16" rx="4" class="c-mask"/>
-        <text x="402" y="223" class="t-security" font-size="8" text-anchor="middle">openDispute()</text>
-        <rect x="431.35" y="372" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
-        <text x="479" y="383" class="t-backend" font-size="8" text-anchor="middle">settle() frozen=0</text>
-        <rect x="508.35" y="286" width="95.30000000000001" height="16" rx="4" class="c-mask"/>
-        <text x="556" y="297" class="t-security" font-size="8" text-anchor="middle">settle() frozen&gt;0</text>
-        <rect x="590.25" y="372" width="85.5" height="16" rx="4" class="c-mask"/>
-        <text x="633" y="383" class="t-messagebus" font-size="8" text-anchor="middle">releaseFrozen()</text>
+
+
+
+
+
+
 
         <!-- Legend -->
         <text x="220" y="542" class="t-primary" font-size="10" font-weight="600">Legend</text>

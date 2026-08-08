@@ -305,24 +305,24 @@ Moss 让用户用自然语言表达链上任务，**在签名前解释将要发�
 
 <img src="docs/diagrams/architecture.svg" alt="System Architecture" width="100%">
 
-**当前实现（monorepo packages）：**
+**当前实现：**
 
 | 层 | 说明 |
 |---|---|
-| **Verification & Tooling** | `scripts/e2e-verify.ts`（全生命周期验证）、`concurrency-demo.ts`、Foundry 测试 |
-| **Silicon Packages** | `Domain`（共享类型）→ `Rule Engine`（确定性检查器）→ `AI Explanation`（三路意见）→ `MossBridge`（唯一 Moss seam） |
-| **Moss Fork (vendor/moss)** | Testnet Runtime → `silicon-arbitration` Protocol → Trace Simulator |
-| **Monad Testnet** | `TaskEscrow` 合约（已部署 `0x6704...FFCcF`，chain 10143） |
+| **Next.js Web** | Workbench 通过服务端 Prepare API 获取 Moss 未签交易与 E3；后续操作使用 Chain Adapter |
+| **Product Packages** | `Domain`（共享类型）· `Rules`（确定性规则）· `AI`（解释层）· `Chain`（Direct tx）· `MossBridge`（唯一 Moss seam） |
+| **Moss Fork (`vendor/moss`)** | Monad Testnet Runtime → `silicon-arbitration.createTask` Capability → Trace Simulator / Receipt parser |
+| **Monad Testnet** | RPC + `TaskEscrow`（已部署 `0x6704...FFCcF`，chain 10143） |
 
 **Moss 边界：** Moss 只覆盖 `createTask`（构造 → 模拟 → E3 签前证据）。`assignAgent`、`submitDelivery`、`acceptDelivery`、`openDispute`、`settle` 全部通过 viem 直接调用，不标记为 Moss verified。
 
-> UI 已实现为 Next.js 三段式演示（爆炸画廊、法庭总览、六幕案卷），当前读取 typed fixture。合约部署与 E3 Moss 模拟是真实记录；土豆案尚未广播，页面会明确区分部署事实、模拟记录与案件链上确认。
+> Workbench 提供真实创建与生命周期操作；演示案卷仍保留明确标注的 fixture，法庭页可按链上 `taskId` 加载真实案件。页面区分 Mock 案件、Moss 模拟与链上确认。
 
 ### 端到端流程
 
 <img src="docs/diagrams/e2e-flow.svg" alt="E2E Flow" width="100%">
 
-**Moss Path（创建任务）：** 用户输入 → MossBridge 构造未签交易 → Simulator 在 Testnet 模拟 → 无 Warning 则生成 E3 签前证据 → 用户查看后显式签名 → 交易确认发出 TaskCreated 事件。
+**Moss Path（创建任务）：** 用户输入 → MossBridge 构造未签交易 → Simulator 在 Testnet 模拟 → API 归档 E3 与 warnings → 用户通过钱包签名广播 → 手动载入交易回执并解析 `TaskCreated.taskId`。架构要求 Warning/revert 阻断签名；当前 Workbench 的该守卫仍待接入。
 
 **Direct Path（后续生命周期）：** `assignAgent → submitDelivery → acceptDelivery`（viem 直接调用）→ 争议时 `openDispute → settle`（规则引擎按 `weightBps` 分账）→ 无法自动裁决的部分冻结为 Manual Review。
 
