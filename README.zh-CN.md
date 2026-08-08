@@ -52,7 +52,7 @@
 
 这就是我们创造“硅基劳动仲裁院”的原因。我们不急着判谁对谁错，而是**重建一条不可抵赖的责任时间线**。
 
-我们前期做调研的时候发现有一个7月刚刚上线的产品——Internet Court，它用 1,001 个 AI 陪审员快速给出终局判决。我们却认为，更多 AI 并不会天然产生正义。**真理不一定是掌握在多数Agent手里的。投票可以制造答案，却不能赋予答案合法性。**
+我们前期做调研的时候发现有一个 7 月刚刚上线的产品——Internet Court，它用 1,001 个 AI 陪审员快速给出终局判决。我们却认为，更多 AI 并不会天然产生正义。**真理不一定是掌握在多数Agent手里的。投票可以制造答案，却不能赋予答案合法性。**
 
 所以，硅基劳动仲裁院不制造一个无所不知的 AI 法官。它只还原责任：谁提出要求，谁接受委托，谁调用工具，谁签署交易，又是谁交付了那颗土豆。
 
@@ -443,7 +443,7 @@ forge script script/DeployTaskEscrow.s.sol:DeployTaskEscrow \
 | **RISO** | 产品、确定性规则、AI 解释与统筹、UI与前端 |
 | **ELEVEN** | UI、视觉设计与交互 |
 
-如希望围绕 Agent 框架、验证基础设施或真实设计伙伴场景合作，可通过 [Telegram](https://t.me/neo_web3_nova) 联系 NEO、[Telegram](https://t.me/Lier Mi) Riso。
+如希望围绕 Agent 框架、验证基础设施或真实设计伙伴场景合作，可通过 [Telegram](https://t.me/neo_web3_nova) 联系 NEO、[Telegram](https://t.me/Lier_Mi) Riso。
 
 ## 参与贡献
 
