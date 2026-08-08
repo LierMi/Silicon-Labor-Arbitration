@@ -7,7 +7,7 @@
  * （Moss 只模拟，不签名不广播）；这里用钱包签原始交易并广播。
  * 后续写操作走 chain 包 direct hooks（viem），不标 Moss verified。
  */
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAccount, useConnect, useDisconnect, useSendTransaction, useReadContract, useWriteContract } from "wagmi";
 import {
@@ -18,7 +18,8 @@ import {
   buildAcceptDelivery,
   buildOpenDispute,
 } from "@sla/chain";
-import { POTATO_REQUIREMENTS_HASH, deadlineFromNow } from "@sla/domain";
+import { POTATO_REQUIREMENTS, computeRequirementsHash, deadlineFromNow } from "@sla/domain";
+import type { Requirement } from "@sla/domain";
 import { formatEther, isAddress } from "viem";
 
 const CHAIN_ID = 10143;
@@ -36,6 +37,25 @@ type Prepared = {
   simulationFailed: boolean;
   warnings: string[];
   evidenceHash: string | null;
+  receipt: unknown;
+  capabilityParams: Record<string, unknown>;
+  rpcFingerprint: string;
+  intent?: {
+    intent: string;
+    verb: string;
+    category: string;
+    risk: string[];
+    tags: string[];
+  };
+  e3?: {
+    explanation: string;
+    canonicalPayloadHash: string;
+    mossCommit: string;
+    protocolVersion: string;
+    contractAddress: string;
+    abiHash: string;
+    chainId: number;
+  };
 };
 
 // ── 读链上任务状态 ─────────────────────────────────────────
@@ -87,6 +107,16 @@ export default function Workbench() {
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  // 需求条款表单：默认预填土豆案 C1-C4，用户可增删改
+  const [requirements, setRequirements] = useState<Requirement[]>(() =>
+    POTATO_REQUIREMENTS.map((r) => ({ ...r })),
+  );
+  const requirementsHash = useMemo(() => computeRequirementsHash(requirements), [requirements]);
+  const weightsOk = requirements.reduce((s, r) => s + r.weightBps, 0) === 10000;
+  const updateReq = (i: number, patch: Partial<Requirement>) => {
+    setRequirements((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  };
+
   const { sendTransactionAsync, isPending: isSending } = useSendTransaction();
   const { writeContractAsync } = useWriteContract();
 
@@ -111,6 +141,10 @@ export default function Workbench() {
   // 创建任务：调服务端 Moss 桥拿 unsigned tx + E3
   const prepareTask = useCallback(async () => {
     if (!address) return;
+    if (!weightsOk) {
+      setPrepareError("条款权重之和必须 = 10000（100%），当前不满足");
+      return;
+    }
     setPreparing(true);
     setPrepareError(null);
     setPrepared(null);
@@ -122,8 +156,9 @@ export default function Workbench() {
         body: JSON.stringify({
           account: address,
           amountMon: REQUIRED_AMOUNT,
-          requirementsHash: POTATO_REQUIREMENTS_HASH,
+          requirementsHash,
           deadline,
+          requirements: requirements.map(({ id, type, label, weightBps }) => ({ id, type, label, weightBps })),
         }),
       });
       const body = await res.json();
@@ -134,7 +169,7 @@ export default function Workbench() {
     } finally {
       setPreparing(false);
     }
-  }, [address]);
+  }, [address, requirementsHash, weightsOk]);
 
   // 签名并广播 Moss 模拟出的那笔 unsigned tx
   const signAndCreate = useCallback(async () => {
@@ -179,8 +214,17 @@ export default function Workbench() {
     }
   }, [status]);
 
+  // 剧场页全局 overflow:hidden，workbench 需要整页滚动；挂载时解锁，卸载恢复
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "auto";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
   return (
-    <main style={{ maxWidth: 860, margin: "0 auto", padding: "2rem 1.5rem", fontFamily: "var(--font-mono), monospace", color: "#f4efe4", background: "#0b0906", minHeight: "100vh" }}>
+    <main style={{ maxWidth: 860, margin: "0 auto", padding: "2rem 1.5rem", fontFamily: "var(--font-mono), monospace", color: "#f4efe4", background: "#0b0906", minHeight: "100dvh" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h1 style={{ fontSize: "1.2rem", letterSpacing: "0.08em" }}>任务工作台 · WORKBENCH</h1>
         <nav style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -209,29 +253,142 @@ export default function Workbench() {
           <section style={card}>
             <h2>① 创建任务 <span style={{ color: "#7d7462", fontSize: "0.7rem" }}>MOSS PATH</span></h2>
             <p style={{ color: "#b8ae99", fontSize: "0.85rem" }}>
-              需求：土豆案（C1 按时 · C2 PNG · C3 透明背景 · C4 画的是猫）· 托管 {REQUIRED_AMOUNT} MON · 截止 2 小时后
+              需求条款（预填土豆案，可增删改；权重之和必须 = 10000）· 托管 {REQUIRED_AMOUNT} MON · 截止 2 小时后
             </p>
+
+            {/* 需求条款编辑器 */}
+            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
+              {requirements.map((req, i) => (
+                <div key={req.id} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                  <code style={{ fontSize: "0.7rem", color: "#7d7462", width: 34 }}>{req.id}</code>
+                  <select
+                    value={req.type}
+                    onChange={(e) => updateReq(i, { type: e.target.value as Requirement["type"] })}
+                    style={{ ...input, width: 110 }}
+                    title="objective=客观可判；subjective=主观（保持 undecidable）"
+                  >
+                    <option value="objective">objective</option>
+                    <option value="subjective">subjective</option>
+                  </select>
+                  <input
+                    value={req.label}
+                    onChange={(e) => updateReq(i, { label: e.target.value })}
+                    placeholder="条款描述，如：在截止时间前交付"
+                    style={{ ...input, flex: 1, minWidth: 220 }}
+                  />
+                  <input
+                    value={req.weightBps}
+                    onChange={(e) => updateReq(i, { weightBps: Number(e.target.value) || 0 })}
+                    type="number"
+                    title="权重（基点，1 bps = 0.01%）"
+                    style={{ ...input, width: 90 }}
+                  />
+                  <button
+                    onClick={() => setRequirements((rs) => rs.filter((_, j) => j !== i))}
+                    type="button"
+                    title="删除该条款"
+                    style={{ ...btn, padding: "0.3rem 0.5rem", borderColor: "#7d7462", background: "transparent" }}
+                  >×</button>
+                </div>
+              ))}
+              <button
+                onClick={() => setRequirements((rs) => [
+                  ...rs,
+                  { id: `C${rs.length + 1}`, type: "objective", check: "custom", expect: true, label: "", weightBps: 0, essential: false },
+                ])}
+                type="button"
+                style={{ ...btn, alignSelf: "flex-start", borderColor: "#7d7462", background: "transparent" }}
+              >+ 添加条款</button>
+            </div>
+
+            {/* 哈希预览 + 权重校验 */}
+            <div style={{ marginTop: 8, fontSize: "0.7rem", color: weightsOk ? "#b8ae99" : "#c0392b" }}>
+              requirementsHash: <code style={{ wordBreak: "break-all" }}>{requirementsHash}</code>
+              <span style={{ marginLeft: 8 }}>权重合计 {requirements.reduce((s, r) => s + r.weightBps, 0)} / 10000 {weightsOk ? "✓" : "✗"}</span>
+            </div>
+
             {!prepared && (
-              <button onClick={prepareTask} disabled={preparing} type="button" style={{ ...btn, ...(preparing ? { opacity: 0.5 } : {}) }}>
-                {preparing ? "Moss 模拟中…" : "① 通过 Moss 准备交易"}
-              </button>
+              <div style={{ marginTop: 10 }}>
+                <button onClick={prepareTask} disabled={preparing || !weightsOk} type="button" style={{ ...btn, ...(preparing || !weightsOk ? { opacity: 0.5 } : {}) }}>
+                  {preparing ? "Moss 模拟中…" : "① 通过 Moss 准备交易"}
+                </button>
+              </div>
             )}
             {prepareError && <p style={{ color: "#c0392b", fontSize: "0.8rem" }}>✗ {prepareError}</p>}
             {prepared && (
               <div style={{ marginTop: 12, border: "1px solid rgba(214,205,185,0.2)", padding: 12, borderRadius: 6 }}>
                 <p style={{ fontSize: "0.8rem" }}>Moss 模拟完成：{prepared.simulationFailed ? "⚠ 有 Warning" : "✓ 无 Warning"}</p>
-                <p style={{ fontSize: "0.75rem", color: "#b8ae99", wordBreak: "break-all" }}>
-                  to: {prepared.unsignedTransaction.to}<br />
-                  gas: {prepared.estimatedGas} · E3: {prepared.evidenceHash?.slice(0, 18) ?? "（见 E3 面板）"}…
-                </p>
+
+                {/* 第 1 层：人话解释（与 E3.explanation 逐字一致） */}
+                {prepared.e3?.explanation && (
+                  <div style={{ marginTop: 10, border: "1px solid rgba(119,201,139,0.35)", borderRadius: 6, padding: 10, background: "rgba(119,201,139,0.05)" }}>
+                    <p style={{ fontSize: "0.7rem", color: "#7d7462", letterSpacing: "0.12em", marginBottom: 6 }}>签名前解释 · PRE-SIGN EXPLANATION（E3 归档原文）</p>
+                    <p style={{ fontSize: "0.85rem", lineHeight: 1.7 }}>{prepared.e3.explanation}</p>
+                  </div>
+                )}
+
+                {/* Intents：Moss Capability 语义元数据 */}
+                {prepared.intent && (
+                  <div style={{ marginTop: 10, border: "1px solid rgba(192,57,43,0.4)", borderRadius: 6, padding: 10, background: "rgba(192,57,43,0.06)" }}>
+                    <p style={{ fontSize: "0.7rem", color: "#7d7462", letterSpacing: "0.12em", marginBottom: 6 }}>INTENT · Moss 意图（签前证据）</p>
+                    <p style={{ fontSize: "0.85rem", lineHeight: 1.6 }}>{prepared.intent.intent}</p>
+                    <dl style={{ fontSize: "0.75rem", color: "#b8ae99", lineHeight: 1.9, marginTop: 6 }}>
+                      <div>verb: <code style={{ color: "#e0a253" }}>{prepared.intent.verb}</code> · category: <code style={{ color: "#e0a253" }}>{prepared.intent.category}</code></div>
+                      <div>risk: {prepared.intent.risk.map((r, i) => <span key={i}><code style={{ color: "#c0392b" }}>[{r}]</code> </span>)}</div>
+                      <div>tags: {prepared.intent.tags.map((t, i) => <span key={i}><code style={{ color: "#948b78" }}>{t}</code> </span>)}</div>
+                    </dl>
+                  </div>
+                )}
+
+                {/* Capability 参数 */}
+                <div style={{ marginTop: 10, fontSize: "0.75rem" }}>
+                  <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 4 }}>CAPABILITY PARAMS · 实际发给 Moss 的参数</p>
+                  <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.7 }}>
+{JSON.stringify(prepared.capabilityParams, null, 2)}
+                  </pre>
+                </div>
+
+                {/* 未签名交易 */}
+                <div style={{ marginTop: 10, fontSize: "0.75rem" }}>
+                  <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 4 }}>UNSIGNED TX · 钱包将签署的原始交易</p>
+                  <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.7 }}>
+{JSON.stringify(prepared.unsignedTransaction, null, 2)}
+                  </pre>
+                  <p style={{ color: "#b8ae99", marginTop: 4 }}>estimatedGas: {prepared.estimatedGas} · RPC: {prepared.rpcFingerprint}</p>
+                </div>
+
+                {/* 模拟 Receipt */}
+                <div style={{ marginTop: 10, fontSize: "0.75rem" }}>
+                  <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 4 }}>SIMULATION RECEIPT · 模拟执行结果</p>
+                  <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.7, maxHeight: 220, overflow: "auto" }}>
+{JSON.stringify(prepared.receipt, null, 2)}
+                  </pre>
+                </div>
+
                 {prepared.warnings.length > 0 && (
-                  <ul style={{ color: "#e0a253", fontSize: "0.75rem" }}>
+                  <ul style={{ color: "#e0a253", fontSize: "0.75rem", marginTop: 8 }}>
                     {prepared.warnings.map((w) => <li key={w}>{w}</li>)}
                   </ul>
                 )}
-                <button onClick={signAndCreate} disabled={isSending} type="button" style={btn}>
-                  {isSending ? "等待钱包签名…" : "② 签名并广播（钱包）"}
-                </button>
+
+                {/* 第 4 层：溯源与哈希（事后可验证） */}
+                {prepared.e3 && (
+                  <div style={{ marginTop: 10, fontSize: "0.75rem", borderTop: "1px solid rgba(214,205,185,0.15)", paddingTop: 10 }}>
+                    <p style={{ color: "#7d7462", letterSpacing: "0.12em", fontSize: "0.7rem", marginBottom: 6 }}>E3 溯源与哈希 · PROVENANCE</p>
+                    <pre style={{ color: "#b8ae99", whiteSpace: "pre-wrap", wordBreak: "break-all", margin: 0, lineHeight: 1.8 }}>{`canonicalPayloadHash: ${prepared.e3.canonicalPayloadHash}
+mossCommit:           ${prepared.e3.mossCommit}
+protocolVersion:     ${prepared.e3.protocolVersion}
+contract:            ${prepared.e3.contractAddress}
+abiHash:             ${prepared.e3.abiHash}
+chainId:             ${prepared.e3.chainId}`}</pre>
+                  </div>
+                )}
+
+                <div style={{ marginTop: 12 }}>
+                  <button onClick={signAndCreate} disabled={isSending} type="button" style={btn}>
+                    {isSending ? "等待钱包签名…" : "② 签名并广播（钱包）"}
+                  </button>
+                </div>
               </div>
             )}
             {txHash && <p style={{ fontSize: "0.75rem", color: "#77c98b", wordBreak: "break-all" }}>✓ tx: {txHash}</p>}

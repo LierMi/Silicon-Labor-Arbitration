@@ -181,6 +181,14 @@ export interface MossPreSignEvidence {
   contractAddress: string;
   abiHash: string;
   capabilityParams: Record<string, unknown>;
+  /** Moss Capability 语义元数据（intent/verb/risk/tags），签名前展示且归档 */
+  intent?: {
+    intent: string;
+    verb: string;
+    category: string;
+    risk: string[];
+    tags: string[];
+  };
   unsignedTx: UnsignedTx;
   simulation: {
     receipt: unknown;

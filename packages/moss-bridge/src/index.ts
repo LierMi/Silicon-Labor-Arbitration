@@ -13,6 +13,8 @@
  */
 import type { Address, UnsignedTx } from "@themoss/core";
 import { Registry } from "@themoss/core";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { createTraceSimulator } from "@themoss/simulator";
 import { monadTestnetRuntime } from "@themoss/system";
 import * as siliconArbitration from "@themoss/protocol-silicon-arbitration";
@@ -66,6 +68,18 @@ export interface PreparedTask {
    * 而很多付费节点把 key 放在 URL 路径或 query 里。见 `sanitizeRpcUrl`。
    */
   rpcFingerprint: string;
+  /**
+   * Moss Capability 的语义元数据（来自 registry.load）。
+   * Intent（意图）是签前证据的核心——它解释这笔交易"想干什么"，
+   * 用户签名前必须看到，E3 也应归档。
+   */
+  intent: {
+    intent: string;
+    verb: string;
+    category: string;
+    risk: string[];
+    tags: string[];
+  };
 }
 
 export interface MossBridgeOptions {
@@ -186,6 +200,19 @@ export async function prepareCreateTask(
     throw new Error(`MossBridge: unexpected action result ${capability.kind}`);
   }
 
+  // 取 Capability 语义元数据（intent/verb/risk/tags），签名前必须展示给用户
+  const [loaded] = registry.load([{ protocol: capability.protocol, method: capability.method }]);
+  if (!loaded) {
+    throw new Error(`MossBridge: registry.load returned nothing for ${capability.protocol}.${capability.method}`);
+  }
+  const intent = {
+    intent: loaded.intent,
+    verb: loaded.verb ?? "unknown",
+    category: loaded.category,
+    risk: loaded.risk,
+    tags: loaded.tags,
+  };
+
   const simulator = createTraceSimulator(runtime, {
     receipt: (_, changes) => registry.parseReceipt(capability, changes),
   });
@@ -212,6 +239,7 @@ export async function prepareCreateTask(
     receipt: sim.receipt ?? null,
     capabilityParams,
     rpcFingerprint: sanitizeRpcUrl(_rpcUrl ?? DEFAULT_RPC_URL),
+    intent,
   };
 }
 
@@ -337,6 +365,34 @@ export interface E3Provenance {
   protocolVersion: string;
 }
 
+export function getE3Provenance(): E3Provenance {
+  // 仓库根：从 cwd 上溯找 moss.lock.json（Next.js 编译后 import.meta.dirname 不可靠）
+  let dir = process.cwd();
+  let lockPath: string | null = null;
+  for (let i = 0; i < 6; i++) {
+    const candidate = resolve(dir, "moss.lock.json");
+    try {
+      readFileSync(candidate, "utf-8");
+      lockPath = candidate;
+      break;
+    } catch {
+      dir = resolve(dir, "..");
+    }
+  }
+  if (!lockPath) throw new Error("找不到 moss.lock.json（从 cwd 上溯 6 级内）");
+  const lock = JSON.parse(readFileSync(lockPath, "utf-8")) as { commit?: string };
+  // 协议包版本：从仓库根 vendor/moss 读（workspace 源码，与 import 的包同源）
+  const protocolPkg = JSON.parse(
+    readFileSync(resolve(dirname(lockPath), "vendor", "moss", "packages", "protocols", "silicon-arbitration", "package.json"), "utf-8"),
+  ) as { version?: string };
+  if (!lock.commit) throw new Error("moss.lock.json 缺 commit 字段");
+  if (!protocolPkg.version) throw new Error("protocol-silicon-arbitration 缺 version");
+  return {
+    mossCommit: lock.commit,
+    protocolVersion: `silicon-arbitration@${protocolPkg.version}`,
+  };
+}
+
 /**
  * 由一次已完成的模拟，构造出**可直接存进 `Case` 的 E3 证据**。
  *
@@ -375,6 +431,8 @@ export async function buildE3(
     abiHash:
       "0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5",
     capabilityParams: task.capabilityParams,
+    // Intents：Moss Capability 的语义元数据，签名前展示且随 E3 归档
+    intent: task.intent,
     // domain 的 UnsignedTx 带 chainId，PreparedTask 的不带——在这里补齐，
     // 而不是让每个调用方各自拼一遍
     unsignedTx: {
