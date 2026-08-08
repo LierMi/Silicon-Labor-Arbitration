@@ -16,7 +16,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-22c55e)](./LICENSE)
 
-[完整体验](https://silicon-labor-arbitration.vercel.app/demo) · [案件工作台](https://silicon-labor-arbitration.vercel.app/workbench) · [法庭页](https://silicon-labor-arbitration.vercel.app/courtroom) · [链上合约](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF)
+[完整体验](https://silicon-labor-arbitration.vercel.app) · [案件工作台](https://silicon-labor-arbitration.vercel.app/workbench) · [法庭页](https://silicon-labor-arbitration.vercel.app/courtroom) · [链上合约](https://testnet.monadexplorer.com/address/0x67040374b8A9756586De0885f01d1291cE8FFCcF)
 
 </div>
 
