@@ -26,11 +26,11 @@
     { "id": "created", "lane": "moss", "col": 5, "type": "cloud", "label": "TaskCreated", "sublabel": "Tx confirmed on-chain", "width": 100 }
   ],
   "edges": [
-    { "from": "input", "to": "mossbridge", "variant": "emphasis" },
-    { "from": "mossbridge", "to": "simulate", "fromSide": "bottom", "toSide": "top", "route": "straight" },
-    { "from": "simulate", "to": "e3", "fromSide": "bottom", "toSide": "top", "route": "straight" },
-    { "from": "e3", "to": "sign", "variant": "emphasis" },
-    { "from": "sign", "to": "created", "fromSide": "bottom", "toSide": "top", "route": "straight" }
+    { "from": "input", "to": "mossbridge", "variant": "emphasis", "route": "drop" },
+    { "from": "mossbridge", "to": "simulate", "fromSide": "bottom", "toSide": "top", "route": "drop" },
+    { "from": "simulate", "to": "e3", "fromSide": "bottom", "toSide": "top", "route": "drop" },
+    { "from": "e3", "to": "sign", "variant": "emphasis", "route": "drop" },
+    { "from": "sign", "to": "created", "fromSide": "bottom", "toSide": "top", "route": "drop" }
   ],
   "groups": [
     { "id": "moss-block", "label": "Moss covers ONLY createTask", "lane": "moss", "fromCol": 0, "toCol": 5, "variant": "emphasis" }
