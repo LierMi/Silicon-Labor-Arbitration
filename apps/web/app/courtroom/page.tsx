@@ -232,7 +232,7 @@ export default function CourtroomPage() {
           <span className={`${styles.liveDot} ${!caseFile.onchain.confirmed ? styles.fixtureDot : ""}`} />
           <span>{caseRuntimeLabel(caseFile.onchain.confirmed)}</span>
           <code>{shortAddress(caseFile.onchain.taskEscrowAddress)}</code>
-          {caseFile.isMock ? <b className={`${styles.sourceBadge} ${styles.mockBadge}`}>DEMO</b> : <b className={styles.sourceBadge}>LIVE</b>}
+          {caseFile.isMock ? <b className={`${styles.sourceBadge} ${styles.mockBadge}`}>DEMO</b> : <b className={`${styles.sourceBadge} ${styles.hybridBadge}`}>HYBRID</b>}
         </div>
       </header>
 
@@ -270,7 +270,11 @@ export default function CourtroomPage() {
               )})}
             </ol>
           </div>
-          <p className={styles.mockNotice}>DEMO FIXTURE · 合约部署真实，本案未广播</p>
+          {caseFile.isMock ? (
+            <p className={styles.mockNotice}>DEMO FIXTURE · 合约部署真实，本案未广播</p>
+          ) : (
+            <p className={styles.mockNotice}>LIVE ON-CHAIN · 状态/金额为链上真实；证据叙事为演示数据（HYBRID）</p>
+          )}
         </aside>
 
         <section className={styles.courtStage}>

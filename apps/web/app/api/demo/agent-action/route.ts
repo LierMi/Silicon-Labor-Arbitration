@@ -21,6 +21,27 @@ import { monadTestnet, TASK_ESCROW_ADDRESS, taskEscrowAbi } from "@sla/chain";
 
 const RPC = "https://testnet-rpc.monad.xyz";
 
+// 固定 Agent allowlist（与 workbench DEMO_AGENTS 的 offset 一致）：
+// 外部请求者无法遍历任意偏移触发 deployer 资助，总支出被结构性限制在
+// allowlist × 单次资助上限（5 × 0.05 MON = 0.25 MON）。
+const ALLOWED_AGENT_OFFSETS = new Set([999, 1000, 1001, 1002, 1003]);
+
+// ponytail: 进程内滑动窗口限流，单实例有效；多实例部署时近似（升级需共享存储）
+const RATE_WINDOW_MS = 10_000;
+const RATE_MAX_HITS = 5;
+const rateHits = new Map<string, number[]>();
+
+function rateLimited(ip: string): boolean {
+  const now = Date.now();
+  const hits = (rateHits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (hits.length >= RATE_MAX_HITS) {
+    rateHits.set(ip, hits);
+    return true;
+  }
+  rateHits.set(ip, [...hits, now]);
+  return false;
+}
+
 function loadDeployerKey(): `0x${string}` {
   // 优先读环境变量（Vercel 等托管环境在 dashboard 配置，不进代码）
   const fromEnv = process.env.DEPLOYER_PRIVATE_KEY;
@@ -34,6 +55,14 @@ function loadDeployerKey(): `0x${string}` {
 }
 
 export async function POST(request: Request) {
+  // 演示开关：默认关闭；生产/部署环境必须显式 DEMO_AGENT_ACTION_ENABLED=true 才启用
+  if (process.env.DEMO_AGENT_ACTION_ENABLED !== "true") {
+    return NextResponse.json({ error: "演示自动签名未启用（需设置 DEMO_AGENT_ACTION_ENABLED=true）" }, { status: 403 });
+  }
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (rateLimited(ip)) {
+    return NextResponse.json({ error: "请求过于频繁，请稍后再试" }, { status: 429 });
+  }
   let body: { taskId?: string; action?: string; agentOffset?: number };
   try {
     body = await request.json();
@@ -47,6 +76,12 @@ export async function POST(request: Request) {
   }
   if (agentOffset === undefined || !Number.isInteger(agentOffset) || agentOffset < 0) {
     return NextResponse.json({ error: "agentOffset 必须是 >= 0 的整数" }, { status: 400 });
+  }
+  if (!ALLOWED_AGENT_OFFSETS.has(agentOffset)) {
+    return NextResponse.json(
+      { error: `agentOffset 不在允许列表内（${[...ALLOWED_AGENT_OFFSETS].sort((a, b) => a - b).join(", ")}）` },
+      { status: 403 },
+    );
   }
   const offset: number = agentOffset;
 

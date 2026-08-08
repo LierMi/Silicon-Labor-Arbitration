@@ -193,6 +193,10 @@
   color: var(--gold);
 }
 
+.hybridBadge {
+  color: #7fb3e8;
+}
+
 .courtGrid {
   position: absolute;
   z-index: 5;

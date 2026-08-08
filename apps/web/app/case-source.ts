@@ -71,7 +71,7 @@ type PublicClientLike = {
   }): Promise<Array<{ args: { taskId?: unknown } }>>;
 };
 
-async function findLatestTaskCreated(client: PublicClientLike) {
+export async function findLatestTaskCreated(client: PublicClientLike) {
   // ponytail: 默认只扫最近 20_000 块（并行，快）；旧任务用 NEXT_PUBLIC_LIVE_TASK_ID 显式指定
   const SCAN_BLOCKS = 20_000n;
   const step = 100n;
@@ -90,7 +90,7 @@ async function findLatestTaskCreated(client: PublicClientLike) {
         client.getLogs({ address: TASK_ESCROW_ADDRESS, event: TASK_CREATED_EVENT, fromBlock: from, toBlock: to }),
       ),
     );
-    for (let j = results.length - 1; j >= 0; j--) {
+    for (let j = 0; j < results.length; j++) {
       const r = results[j];
       if (r.status === "fulfilled" && r.value.length > 0) {
         const taskId = r.value.at(-1)!.args.taskId;
@@ -158,6 +158,24 @@ async function loadLiveCase(): Promise<Case> {
   };
 }
 
+// ponytail: 模块级 promise 缓存，同一 taskId 的链上扫描全页面共享一次；
+// 任务状态变化需要自动刷新时升级为 SWR/refetch
+const liveCaseCache = new Map<string, Promise<Case>>();
+
+function loadLiveCaseCached(): Promise<Case> {
+  const key = getLiveTaskId() ?? "latest";
+  let loading = liveCaseCache.get(key);
+  if (!loading) {
+    loading = loadLiveCase();
+    liveCaseCache.set(key, loading);
+    loading.catch(() => {
+      // 失败不缓存，下次进入页面可重试
+      liveCaseCache.delete(key);
+    });
+  }
+  return loading;
+}
+
 /**
  * 页面数据入口。mock 同步返回；live 异步拉取，加载中先给 mock 骨架，
  * 成功后替换为真实数据。live 失败 → 保留 mock 并标 isMock=true。
@@ -172,13 +190,13 @@ export function useCase() {
   useEffect(() => {
     if (effectiveSource !== "live") return;
     let cancelled = false;
-    loadLiveCase()
+    loadLiveCaseCached()
       .then((live) => {
         if (!cancelled) setCaseFile(live);
       })
       .catch((err) => {
         // ponytail: 失败保留 mock 骨架，诚实标注，不做真实数据伪装
-        console.error("[case-source] live load failed, fallback to mock:", err);
+        if (!cancelled) console.error("[case-source] live load failed, fallback to mock:", err);
       });
     return () => {
       cancelled = true;
