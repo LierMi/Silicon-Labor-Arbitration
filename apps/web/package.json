@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "pnpm --dir ../.. build:moss",
     "build": "next build",
     "test": "node --import tsx --test app/**/*.test.ts",
     "typecheck": "tsc --noEmit"
