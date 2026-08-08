@@ -221,18 +221,20 @@ export default function CourtroomPage() {
             <i>SILICON LABOR ARBITRATION</i>
           </span>
         </Link>
-        <Link href="/workbench" style={{ fontSize: "0.7rem", color: "#d6cdb9", textDecoration: "none", border: "1px solid rgba(214,205,185,0.3)", borderRadius: 4, padding: "0.35rem 0.7rem", fontFamily: "var(--font-mono), monospace" }}>
-          任务工作台 →
-        </Link>
         <div className={styles.courtTitle}>
           <span>ARBITRATION CHAMBER · 01</span>
           <b>硅基劳动仲裁院</b>
         </div>
-        <div className={styles.chainState}>
-          <span className={`${styles.liveDot} ${!caseFile.onchain.confirmed ? styles.fixtureDot : ""}`} />
-          <span>{caseRuntimeLabel(caseFile.onchain.confirmed)}</span>
-          <code>{shortAddress(caseFile.onchain.taskEscrowAddress)}</code>
-          {caseFile.isMock ? <b className={`${styles.sourceBadge} ${styles.mockBadge}`}>DEMO</b> : <b className={`${styles.sourceBadge} ${styles.hybridBadge}`}>HYBRID</b>}
+        <div className={styles.headerActions}>
+          <Link href="/workbench" style={{ fontSize: "0.7rem", color: "#d6cdb9", textDecoration: "none", border: "1px solid rgba(214,205,185,0.3)", borderRadius: 4, padding: "0.35rem 0.7rem", fontFamily: "var(--font-mono), monospace" }}>
+            任务工作台 →
+          </Link>
+          <div className={styles.chainState}>
+            <span className={`${styles.liveDot} ${!caseFile.onchain.confirmed ? styles.fixtureDot : ""}`} />
+            <span>{caseRuntimeLabel(caseFile.onchain.confirmed)}</span>
+            <code>{shortAddress(caseFile.onchain.taskEscrowAddress)}</code>
+            {caseFile.isMock ? <b className={`${styles.sourceBadge} ${styles.mockBadge}`}>DEMO</b> : <b className={`${styles.sourceBadge} ${styles.hybridBadge}`}>HYBRID</b>}
+          </div>
         </div>
       </header>
 
