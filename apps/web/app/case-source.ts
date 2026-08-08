@@ -43,6 +43,11 @@ export function getCaseSource(): CaseSource {
 }
 
 export function getLiveTaskId(): string | undefined {
+  // URL 参数优先（?taskId=0x…，可分享给法庭页/体验页）
+  if (typeof window !== "undefined") {
+    const fromUrl = new URLSearchParams(window.location.search).get("taskId");
+    if (fromUrl?.startsWith("0x")) return fromUrl;
+  }
   const raw = process.env.NEXT_PUBLIC_LIVE_TASK_ID;
   return raw?.startsWith("0x") ? raw : undefined;
 }
@@ -159,10 +164,13 @@ async function loadLiveCase(): Promise<Case> {
  */
 export function useCase() {
   const source = getCaseSource();
+  // URL 带 ?taskId= 时强制走 live（分享给法庭页/体验页的入口）
+  const forcedLive = typeof window !== "undefined" && Boolean(new URLSearchParams(window.location.search).get("taskId"));
+  const effectiveSource: CaseSource = forcedLive ? "live" : source;
   const [caseFile, setCaseFile] = useState<Case>(() => freshPotatoCase());
 
   useEffect(() => {
-    if (source !== "live") return;
+    if (effectiveSource !== "live") return;
     let cancelled = false;
     loadLiveCase()
       .then((live) => {
@@ -175,10 +183,10 @@ export function useCase() {
     return () => {
       cancelled = true;
     };
-  }, [source]);
+  }, [effectiveSource]);
 
   const connections = useMemo(() => buildEvidenceConnectionIndex(caseFile), [caseFile]);
   const summary = useMemo(() => buildArchiveSummary(caseFile), [caseFile]);
 
-  return { caseFile, source, connections, summary };
+  return { caseFile, source: effectiveSource, connections, summary };
 }

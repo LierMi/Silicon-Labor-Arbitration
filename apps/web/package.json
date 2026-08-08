@@ -12,11 +12,14 @@
   "dependencies": {
     "@sla/chain": "workspace:*",
     "@sla/domain": "workspace:*",
+    "@sla/moss-bridge": "workspace:*",
+    "@tanstack/react-query": "^5.101.4",
     "gsap": "^3.15.0",
     "next": "15.5.22",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "viem": "2.55.10"
+    "viem": "2.55.10",
+    "wagmi": "2.12.20"
   },
   "devDependencies": {
     "@types/node": "22.20.1",

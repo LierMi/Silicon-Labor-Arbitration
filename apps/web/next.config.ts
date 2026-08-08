@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@sla/domain", "@sla/chain"],
+  transpilePackages: ["@sla/domain", "@sla/chain", "@sla/moss-bridge"],
   webpack(config, { isServer }) {
     config.resolve.extensionAlias = {
       ...config.resolve.extensionAlias,

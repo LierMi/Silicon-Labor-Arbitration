@@ -7,6 +7,7 @@ allowBuilds:
   bufferutil: true
   esbuild: true
   keccak: true
+  secp256k1: true
   # Next.js 的图片处理依赖，需要跑构建脚本装原生二进制。
   # pnpm 默认拦截所有依赖的构建脚本（防供应链攻击），必须显式放行，
   # 否则 `pnpm install` 直接以 ERR_PNPM_IGNORED_BUILDS 失败——CI 也会挂。
