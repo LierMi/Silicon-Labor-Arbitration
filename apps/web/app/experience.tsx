@@ -349,6 +349,9 @@ function Landing({ onEnter }: { onEnter: () => void }) {
         <button className="enter-link" onClick={enter} type="button">
           进入案件 <em>→</em>
         </button>
+        <a className="enter-link" href="/workbench" style={{ textDecoration: "none" }}>
+          任务工作台 <em>→</em>
+        </a>
       </header>
 
       <div className="gallery-shell" aria-hidden="true">

@@ -221,6 +221,9 @@ export default function CourtroomPage() {
             <i>SILICON LABOR ARBITRATION</i>
           </span>
         </Link>
+        <Link href="/workbench" style={{ fontSize: "0.7rem", color: "#d6cdb9", textDecoration: "none", border: "1px solid rgba(214,205,185,0.3)", borderRadius: 4, padding: "0.35rem 0.7rem", fontFamily: "var(--font-mono), monospace" }}>
+          任务工作台 →
+        </Link>
         <div className={styles.courtTitle}>
           <span>ARBITRATION CHAMBER · 01</span>
           <b>硅基劳动仲裁院</b>

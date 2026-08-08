@@ -135,6 +135,10 @@ export default function Workbench() {
   const updateReq = (i: number, patch: Partial<Requirement>) => {
     setRequirements((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
   };
+  // 托管金额（MON）可输入；权重用百分比编辑（25 = 25%，内部 ×100）
+  const [amountMon, setAmountMon] = useState(REQUIRED_AMOUNT);
+  const weightPercent = (bps: number) => bps / 100;
+  const setWeightPercent = (i: number, pct: number) => updateReq(i, { weightBps: Math.round(pct * 100) });
 
   const { sendTransactionAsync, isPending: isSending } = useSendTransaction();
   const { writeContractAsync, isPending: writePending } = useWriteContract();
@@ -164,6 +168,11 @@ export default function Workbench() {
       setPrepareError("条款权重之和必须 = 10000（100%），当前不满足");
       return;
     }
+    const amount = Number(amountMon);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPrepareError("托管金额必须是正数（如 0.1）");
+      return;
+    }
     setPreparing(true);
     setPrepareError(null);
     setPrepared(null);
@@ -174,7 +183,7 @@ export default function Workbench() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           account: address,
-          amountMon: REQUIRED_AMOUNT,
+          amountMon,
           requirementsHash,
           deadline,
           requirements: requirements.map(({ id, type, label, weightBps }) => ({ id, type, label, weightBps })),
@@ -188,7 +197,7 @@ export default function Workbench() {
     } finally {
       setPreparing(false);
     }
-  }, [address, requirementsHash, weightsOk]);
+  }, [address, requirementsHash, weightsOk, amountMon]);
 
   // 签名并广播 Moss 模拟出的那笔 unsigned tx
   const signAndCreate = useCallback(async () => {
@@ -398,11 +407,26 @@ export default function Workbench() {
           {/* 阶段 1：创建任务（Moss 路径） */}
           <section style={card}>
             <h2>① 创建任务 <span style={{ color: "#7d7462", fontSize: "0.7rem" }}>MOSS PATH</span></h2>
-            <p style={{ color: "#b8ae99", fontSize: "0.85rem" }}>
-              需求条款（预填土豆案，可增删改；权重之和必须 = 10000）· 托管 {REQUIRED_AMOUNT} MON · 截止 2 小时后
-            </p>
+
+            {/* 托管金额 */}
+            <div style={{ marginTop: 4, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "0.8rem", color: "#b8ae99" }}>托管金额</span>
+              <input
+                value={amountMon}
+                onChange={(e) => setAmountMon(e.target.value)}
+                type="number"
+                step="0.1"
+                min="0.1"
+                style={{ ...input, width: 120 }}
+              />
+              <span style={{ fontSize: "0.8rem", color: "#b8ae99" }}>MON</span>
+              <span style={{ fontSize: "0.7rem", color: "#7d7462" }}>锁入托管合约，验收通过才释放</span>
+            </div>
 
             {/* 需求条款编辑器 */}
+            <p style={{ color: "#b8ae99", fontSize: "0.85rem", marginTop: 12 }}>
+              验收条款（预填土豆案，可增删改）——每条：判定方式 + 描述 + 占托管金额的比例（合计必须 100%）
+            </p>
             <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
               {requirements.map((req, i) => (
                 <div key={req.id} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
@@ -410,11 +434,11 @@ export default function Workbench() {
                   <select
                     value={req.type}
                     onChange={(e) => updateReq(i, { type: e.target.value as Requirement["type"] })}
-                    style={{ ...input, width: 110 }}
-                    title="objective=客观可判；subjective=主观（保持 undecidable）"
+                    style={{ ...input, width: 150 }}
+                    title="客观：机器可自动判定；主观：需要人工判断（保持 undecidable）"
                   >
-                    <option value="objective">objective</option>
-                    <option value="subjective">subjective</option>
+                    <option value="objective">客观 · 机器判定</option>
+                    <option value="subjective">主观 · 人工判定</option>
                   </select>
                   <input
                     value={req.label}
@@ -423,12 +447,16 @@ export default function Workbench() {
                     style={{ ...input, flex: 1, minWidth: 220 }}
                   />
                   <input
-                    value={req.weightBps}
-                    onChange={(e) => updateReq(i, { weightBps: Number(e.target.value) || 0 })}
+                    value={weightPercent(req.weightBps)}
+                    onChange={(e) => setWeightPercent(i, Number(e.target.value) || 0)}
                     type="number"
-                    title="权重（基点，1 bps = 0.01%）"
-                    style={{ ...input, width: 90 }}
+                    step="5"
+                    min="0"
+                    max="100"
+                    title="该条款占总托管金额的比例（%）"
+                    style={{ ...input, width: 80 }}
                   />
+                  <span style={{ fontSize: "0.75rem", color: "#7d7462" }}>%</span>
                   <button
                     onClick={() => setRequirements((rs) => rs.filter((_, j) => j !== i))}
                     type="button"
@@ -450,7 +478,7 @@ export default function Workbench() {
             {/* 哈希预览 + 权重校验 */}
             <div style={{ marginTop: 8, fontSize: "0.7rem", color: weightsOk ? "#b8ae99" : "#c0392b" }}>
               requirementsHash: <code style={{ wordBreak: "break-all" }}>{requirementsHash}</code>
-              <span style={{ marginLeft: 8 }}>权重合计 {requirements.reduce((s, r) => s + r.weightBps, 0)} / 10000 {weightsOk ? "✓" : "✗"}</span>
+              <span style={{ marginLeft: 8 }}>权重合计 {requirements.reduce((s, r) => s + r.weightBps, 0) / 100}% {weightsOk ? "✓" : "✗（必须 = 100%）"}</span>
             </div>
 
             {!prepared && (
