@@ -9,7 +9,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useAccount, useConnect, useDisconnect, useSendTransaction, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useConnect, useDisconnect, useSendTransaction, useReadContract, useWriteContract, useSwitchChain, usePublicClient } from "wagmi";
 import {
   TASK_ESCROW_ADDRESS,
   taskEscrowAbi,
@@ -95,13 +95,19 @@ function useTaskDetails(taskId: `0x${string}` | undefined) {
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
 export default function Workbench() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
+  const { switchChainAsync } = useSwitchChain();
+  const publicClient = usePublicClient();
+  const onWrongChain = isConnected && (!chain || chain.id !== CHAIN_ID);
+  // 签名前的余额诊断（显示给用户，定位「钱包估算 0 vs 链上真实余额」）
+  const [diag, setDiag] = useState<string | null>(null);
 
   const [prepared, setPrepared] = useState<Prepared | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState<string | null>(null);
+  const [signError, setSignError] = useState<string | null>(null);
   const [taskId, setTaskId] = useState<`0x${string}` | undefined>(undefined);
   const [agentAddress, setAgentAddress] = useState("");
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
@@ -174,11 +180,47 @@ export default function Workbench() {
   // 签名并广播 Moss 模拟出的那笔 unsigned tx
   const signAndCreate = useCallback(async () => {
     if (!prepared) return;
-    await run(async () => {
+    if (!isConnected || !address) {
+      setSignError("钱包未连接，请先点右上角「连接钱包」");
+      return;
+    }
+    if (onWrongChain) {
+      try {
+        await switchChainAsync({ chainId: CHAIN_ID });
+      } catch (err) {
+        setSignError(`切换到 Monad Testnet (${CHAIN_ID}) 失败：${err instanceof Error ? err.message : String(err)}`);
+        return;
+      }
+    }
+    setSignError(null);
+    setDiag(null);
+    try {
+      // 诊断：钱包看到的链 + Monad 链上真实余额
+      let diagParts = [`钱包 chain: ${chain?.id ?? "(null)"}`];
+      if (publicClient && address) {
+        try {
+          const bal = await publicClient.getBalance({ address });
+          diagParts.push(`Monad(10143) 链上余额: ${formatEther(bal)} MON`);
+        } catch (e) {
+          diagParts.push(`余额查询失败: ${e instanceof Error ? e.message : String(e)}`);
+        }
+      }
+      setDiag(diagParts.join(" · "));
       const { to, data, value } = prepared.unsignedTransaction;
-      return sendTransactionAsync({ to: to as `0x${string}`, data: data as `0x${string}`, value: BigInt(value) });
-    });
-  }, [prepared, sendTransactionAsync, run]);
+      setTxHash(await sendTransactionAsync({
+        to: to as `0x${string}`,
+        data: data as `0x${string}`,
+        value: BigInt(value),
+        // 强制在 Monad Testnet 上估算/发送——wagmi 默认用钱包 provider 当前网络，
+        // 钱包停在别的链时余额估算为 0（真实链上余额 112 MON）
+        chainId: CHAIN_ID,
+      }));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setSignError(msg);
+      console.error("[workbench] sign failed:", msg);
+    }
+  }, [prepared, sendTransactionAsync, isConnected, address, onWrongChain, switchChainAsync]);
 
   const doAssign = useCallback(() => {
     if (!taskId || !isAddress(agentAddress)) return;
@@ -223,6 +265,17 @@ export default function Workbench() {
     };
   }, []);
 
+  // 连接后自动切到 Monad Testnet。
+  // ⚠️ chain 为 null 也要切：钱包在 Monad 之外的链时，wagmi 的 chains 只配了
+  // Monad，useAccount().chain 无法识别返回 null——条件漏掉 null 就永远不触发。
+  useEffect(() => {
+    if (isConnected && (!chain || chain.id !== CHAIN_ID)) {
+      switchChainAsync({ chainId: CHAIN_ID }).catch((err) => {
+        console.error("[workbench] auto switch chain failed:", err);
+      });
+    }
+  }, [isConnected, chain?.id, switchChainAsync]);
+
   return (
     <main style={{ maxWidth: 860, margin: "0 auto", padding: "2rem 1.5rem", fontFamily: "var(--font-mono), monospace", color: "#f4efe4", background: "#0b0906", minHeight: "100dvh" }}>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
@@ -233,6 +286,9 @@ export default function Workbench() {
           {isConnected ? (
             <>
               <code style={{ fontSize: "0.75rem" }}>{address?.slice(0, 6)}…{address?.slice(-4)}</code>
+              {onWrongChain && (
+                <code style={{ fontSize: "0.7rem", color: "#c0392b" }}>⚠ 链 {chain?.id}（需 {CHAIN_ID}）</code>
+              )}
               <button onClick={() => disconnect()} type="button" style={btn}>断开</button>
             </>
           ) : (
@@ -389,6 +445,8 @@ chainId:             ${prepared.e3.chainId}`}</pre>
                     {isSending ? "等待钱包签名…" : "② 签名并广播（钱包）"}
                   </button>
                 </div>
+                {signError && <p style={{ color: "#c0392b", fontSize: "0.75rem", marginTop: 8 }}>✗ 签名失败：{signError}</p>}
+                {diag && <p style={{ color: "#948b78", fontSize: "0.7rem", marginTop: 4 }}>诊断：{diag}</p>}
               </div>
             )}
             {txHash && <p style={{ fontSize: "0.75rem", color: "#77c98b", wordBreak: "break-all" }}>✓ tx: {txHash}</p>}
