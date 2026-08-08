@@ -28,12 +28,12 @@
     { "id": "blocked", "lane": "stop", "col": 4, "type": "security", "label": "Guard Missing", "sublabel": "not blocked" }
   ],
   "edges": [
-    { "from": "input", "to": "api", "variant": "emphasis", "route": "drop" },
-    { "from": "api", "to": "simulate", "route": "drop" },
-    { "from": "simulate", "to": "e3", "route": "drop" },
-    { "from": "e3", "to": "sign", "variant": "emphasis", "route": "drop" },
-    { "from": "sign", "to": "created", "variant": "emphasis", "route": "drop" },
-    { "from": "e3", "to": "blocked", "label": "warning / revert", "variant": "security", "role": "error", "fromSide": "bottom", "toSide": "top", "route": "drop", "labelSegment": 1 }
+    { "from": "input", "to": "api", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "via": [[88, 166], [220, 166]] },
+    { "from": "api", "to": "simulate", "fromSide": "bottom", "toSide": "left", "via": [[220, 367]] },
+    { "from": "simulate", "to": "e3", "fromSide": "top", "toSide": "bottom", "via": [[300, 290], [430, 290]] },
+    { "from": "e3", "to": "sign", "variant": "emphasis", "fromSide": "top", "toSide": "bottom", "via": [[430, 166], [500, 166]] },
+    { "from": "sign", "to": "created", "variant": "emphasis", "fromSide": "right", "toSide": "top", "via": [[546, 290], [625, 290]] },
+    { "from": "e3", "to": "blocked", "label": "warning", "variant": "security", "role": "error", "fromSide": "right", "toSide": "top", "via": [[488, 414], [500, 414]], "labelAt": [530, 352] }
   ],
   "groups": [],
   "cards": [
