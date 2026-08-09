@@ -326,19 +326,23 @@ Domain Command
 
 ## 十一、当前实施状态
 
+> 更新：2026-08-09。决策本身（P0 只集成 createTask、粗粒度 verb 映射、MossBridge 接口、直接路径边界）保持不变，本节只更新实施进度。
+
 已完成：
 
-- Monad Testnet Runtime 与 deployment network guard 已提交 Moss PR；
-- Monad Testnet `eth_chainId` 和基础 `debug_traceCall` 已验证；
-- 本决策已收敛 P0 集成边界。
+- Monad Testnet Runtime 与 deployment network guard 已合并（`LierMi/moss#1`，commit `5d70524`）；
+- Monad Testnet `eth_chainId` 和 `debug_traceCall` 已验证；
+- `TaskEscrow` 合约与 33 个 Foundry 测试（含资金 fuzz 与状态序列 invariant）；
+- `TaskCreated` Event / ABI 冻结，canonical ABI hash `0xce8965794b678d101ae433472fb8d7e536fc0254386e00fabef36aaa66b73cf5`；
+- Monad Testnet 部署完成并链上核验：`0x67040374b8A9756586De0885f01d1291cE8FFCcF`，部署区块 `49534792`，见 `deployments/monad-testnet.json`；
+- `silicon-arbitration.createTask` Protocol Package 已合并（PR #3 `b413dfe`、PR #4 `b00ed2d`），产品 pin `vendor/moss@b00ed2d`；
+- 产品 MossBridge（`packages/moss-bridge`）实现 `prepareTask → capability → unsignedTx → simulate → E3`，含钱包一致性 fingerprint gate；
+- canonical E3 由 `packages/domain` 的 `canonical.ts`（`req-canon-v1`）与 `computeE3PayloadHash` 支撑，`e3.test.ts` 覆盖复算；
+- Moss live simulation 通过：对已部署 TaskEscrow 的真实 `createTask` 模拟返回完整 Change / Receipt，Warnings 为空。
 
-尚未完成：
+尚未完成（Gate 10 范围）：
 
-- `TaskEscrow` 合约和 Foundry 测试；
-- `TaskCreated` Event / ABI 冻结；
-- Monad Testnet deployment manifest；
-- `silicon-arbitration.createTask` Protocol；
-- 产品 MossBridge；
-- canonical E3 与钱包一致性验证。
+- Demo 案件的 E3 仍是 fixture（`isMock: true`、`confirmed: false`），真实钱包签名/广播与链上回执回填未走完；
+- 现场三分钟端到端 Demo 演练。
 
-因此目前只能声明“Testnet Runtime PR 已完成”，不能声明“产品 Moss 集成已完成”。
+因此目前可以声明“Moss Testnet 集成已完成并通过 live simulation 验证”；在真实钱包广播路径走通前，不得宣称“端到端已上线”。
