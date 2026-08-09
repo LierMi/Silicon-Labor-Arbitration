@@ -55,7 +55,9 @@ Contract `TaskStatus.ManualReview` means task funds await an explicit reviewed r
 
 The Gate 3 chain-ID guard was removed only after the acceptance, settlement, refund, authorization, authority recovery, evidence-hash, duplicate-settlement, deferred-payment withdrawal, and reentrancy paths passed the Gate 4 Foundry suite. A cold run currently executes 33 tests, including two 1,000-run funding/allocation fuzz tests and a 1,000-run stateful invariant covering 500,000 randomized lifecycle calls. The suite also covers the post-deadline delivery/refund race, failed-recipient fallback, deferred-withdrawal reentrancy, authority rotation, and cross-task callbacks. The committed Moss-facing ABI and canonical hash remain unchanged.
 
-The contract is now deployable when `chainId == 10143`, but no real Monad Testnet deployment is claimed until a deployment transaction, confirmed bytecode, block number, and versioned manifest are captured. The settlement authority and authority admin must be separately controlled Testnet accounts (preferably multisigs); the constructor rejects zero or identical role addresses. This MVP does not use a proxy.
+The contract is deployed on Monad Testnet (`chainId == 10143`). The versioned deployment manifest `deployments/monad-testnet.json` records the address (`0x67040374b8A9756586De0885f01d1291cE8FFCcF`), deployment transaction, block (`49534792`), constructor arguments (separate `settlementAuthority` / `authorityAdmin`), runtime bytecode size and sha256, init-code keccak, and the Moss-facing ABI hash, with `verifiedOnChain` set. The settlement authority and authority admin are separately controlled Testnet accounts; the constructor rejects zero or identical role addresses. This MVP does not use a proxy.
+
+The Moss Protocol Package (`silicon-arbitration`, pinned in `vendor/moss`) and the product `packages/moss-bridge` consume this deployment; a live `action → simulate` against the deployed contract returns a full Change/Receipt with no terminal Warning. The demo case's E3 remains a labeled fixture (`isMock: true`, `confirmed: false`) until a real wallet sign/broadcast round-trip is captured.
 
 ## Commands
 
@@ -78,4 +80,4 @@ forge test -vvv
 python3 script/check_gate3_abi.py
 ```
 
-Deployment and the versioned Monad Testnet manifest are the remaining Gate 4 evidence. Do not place private keys or funded wallet exports in this repository.
+Deployment evidence and the versioned Monad Testnet manifest live in `deployments/monad-testnet.json`; keep that file in sync whenever the contract or its ABI changes. Do not place private keys or funded wallet exports in this repository.
